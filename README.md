@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img alt="Preview" width="524" alt="image" src=""/>
+  <img alt="Preview" width="524" alt="image" src="https://"/>
   <br/>
   A simple standalone program which automates the installation, removal and miantenance of <a href="https://github.com/InAccord">InAccord</a>.
   <br/>
