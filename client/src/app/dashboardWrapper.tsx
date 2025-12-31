@@ -3,11 +3,11 @@
 import React from 'react'
 import Navbar from "@/app/(components)/Navbar";
 import Sidebar from "@/app/(components)/Sidebar";
-import StoreProvider from "./redux";
+import StoreProvider, { useAppSelector } from "./redux";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
    const isSidebarCollapsed = useAppSelector(
-    (state) => state.global.isSidebarCollapsed
+    ( state ) => state.global.isSidebarCollapsed
   );
 
   return (
