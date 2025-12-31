@@ -9,6 +9,7 @@ import {
 import globalReducer from "@/state";
 import { api } from "@/state/api";
 import { setupListeners } from "@reduxjs/toolkit/query";
+
 import {
   persistStore,
   persistReducer,
