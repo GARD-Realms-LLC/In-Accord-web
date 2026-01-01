@@ -26,7 +26,7 @@ const Sidebar = () => {
 
     <div className="flex gap-3 justify-between md:justify-normal items-center pt-8 ">
       <div>logo</div>
-      <h3 className="font-extrabold text-2xl">IA</h3>
+      <h3 className="font-extrabold text-2xl">In-Accord</h3>
 
     <button className="md-hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100" 
       onClick={toggleSidebar} 
@@ -44,7 +44,7 @@ const Sidebar = () => {
 
      {/* FOOTER */}
        <div>
-      <p className="text-center text-xs text-gray-500">&copy; 2026 IA</p>    
+      <p className="text-center text-xs text-gray-500">&copy; 2026 In-Accord</p>    
     </div>
    </div>
   );
