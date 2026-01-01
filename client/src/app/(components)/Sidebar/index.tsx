@@ -5,7 +5,6 @@ import { setIsSidebarCollapsed } from '@/state';
 import { Layout, LucideIcon, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import React from 'react';
 
 interface SidebarLinkProps {
   href: string;
@@ -34,7 +33,7 @@ const SidebarLink = ({
         }
       }`}
       >
-        <Icon className="w-6 h-6 !text-gray-700" />
+        <Icon className="w-6 h-6 text-gray-700!" />
 
         <span className={`${
           isCollapsed ? "hidden" : "block"
@@ -87,7 +86,7 @@ const Sidebar = () => {
     </div>
 
      {/* LINKS */}
-     <div className="flex-grow mt-8">
+     <div className="grow mt-8">
         <SidebarLink 
         href="/dashboard" 
         icon={Layout}

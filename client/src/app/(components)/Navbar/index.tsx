@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '@/app/redux';
 import { setIsSidebarCollapsed } from '@/state';
 import { Bell, Menu, Settings, Sun } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
 
   const Navbar = () => {
     const dispatch = useAppDispatch();
