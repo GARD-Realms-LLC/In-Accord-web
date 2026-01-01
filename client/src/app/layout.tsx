@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "In-Accord",
-  description: "The Premier Discord Customiser.",
+  description: "The Premier Discord Customis and Control APP.",
 };
 
 export default function RootLayout({
