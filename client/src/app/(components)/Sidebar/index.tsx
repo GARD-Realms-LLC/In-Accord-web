@@ -2,8 +2,9 @@
 
 import { useAppDispatch, useAppSelector } from '@/app/redux';
 import { setIsSidebarCollapsed } from '@/state';
-import { Layout, Link, LucideIcon, Menu } from 'lucide-react';
+import { Layout, LucideIcon, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import React from 'react';
 
 interface SidebarLinkProps {
