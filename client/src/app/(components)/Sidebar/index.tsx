@@ -21,7 +21,7 @@ const SidebarLink = ({
 }: SidebarLinkProps) => {
   const pathname = usePathname();
   const isActive = 
-    pathname === href || (pathname == "/" && href === "./dashboard");
+    pathname === href || (pathname == "/" && href === "/dashboard");
     pathname === href || (pathname == "/" && href === "/plugins");
     pathname === href || (pathname == "/" && href === "/themes");
     pathname === href || (pathname == "/" && href === "/inventory");
@@ -99,14 +99,17 @@ const Sidebar = () => {
 
      {/* LINKS */}
       <hr></hr>
-     <div className='grow mt-11'>
+      <p></p>
+      <p></p>
+     <div className='grow mt-6 flex flex-col gap-1  overflow-y-auto'>
+
         <SidebarLink 
         href="/dashboard" 
         icon={Layout}
         label="Dashboard" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <hr></hr>
+      
       <p>Download</p>
         <SidebarLink 
         href="/plugins" 
@@ -120,7 +123,6 @@ const Sidebar = () => {
         label="Themes" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <hr></hr>
       <p>My Stuff</p>
         <SidebarLink 
         href="/inventory" 
@@ -146,7 +148,6 @@ const Sidebar = () => {
         label="Expenses" 
         isCollapsed={isSidebarCollapsed} 
       />
-    <hr></hr>
     <p>Adverts</p>
         <SidebarLink 
         href="/bots" 
@@ -172,7 +173,6 @@ const Sidebar = () => {
         label="Uploads" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <hr></hr>
       <p>Contacts</p>
         <SidebarLink 
         href="/users" 
