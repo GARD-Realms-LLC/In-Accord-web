@@ -2,7 +2,7 @@
 
 import { useAppDispatch, useAppSelector } from '@/app/redux';
 import { setIsSidebarCollapsed } from '@/state';
-import { Archive, BotIcon, CircleDollarSignIcon, Clipboard, DrumstickIcon, FileQuestionIcon, Layout, LucideIcon, Menu, PlugIcon, ServerCogIcon, Settings, User, WebhookIcon } from 'lucide-react';
+import { Archive, BotIcon, CircleDollarSignIcon, Clipboard, DrumstickIcon, FileQuestionIcon, Layout, LucideIcon, Menu, PcCaseIcon, PlugIcon, ServerCogIcon, Settings, User, WebhookIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
@@ -30,6 +30,7 @@ const SidebarLink = ({
     pathname === href || (pathname == "/" && href === "/expenses");
     pathname === href || (pathname == "/" && href === "/bots");
     pathname === href || (pathname == "/" && href === "/servers");
+    pathname === href || (pathname == "/" && href === "/hosting");
     pathname === href || (pathname == "/" && href === "/upload");
     pathname === href || (pathname == "/" && href === "/users"); 
     pathname === href || (pathname == "/" && href === "/support");
@@ -158,6 +159,14 @@ const Sidebar = () => {
         icon={ServerCogIcon}
         label="Servers" 
         isCollapsed={isSidebarCollapsed} 
+
+      />
+        <SidebarLink 
+        href="/hosting" 
+        icon={PcCaseIcon}
+        label="Hosting" 
+        isCollapsed={isSidebarCollapsed}
+
       />
         <SidebarLink 
         href="/uploads" 
