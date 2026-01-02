@@ -21,9 +21,10 @@ const SidebarLink = ({
 }: SidebarLinkProps) => {
   const pathname = usePathname();
   const isActive = 
-    pathname === href || (pathname == "/" && href === "/dashboard");
+    pathname === href || (pathname == "/" && href === "dashboard");
     pathname === href || (pathname == "/" && href === "/plugins");
     pathname === href || (pathname == "/" && href === "/themes");
+    pathname === href || (pathname == "/" && href === "/upload");
     pathname === href || (pathname == "/" && href === "/inventory");
     pathname === href || (pathname == "/" && href === "/products");   
     pathname === href || (pathname == "/" && href === "/settings");
@@ -31,7 +32,6 @@ const SidebarLink = ({
     pathname === href || (pathname == "/" && href === "/bots");
     pathname === href || (pathname == "/" && href === "/servers");
     pathname === href || (pathname == "/" && href === "/hosting");
-    pathname === href || (pathname == "/" && href === "/upload");
     pathname === href || (pathname == "/" && href === "/users"); 
     pathname === href || (pathname == "/" && href === "/support");
 
@@ -120,6 +120,12 @@ const Sidebar = () => {
         label="Themes" 
         isCollapsed={isSidebarCollapsed} 
       />
+        <SidebarLink 
+        href="/uploads" 
+        icon={DrumstickIcon}
+        label="Uploads" 
+        isCollapsed={isSidebarCollapsed} 
+      />
       <p>My Stuff</p>
         <SidebarLink 
         href="/inventory" 
@@ -163,12 +169,6 @@ const Sidebar = () => {
         icon={PcCaseIcon}
         label="Hosting" 
         isCollapsed={isSidebarCollapsed}
-      />
-        <SidebarLink 
-        href="/uploads" 
-        icon={DrumstickIcon}
-        label="Uploads" 
-        isCollapsed={isSidebarCollapsed} 
       />
       <p>Contacts</p>
         <SidebarLink 
