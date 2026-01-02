@@ -28,7 +28,7 @@ const shadeMapping = {
   900: 50,
 }; 
 
-const generateThemeObject = (colors: any, mapping: any, invert: false) => {
+const generateThemeObject = (colors: any, mapping: any, invert: boolean = false) => {
   const theme: any = {};
   baseColors.forEach((color) => {
     theme[color] = {};
