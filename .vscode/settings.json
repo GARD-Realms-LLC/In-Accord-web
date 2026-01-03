@@ -52,5 +52,6 @@
         "activityBarBadge.foreground": "#000000",
         "activityBarBadge.background": "#09e1b2"
     },
-    "WillLuke.nextjs.hasPrompted": true
+    "WillLuke.nextjs.hasPrompted": true,
+    "dotenv.enableAutocloaking": true
 }
