@@ -76,15 +76,15 @@ const Sidebar = () => {
     <div className={sidebarClassNames}>
 
     {/* TOP LOGO */}
-    <div className={`flex gap-3 justify-between md:justify-normal items-center pt-8 ${
-      isSidebarCollapsed ? 'px-5' : 'px-8'
+    <div className={`flex gap-3 justify-between md:justify-normal items-center pt-4 ${
+      isSidebarCollapsed ? 'px-7' : 'px-4'
     }`}
     >
-      <div>logo</div>
+      <div><img src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/hedwig.jpg" alt="Logo" /></div>
       <h1 
       className={`${
         isSidebarCollapsed ? "hidden" : "block"
-        } font-extrabold text-2xl`}
+        } font-extrabold text-2xl text-gray-600`}
       >            
         In-Accord
       </h1>
