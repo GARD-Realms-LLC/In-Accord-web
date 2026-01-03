@@ -107,7 +107,7 @@ const Sidebar = () => {
         label="Dashboard" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <p>Download</p>
+      <p>- Download:</p>
         <SidebarLink 
         href="/plugins" 
         icon={PlugIcon}
@@ -126,7 +126,7 @@ const Sidebar = () => {
         label="Uploads" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <p>My Stuff</p>
+      <p>- My Stuff:</p>
         <SidebarLink 
         href="/inventory" 
         icon={Archive}
@@ -151,7 +151,7 @@ const Sidebar = () => {
         label="My Contracts" 
         isCollapsed={isSidebarCollapsed} 
       />
-    <p>Adverts</p>
+    <p>- Adverts:</p>
         <SidebarLink 
         href="/bots" 
         icon={BotIcon}
@@ -170,7 +170,7 @@ const Sidebar = () => {
         label="Hosting" 
         isCollapsed={isSidebarCollapsed}
       />
-      <p>Contacts</p>
+      <p>- Contacts:</p>
         <SidebarLink 
         href="/users" 
         icon={User}

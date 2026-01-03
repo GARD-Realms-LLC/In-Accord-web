@@ -9,13 +9,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
-   const IsDarkMode = useAppSelector ((state) => state.global.IsDarkMode);
+   const IsDarkMode = useAppSelector ((state) => state.global.isDarkMode);
 
     useEffect(() => { 
       if (IsDarkMode) {
-        document.documentElement.classList.add('dark');
-      } else {
         document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.add('dark');
       }
     });
 
