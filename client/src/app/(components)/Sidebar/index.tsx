@@ -80,19 +80,7 @@ const Sidebar = () => {
       isSidebarCollapsed ? 'px-7' : 'px-4'
     }`}
     >
-      <div><img src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/hedwig.jpg" alt="Logo" /></div>
-      <h1 
-      className={`${
-        isSidebarCollapsed ? "hidden" : "block"
-        } font-extrabold text-2xl text-gray-600`}
-      >            
-        In-Accord
-      </h1>
-    <button className="md-hidden px-6 py-6 bg-gray-100 rounded-full hover:bg-blue-100" 
-      onClick={toggleSidebar} 
-      >
-      <Menu className="w-4 h-4" />
-    </button>
+      <div><img src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg" alt="In-Accord" /></div>
     </div>
 
      {/* LINKS */}
