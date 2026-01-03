@@ -9,7 +9,7 @@
         "**/*tsconfig.json": true,
         ".cache": true,
         "retool.config.json": true,
-        "**/node_modules": false
+        "**/node_modules": true
     },
     "window.title": "e:\\In-Accord-web",
     "workbench.colorCustomizations": {
