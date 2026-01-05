@@ -1,6 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const prisma = new PrismaClient();
 
 async function deleteAllData(orderedFileNames: string[]) {
@@ -25,21 +30,35 @@ async function deleteAllData(orderedFileNames: string[]) {
 async function main() {
   const dataDirectory = path.join(__dirname, "seedData");
 
-  const orderedFileNames = [
-    "products.json",
-    "expenseSummary.json",
+  // Delete in child-first order to avoid FK constraint errors
+  const deleteFileNames = [
+    "expenseByCategory.json",
     "sales.json",
-    "salesSummary.json",
     "purchases.json",
-    "purchaseSummary.json",
-    "users.json",
     "expenses.json",
+    "users.json",
+    "expenseSummary.json",
+    "salesSummary.json",
+    "purchaseSummary.json",
+    "products.json",
+  ];
+
+  // Insert in parent-first order for FK dependencies
+  const insertFileNames = [
+    "products.json",
+    "users.json",
+    "expenseSummary.json",
+    "salesSummary.json",
+    "purchaseSummary.json",
+    "expenses.json",
+    "sales.json",
+    "purchases.json",
     "expenseByCategory.json",
   ];
 
-  await deleteAllData(orderedFileNames);
+  await deleteAllData(deleteFileNames);
 
-  for (const fileName of orderedFileNames) {
+  for (const fileName of insertFileNames) {
     const filePath = path.join(dataDirectory, fileName);
     const jsonData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     const modelName = path.basename(fileName, path.extname(fileName));

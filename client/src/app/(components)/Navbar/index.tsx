@@ -11,14 +11,17 @@ import Link from 'next/link';
         (state) => state.global.isSidebarCollapsed
       );
 
-  const IsDarkMode = useAppSelector ((state) => state.global.isDarkMode);
+  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
 
     const toggleSidebar = () => {
       dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
     };
     
     const toggleDarkMode = () => {
-      dispatch(setIsDarkMode(!IsDarkMode));
+      console.log('Dark mode toggle clicked. Current isDarkMode state:', isDarkMode);
+      const newState = !isDarkMode;
+      console.log('Dispatching new state:', newState);
+      dispatch(setIsDarkMode(newState));
     };
 
     return (
@@ -29,20 +32,20 @@ import Link from 'next/link';
       <div className="hidden md:flex justify-between items-center gap-5">
       </div>  
       <button 
-        className="px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100" 
+        className="px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600" 
         onClick={toggleSidebar}
         >
-         <Menu className="w-4 h-4" />
+         <Menu className="w-4 h-4 dark:text-gray-300" />
         </button>
       </div>
       <div className='relative'>
         <input 
           type="search" 
           placeholder="Start typing  to search" 
-          className="pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 bg-white rounded-lg focus:outline-none focus:ring-blue-500"
+          className="pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
           />
         <div className='absolute inset-y-0 left-0 pl- flex items-center pointer-events-none'>
-          <Bell className="text-gray-500" size={20} />
+          <Bell className="text-gray-500 dark:text-gray-400" size={20} />
         </div>
        </div> 
 
@@ -50,13 +53,17 @@ import Link from 'next/link';
       <div className="flex justify-between items-center gap-5">
         <div className="hidden md:flex justify-between items-center gap-5">
         </div>  
-           <button onClick={toggleDarkMode}>
-            {IsDarkMode ? (
-              <Sun className="cursor-pointer text-yellow-500" size={24} />
+           <button 
+             onClick={toggleDarkMode}
+             className="px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600 z-50"
+             type="button"
+           >
+            {isDarkMode ? (
+              <Sun className="cursor-pointer text-gray-500 dark:text-yellow-400" size={24} />
             ): (
-              <Moon className="cursor-pointer text-yellow-500" size={24} />
+              <Moon className="cursor-pointer text-gray-500 dark:text-gray-300" size={24} />
             )}
-           </button> 
+           </button>
            <div className="relative">
             <Bell className="cursor-pointer text-gray-500" size={24} />
             <span className="absolute -top-2 -right-2 inline-flex items-center justify-center 
