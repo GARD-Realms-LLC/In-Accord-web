@@ -25,7 +25,13 @@ import Link from 'next/link';
     };
 
     return (
-    <div className="flex justify-between items-center w-full mb-7">
+  <div 
+    className="flex justify-between items-center w-full mb-7 px-4 py-3 rounded-lg"
+    style={{
+      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+      color: isDarkMode ? '#f3f4f6' : '#111827'
+    }}
+  >
          
      {/*left side */} 
       <div className="flex justify-between items-center gap-5">
