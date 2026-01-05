@@ -71,7 +71,7 @@ const Sidebar = () => {
   const startWidthRef = useRef(0);
   const isResizingRef = useRef(false);
 
-  const collapsedWidth = 64;
+  const collapsedWidth = 68;
   // Allow an even thinner minimum while keeping icons usable
   const minWidth = 70;
   const maxWidth = 320;
