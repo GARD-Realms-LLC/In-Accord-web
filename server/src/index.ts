@@ -6,7 +6,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 
 /* ROUTE IMPORTS */
-import dashboardRoutes from "./routes/dashboardRoutes";
+import dashboardRoutes from "./routes/dashboardRoutes"; // http://localhost:8000/dashboard
 
 /* CONFIGURATION */
 dotenv.config();
@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 /* ROUTES */
-app.use("/dashboard", dashboardRoutes); // http://localhost:8000/dashboard
+app.use("/dashboard", dashboardRoutes);
 
 
 
