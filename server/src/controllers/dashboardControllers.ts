@@ -43,6 +43,7 @@ export const getDashboardStats = async (
             amount: item.amount.toString(),
         }));
         
+    
         res.json({
             popularProducts,
             saleSummary,

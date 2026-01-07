@@ -1,9 +1,12 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import morgan from 'morgan';
-import helmet from 'helmet';
+import express from "express";
+import dotenv from "dotenv";
+import bodyParser from "body-parser";
+import cors from "cors";
+import morgan from "morgan";
+import helmet from "helmet";
+
+/* ROUTE IMPORTS */
+import dashboardRoutes from "./routes/dashboardRoutes";
 
 /* CONFIGURATION */
 dotenv.config();
@@ -17,9 +20,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 /* ROUTES */
-app.get("/hello", (req, res) => {
-    res.send("Hello World!");   
-});    
+app.use("/dashboard", dashboardRoutes); // http://localhost:8000/dashboard
+
 
 
 /* SERVER */
