@@ -259,13 +259,13 @@ const Sidebar = () => {
         label="Hosting" 
         isCollapsed={isSidebarCollapsed}
       />
-      <SectionLabel text="Contacts" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
         href="/users" 
         icon={User}
         label="Ask a Dev" 
         isCollapsed={isSidebarCollapsed} 
       />
+      <SectionLabel text="Contacts" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
         href="/support" 
         icon={WebhookIcon}
