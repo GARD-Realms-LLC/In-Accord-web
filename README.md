@@ -7,9 +7,9 @@
 </p>
 
 <p align="center">
-  <img alt="Preview" width="524" alt="image" src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/In-Accord%20working.png"/>
+  <img alt="Preview" width="524" alt="image" src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/Untitled.bmp"/>
   <br/>
-  A simple standalone program which automates the installation, removal and miantenance of <a href="https://github.com/InAccord">InAccord</a>.
+  A simple standalone program which automates the installation, removal and miantenance of <a href="https://github.com/InAccord">InAccord</a>.https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/Untitled.bmp
   <br/>
   <br/>
   <a href="https://InAccord.app/invite" target="_blank">
