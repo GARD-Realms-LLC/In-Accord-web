@@ -105,6 +105,9 @@ yarn dist
 
 For information on contributing to this project, please see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-<a href="https://github.com/GARD-Realms-LLC/In-Accord-web/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=In-Accord/" />
-</a>
+
+Thanks to all these wonderful people ([emoji key](allcontributors.org)):
+
+*   [@contributor_username_1](github.com) - (role or contribution description)
+*   [@contributor_username_2](github.com) - (role or contribution description)
+*   [@contributor_username_3](github.com) - (role or contribution description)
