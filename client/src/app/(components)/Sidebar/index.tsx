@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/redux';
 import { setIsSidebarCollapsed, setSidebarWidth } from '@/state';
-import { Archive, BotIcon, CircleDollarSignIcon, Clipboard, DrumstickIcon, FileQuestionIcon, GitCompareArrowsIcon, Layout, LucideIcon, Menu, PcCaseIcon, PlugIcon, ServerCogIcon, Settings, StarsIcon, User, WebhookIcon } from 'lucide-react';
+import { Archive, BotIcon, CircleDollarSignIcon, Clipboard, DrumstickIcon, FileQuestionIcon, GitCompareArrowsIcon, Layout, LucideIcon, Menu, PcCaseIcon, PlugIcon, ServerCogIcon, Settings, StarsIcon, User, Users2Icon, WebhookIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -37,6 +37,7 @@ const SidebarLink = ({
     "/hosting",
     "/users",
     "/support",
+    "/team",
     "/administrator",
   ];
   const isActive = pathname === href || (pathname === "/" && rootActivePaths.includes(href));
@@ -268,7 +269,13 @@ const Sidebar = () => {
         <SidebarLink 
         href="/support" 
         icon={WebhookIcon}
-        label="All Support" 
+        label="Support" 
+        isCollapsed={isSidebarCollapsed} 
+      />
+        <SidebarLink 
+        href="/team" 
+        icon={Users2Icon}
+        label="Our Team" 
         isCollapsed={isSidebarCollapsed} 
       />
       </div>
