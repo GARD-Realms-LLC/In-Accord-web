@@ -1,4 +1,5 @@
 import { useGetDashboardMetricsQuery } from "@/state/api";
+import { Rating } from "@mui/material";
 import React from "react"
 
 
@@ -24,13 +25,15 @@ const CardPopularProducts  = () => {
               <div className="flex items-center gap-3">
               <div> img </div>
               <div className="flex flex-col justify-between gap-1">
-                <div className="font-bold text-gray-700">{product.name}</div>
+                <div className="font-bold text-gray-700">
+                    {product.name}
+                 </div>
                 <div className="flex text-sm items-center">
                 <span className="font-bold text-blue-500 text-xl">
                   ${product.price}
                 </span>
                 <span className="mx-2">|</span>
-                <Rating />
+                <Rating rating={product.rating || 0 } />
               </div>
              </div> 
             </div>
