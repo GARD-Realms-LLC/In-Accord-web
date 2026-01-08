@@ -47,7 +47,7 @@ const getDashboardStats = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const expenseByCategorySummary = expenseByCategorySummaryRaw.map((item) => (Object.assign(Object.assign({}, item), { amount: item.amount.toString() })));
         res.json({
             popularProducts,
-            saleSummary,
+            salesSummary: saleSummary,
             purchaseSummary,
             expenseSummary,
             expenseByCategorySummary

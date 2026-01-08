@@ -13,12 +13,26 @@ import {
 
 const CardSalesSummary = () => {
   const { data, isLoading, isError } = useGetDashboardMetricsQuery();
-  const salesData = data?.salesSummary || [];
+  const allSalesData = data?.salesSummary || [];
 
   const [timeframe, setTimeframe] = useState("weekly");
 
+  // Filter data based on timeframe - show most recent items
+  const getFilteredData = () => {
+    if (timeframe === "daily") return allSalesData.slice(0, 1);
+    if (timeframe === "weekly") return allSalesData.slice(0, 7);
+    if (timeframe === "monthly") return allSalesData.slice(0, 30);
+    return allSalesData.slice(0, 7);
+  };
+
+  const salesData = getFilteredData();
+
   const totalValueSum =
     salesData.reduce((acc, curr) => acc + curr.totalValue, 0) || 0;
+
+  console.log('Sales data:', salesData);
+  console.log('Total value sum:', totalValueSum);
+  console.log('Timeframe:', timeframe);
 
   const averageChangePercentage =
     salesData.reduce((acc, curr, _, array) => {

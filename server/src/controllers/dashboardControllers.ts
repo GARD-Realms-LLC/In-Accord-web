@@ -46,7 +46,7 @@ export const getDashboardStats = async (
     
         res.json({
             popularProducts,
-            saleSummary,
+            salesSummary: saleSummary,
             purchaseSummary,
             expenseSummary,
             expenseByCategorySummary
