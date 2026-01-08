@@ -1,4 +1,4 @@
-<h1 align="center">InAccord Website</h1>
+<h1 align="center">In-Accord</h1>
 
 <p align="center">
   <a href="#overview">Overview</a> |
