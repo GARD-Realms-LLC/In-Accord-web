@@ -22,21 +22,24 @@ const SidebarLink = ({
   isCollapsed
 }: SidebarLinkProps) => {
   const pathname = usePathname();
-  const isActive = 
-    pathname === href || (pathname == "/" && href === "dashboard");
-    pathname === href || (pathname == "/" && href === "/plugins");
-    pathname === href || (pathname == "/" && href === "/themes");
-    pathname === href || (pathname == "/" && href === "/upload");
-    pathname === href || (pathname == "/" && href === "/inventory");
-    pathname === href || (pathname == "/" && href === "/products");   
-    pathname === href || (pathname == "/" && href === "/settings");
-    pathname === href || (pathname == "/" && href === "/expenses");
-    pathname === href || (pathname == "/" && href === "/bots");
-    pathname === href || (pathname == "/" && href === "/servers");
-    pathname === href || (pathname == "/" && href === "/hosting");
-    pathname === href || (pathname == "/" && href === "/users"); 
-    pathname === href || (pathname == "/" && href === "/support");
-    pathname === href || (pathname == "/" && href === "/administration");
+  const rootActivePaths = [
+    "/home",
+    "/plugins",
+    "/themes",
+    "/uploads",
+    "/dashboard",
+    "/inventory",
+    "/products",
+    "/settings",
+    "/expenses",
+    "/bots",
+    "/servers",
+    "/hosting",
+    "/users",
+    "/support",
+    "/administrator",
+  ];
+  const isActive = pathname === href || (pathname === "/" && rootActivePaths.includes(href));
 
   return (
     <Link href={href}>
@@ -48,11 +51,11 @@ const SidebarLink = ({
         }
       }`}
       >
-        <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        <Icon className="w-6 h-6 text-black dark:text-gray-300" />
 
         <span className={`${
           isCollapsed ? "hidden" : "block"
-          } font-medium text-base text-gray-700 dark:text-gray-300`}
+          } font-medium text-base text-black dark:text-gray-300`}
         >
           {label}
         </span>
@@ -60,6 +63,16 @@ const SidebarLink = ({
     </Link>
   );
 };
+
+const SectionLabel = ({ text, isCollapsed }: { text: string; isCollapsed: boolean }) => (
+  <span
+    className={`${
+      isCollapsed ? 'hidden' : 'block'
+    } px-4 mt-4 text-xs font-semibold tracking-wide text-gray-500 uppercase`}
+  >
+    {text}
+  </span>
+);
 
 const Sidebar = () => {
   const dispatch = useAppDispatch();
@@ -140,7 +153,7 @@ const Sidebar = () => {
 
   // Keep the sidebar as a full-height column so the footer can sit at the bottom on tall viewports
   // Make sidebar relative so the resize handle is positioned correctly
-  const sidebarClassNames = `relative flex flex-col min-h-screen bg-white dark:bg-gray-800 transition-all duration-300 overflow-hidden shadow-md z-40`;
+  const sidebarClassNames = `relative flex flex-col h-screen bg-white dark:bg-gray-800 transition-all duration-300 overflow-hidden shadow-md z-40`;
 
   return (
     <Tooltip.Provider>
@@ -154,32 +167,29 @@ const Sidebar = () => {
     >
 
     {/* TOP LOGO */}
-    <div className={`flex gap-3 justify-between md:justify-normal items-center pt-4 ${
+    <div className={`flex justify-center items-center pt-4 pb-4 ${
       isSidebarCollapsed ? 'px-2' : 'px-4'
     }`}
     >
-      <div>
+      <Link href="/home" aria-label="Go to home">
         <img 
           src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg" 
           alt="In-Accord" 
           className={`${isSidebarCollapsed ? 'w-10 h-10' : 'w-full'} object-contain`}
         />
-      </div>
+      </Link>
     </div>
 
      {/* LINKS */}
-      <p>`</p>
-      <hr></hr>
-      <p></p>
-      <p></p>
+      <hr />
     <div className='flex-1 mt-6 flex flex-col gap-1 overflow-y-auto'>
         <SidebarLink 
-        href="/dashboard"
-        icon={Layout}
-        label="Dashboard" 
+        href="/home"
+        icon={Menu}
+        label="Home" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <p>- Download:</p>
+      <SectionLabel text="Download" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
         href="/plugins" 
         icon={PlugIcon}
@@ -198,7 +208,13 @@ const Sidebar = () => {
         label="Uploads" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <p>- My Stuff:</p>
+      <SectionLabel text="My Stuff" isCollapsed={isSidebarCollapsed} />
+        <SidebarLink 
+        href="/dashboard"
+        icon={Layout}
+        label="My Dashboard" 
+        isCollapsed={isSidebarCollapsed} 
+      />
         <SidebarLink 
         href="/inventory" 
         icon={Archive}
@@ -223,11 +239,7 @@ const Sidebar = () => {
         label="My Contracts" 
         isCollapsed={isSidebarCollapsed} 
       />
-      <div
-        className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-200 dark:hover:bg-gray-600"
-        onMouseDown={handleMouseDown}
-      />
-    <p>- Adverts:</p>
+    <SectionLabel text="Adverts" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
         href="/bots" 
         icon={BotIcon}
@@ -246,7 +258,7 @@ const Sidebar = () => {
         label="Hosting" 
         isCollapsed={isSidebarCollapsed}
       />
-      <p>- Contacts:</p>
+      <SectionLabel text="Contacts" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
         href="/users" 
         icon={User}
@@ -259,16 +271,16 @@ const Sidebar = () => {
         label="All Support" 
         isCollapsed={isSidebarCollapsed} 
       />
-    </div><div>
-      <hr></hr>
+      </div>
+
+      <div className="px-2 mb-4">
         <SidebarLink 
-        href="/administration" 
-        icon={StarsIcon}
-        label="Admin" 
-        isCollapsed={isSidebarCollapsed} 
-      />
-      <p></p>
-      <p></p>
+          href="/administrator" 
+          icon={StarsIcon}
+          label="Admin" 
+          isCollapsed={isSidebarCollapsed} 
+        />
+        <hr className="mt-2 border-gray-300 dark:border-gray-600" />
       </div>
 
      {/* Bottom Section: Social icons and footer */}
@@ -307,7 +319,7 @@ const Sidebar = () => {
           <Tooltip.Root>
             <Tooltip.Trigger asChild>
               <Link href={steamUrl} target="_blank" rel="noopener noreferrer" aria-label="Steam" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-[#171a21] dark:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px] text-black dark:text-white">
                   <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z" />
                 </svg>
               </Link>
@@ -319,6 +331,10 @@ const Sidebar = () => {
           <p className="mt-3 text-center text-xs text-red-500 dark:text-red-400">&copy; 2026 In-Accord | GARD Realms LLC</p>
         )}
       </div>
+      <div
+        className="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-blue-200 dark:hover:bg-gray-600"
+        onMouseDown={handleMouseDown}
+      />
    </div>
    </Tooltip.Provider>
   );
