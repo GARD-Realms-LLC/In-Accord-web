@@ -21,11 +21,13 @@ app.use(cors());
 
 /* ROUTES */
 app.use("/dashboard", dashboardRoutes);
+import supportRoutes from "./routes/supportRoutes";
+app.use('/api/support', supportRoutes);
 
 
 
 /* SERVER */
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8000;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 }); 

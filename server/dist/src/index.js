@@ -23,8 +23,10 @@ app.use(body_parser_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
 /* ROUTES */
 app.use("/dashboard", dashboardRoutes_1.default);
+const supportRoutes_1 = __importDefault(require("./routes/supportRoutes"));
+app.use('/api/support', supportRoutes_1.default);
 /* SERVER */
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8000;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
