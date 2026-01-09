@@ -347,6 +347,7 @@ const Administrator = (props: Props) => {
     const [formRole, setFormRole] = useState<User['role']>('User');
     const [formUsername, setFormUsername] = useState('');
     const [formPassword, setFormPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const openCreateUser = () => {
       setEditingUser(null);
@@ -379,17 +380,20 @@ const Administrator = (props: Props) => {
     };
 
     const saveUser = () => {
+      const minPasswordLen = 8;
       if (!formName.trim()) { alert('Name is required'); return; }
       if (!formUsername.trim()) { alert('Username is required'); return; }
       if (!isValidEmail(formEmail)) { alert('Invalid email address'); return; }
 
       if (editingUser) {
+        if (formPassword && formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: formPassword || x.password } : x);
         setUsers(updated as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
       } else {
         if (!formPassword) { alert('Password is required for new user'); return; }
+        if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: formPassword, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
         setUsers([newUser, ...users] as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
@@ -853,7 +857,10 @@ const Administrator = (props: Props) => {
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
                   <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Full name" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
                   <input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="username" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                  <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type="password" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                  <div className="flex items-center gap-2">
+                    <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type={showPassword ? 'text' : 'password'} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                    <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
+                  </div>
                   <input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@example.com" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
                   <select value={formRole} onChange={e => setFormRole(e.target.value as User['role'])} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
                     <option>Admin</option>
@@ -887,12 +894,14 @@ const Administrator = (props: Props) => {
                     <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-4 py-3 text-gray-900 dark:text-white">{u.name}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.username}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.password ? '●●●●●' : <span className="text-xs text-red-500">Unset</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.email}</td>
                       <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">{u.role}</span></td>
                       <td className="px-4 py-3">{u.status === 'Active' ? <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Active</span> : <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Suspended</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.createdAt}</td>
                       <td className="px-4 py-3">
                         <button onClick={() => openEditUser(u)} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Edit</button>
+                        <button onClick={() => { setEditingUser(u); setFormName(u.name); setFormEmail(u.email); setFormRole(u.role); setFormUsername(u.username); setFormPassword(''); setShowUserForm(true); alert('Enter a new password and click Save to reset.'); }} className="text-indigo-600 hover:text-indigo-700 text-sm font-medium mr-3">Reset Password</button>
                         <button onClick={() => deleteUser(u.id)} className="text-red-600 hover:text-red-700 text-sm font-medium mr-3">Delete</button>
                         <button onClick={() => toggleUserStatus(u.id)} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Toggle Status</button>
                       </td>
