@@ -810,6 +810,10 @@ const Administrator = (props: Props) => {
       loggingLevel: 'info',
       allowedOrigins: ['http://localhost:3000'],
       integrations: { github: true, sentry: false, analytics: true },
+      oauth: {
+        github: { enabled: false, enableLogin: false, clientId: '', clientSecret: '', redirectUri: (typeof window !== 'undefined' ? window.location.origin + '/api/auth/github/callback' : ''), connected: false },
+        discord: { enabled: false, enableLogin: false, clientId: '', clientSecret: '', redirectUri: (typeof window !== 'undefined' ? window.location.origin + '/api/auth/discord/callback' : ''), connected: false }
+      },
       backupSchedule: 'daily',
       apiKeys: [] as { id: string; name: string; key: string; createdAt: string }[],
       sidebarLogo: '',
@@ -821,18 +825,57 @@ const Administrator = (props: Props) => {
     const [systemConfig, setSystemConfig] = useState<SystemConfig>(() => {
       try {
         const raw = typeof window !== 'undefined' ? localStorage.getItem('system_config') : null;
-        return raw ? JSON.parse(raw) : defaultSystemConfig;
-      } catch { return defaultSystemConfig; }
+        if (!raw) return defaultSystemConfig;
+        const parsed = JSON.parse(raw) as Partial<SystemConfig>;
+        return {
+          ...defaultSystemConfig,
+          ...parsed,
+          integrations: { ...defaultSystemConfig.integrations, ...(parsed.integrations || {}) },
+          oauth: {
+            github: { ...defaultSystemConfig.oauth.github, ...((parsed.oauth as any)?.github || {}) },
+            discord: { ...defaultSystemConfig.oauth.discord, ...((parsed.oauth as any)?.discord || {}) }
+          },
+          apiKeys: (parsed.apiKeys as any) ?? defaultSystemConfig.apiKeys,
+          allowedOrigins: parsed.allowedOrigins ?? defaultSystemConfig.allowedOrigins,
+          sidebarLogo: (parsed as any).sidebarLogo ?? defaultSystemConfig.sidebarLogo,
+          sidebarUrl: (parsed as any).sidebarUrl ?? defaultSystemConfig.sidebarUrl,
+        } as SystemConfig;
+      } catch (e) { console.warn('Failed to parse system_config from localStorage', e); return defaultSystemConfig; }
     });
+
+    const [integrationSaveStatus, setIntegrationSaveStatus] = useState<'idle'|'saving'|'saved'|'error'>('idle');
+    const [integrationSaveMessage, setIntegrationSaveMessage] = useState('');
 
     useEffect(() => {
       try { if (typeof window !== 'undefined') localStorage.setItem('system_config', JSON.stringify(systemConfig)); } catch {}
     }, [systemConfig]);
 
-    const saveSystemConfig = () => {
+    const saveSystemConfig = async () => {
       setSystemConfig(prev => ({ ...prev }));
-      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Saved Configuration', details: `Config saved`, status: 'Success' }, ...prev]);
+      setIntegrationSaveStatus('saving');
+      setIntegrationSaveMessage('Saving...');
+      try {
+        const res = await fetch('/api/integrations/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ github: systemConfig.oauth.github, discord: systemConfig.oauth.discord })
+        });
+        if (res.ok) {
+          setIntegrationSaveStatus('saved');
+          setIntegrationSaveMessage('Integration config saved');
+          setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Saved Configuration', details: `Config saved`, status: 'Success' }, ...prev]);
+        } else {
+          const j = await res.json().catch(() => ({}));
+          setIntegrationSaveStatus('error');
+          setIntegrationSaveMessage(j.error || 'Failed to save config');
+        }
+      } catch (e: any) {
+        console.warn('Failed to save integration config to server', e);
+        setIntegrationSaveStatus('error');
+        setIntegrationSaveMessage('Network or server error');
+      }
       alert('System configuration saved.');
+      setTimeout(() => { setIntegrationSaveStatus('idle'); setIntegrationSaveMessage(''); }, 3500);
     };
 
     const resetSystemDefaults = () => {
@@ -1016,6 +1059,23 @@ const Administrator = (props: Props) => {
       }
     }, []);
 
+    // Load persisted integration config from server (safe view)
+    useEffect(() => {
+      (async () => {
+        try {
+          const res = await fetch('/api/integrations/config');
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data && data.config) {
+            setSystemConfig(prev => ({ ...prev, oauth: {
+              github: { ...prev.oauth.github, ...(data.config.github || {}) },
+              discord: { ...prev.oauth.discord, ...(data.config.discord || {}) }
+            } }));
+          }
+        } catch (e) { console.warn('Failed to load integration config', e); }
+      })();
+    }, []);
+
     // Auto-refresh system health metrics every 5 seconds
     useEffect(() => {
       const interval = setInterval(updateMetrics, 5000);
@@ -1052,11 +1112,11 @@ const Administrator = (props: Props) => {
       if (!m.name?.trim()) newErrors.name = 'Name is required.';
       if (!m.jobTitle?.trim()) newErrors.jobTitle = 'Job Title is required.';
       if (!m.description?.trim()) newErrors.description = 'Description is required.';
-      if (!isValidURL(m.imageUrl)) newErrors.imageUrl = 'Image URL must be a valid URL.';
-      if (!isValidEmail(m.email)) newErrors.email = 'Email must be valid (e.g., name@example.com).';
-      if (!isValidURL(m.website)) newErrors.website = 'Website must be a valid URL.';
-      if (!isValidURL(m.github)) newErrors.github = 'GitHub must be a valid URL.';
-      if (!isValidURL(m.discord)) newErrors.discord = 'Discord must be a valid URL.';
+      if (!isValidURL(m.imageUrl || '')) newErrors.imageUrl = 'Image URL must be a valid URL.';
+      if (!isValidEmail(m.email || '')) newErrors.email = 'Email must be valid (e.g., name@example.com).';
+      if (!isValidURL(m.website || '')) newErrors.website = 'Website must be a valid URL.';
+      if (!isValidURL(m.github || '')) newErrors.github = 'GitHub must be a valid URL.';
+      if (!isValidURL(m.discord || '')) newErrors.discord = 'Discord must be a valid URL.';
 
       if (Object.keys(newErrors).length > 0) {
         setErrors((prev) => ({ ...prev, [index]: newErrors }));
@@ -1500,41 +1560,160 @@ const Administrator = (props: Props) => {
                   </div>
                 </div>
 
-                <div className="mt-6 flex gap-2">
+                <div className="mt-6 flex items-center gap-2">
                   <button onClick={saveSystemConfig} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save Configuration</button>
                   <button onClick={resetSystemDefaults} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset Defaults</button>
+                  <div className="ml-3">
+                    {integrationSaveStatus === 'saving' && <span className="text-sm text-gray-600">{integrationSaveMessage || 'Saving...'}</span>}
+                    {integrationSaveStatus === 'saved' && <span className="text-sm text-green-600">{integrationSaveMessage || 'Saved'}</span>}
+                    {integrationSaveStatus === 'error' && <span className="text-sm text-red-600">{integrationSaveMessage || 'Save failed'}</span>}
+                  </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white">Integrations</h4>
-                <div className="mt-2 space-y-2">
-                  <label className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <div className="font-medium text-sm">GitHub</div>
-                      <div className="text-xs text-gray-500">Enable GitHub integration for issue syncing.</div>
-                    </div>
-                    <input type="checkbox" checked={systemConfig.integrations.github} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, github: e.target.checked } }))} />
-                  </label>
+                <h4 className="text-md font-semibold text-gray-900 dark:text-white">Integration Management</h4>
+                <div className="mt-3 space-y-4">
+                  {/* Generic toggles for lightweight integrations (kept for backward compatibility) */}
+                  <div className="grid grid-cols-1 gap-2">
+                    <label className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <div className="font-medium text-sm">Issue/Telemetry Integrations</div>
+                        <div className="text-xs text-gray-500">Enable basic integrations like GitHub issue sync, Sentry, and analytics.</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={systemConfig.integrations.github} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, github: e.target.checked } }))} />
+                        <input type="checkbox" checked={systemConfig.integrations.sentry} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, sentry: e.target.checked } }))} />
+                        <input type="checkbox" checked={systemConfig.integrations.analytics} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, analytics: e.target.checked } }))} />
+                      </div>
+                    </label>
+                  </div>
 
-                  <label className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <div className="font-medium text-sm">Sentry</div>
-                      <div className="text-xs text-gray-500">Enable error monitoring (Sentry DSN required).</div>
+                  {/* OAuth provider management */}
+                  <div className="p-3 border rounded-lg bg-white dark:bg-gray-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold">GitHub Login</div>
+                        <div className="text-xs text-gray-500">Configure GitHub OAuth login (optional).</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm">Enabled</label>
+                        <input type="checkbox" checked={systemConfig.oauth.github.enabled} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, enabled: e.target.checked } } }))} />
+                      </div>
                     </div>
-                    <input type="checkbox" checked={systemConfig.integrations.sentry} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, sentry: e.target.checked } }))} />
-                  </label>
 
-                  <label className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <div className="font-medium text-sm">Analytics</div>
-                      <div className="text-xs text-gray-500">Enable usage analytics collection.</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Client ID</label>
+                        <input value={systemConfig.oauth.github.clientId} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, clientId: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
+                        <input type="password" value={systemConfig.oauth.github.clientSecret} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, clientSecret: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                      </div>
                     </div>
-                    <input type="checkbox" checked={systemConfig.integrations.analytics} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, analytics: e.target.checked } }))} />
-                  </label>
-                </div>
 
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white mt-6">API Keys</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
+                        <input value={systemConfig.oauth.github.redirectUri} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, redirectUri: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button onClick={async () => {
+                          try {
+                            const r = await fetch('/api/auth/github/url');
+                            if (r.ok) {
+                              const j = await r.json();
+                              try { await navigator.clipboard.writeText(j.url); alert('Auth URL copied'); } catch { alert(j.url); }
+                            } else { alert('Failed to fetch auth url'); }
+                          } catch (e) { console.warn(e); alert('Failed to fetch auth url'); }
+                        }} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
+
+                        <button onClick={async () => {
+                          try {
+                            const r = await fetch('/api/auth/github/url');
+                            if (r.ok) {
+                              const j = await r.json();
+                              window.open(j.url, '_blank');
+                            } else { alert('Failed to fetch auth url'); }
+                          } catch (e) { console.warn(e); alert('Failed to start OAuth'); }
+                        }} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
+
+                        <button onClick={() => { const ok = !!systemConfig.oauth.github.clientId && !!systemConfig.oauth.github.clientSecret; setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, connected: ok } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: ok ? 'GitHub OAuth Configured' : 'GitHub OAuth Missing Credentials', details: ok ? 'GitHub OAuth configured' : 'Missing client id/secret', status: 'Success' }, ...prev]); alert(ok ? 'Connection simulated as successful.' : 'Missing client id or secret.'); }} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Test / Connect</button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm">Status: {systemConfig.oauth.github.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, connected: true } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'GitHub Connected', details: 'Marked connected (simulated)', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Simulate Connect</button>
+                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, connected: false } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'GitHub Disconnected', details: 'Disconnected', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 border rounded-lg bg-white dark:bg-gray-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold">Discord Login</div>
+                        <div className="text-xs text-gray-500">Configure Discord OAuth login (optional).</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm">Enabled</label>
+                        <input type="checkbox" checked={systemConfig.oauth.discord.enabled} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, enabled: e.target.checked } } }))} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Client ID</label>
+                        <input value={systemConfig.oauth.discord.clientId} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, clientId: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
+                        <input type="password" value={systemConfig.oauth.discord.clientSecret} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, clientSecret: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
+                        <input value={systemConfig.oauth.discord.redirectUri} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, redirectUri: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button onClick={async () => {
+                          try {
+                            const r = await fetch('/api/auth/discord/url');
+                            if (r.ok) {
+                              const j = await r.json();
+                              try { await navigator.clipboard.writeText(j.url); alert('Auth URL copied'); } catch { alert(j.url); }
+                            } else { alert('Failed to fetch auth url'); }
+                          } catch (e) { console.warn(e); alert('Failed to fetch auth url'); }
+                        }} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
+
+                        <button onClick={async () => {
+                          try {
+                            const r = await fetch('/api/auth/discord/url');
+                            if (r.ok) { const j = await r.json(); window.open(j.url, '_blank'); } else { alert('Failed to fetch auth url'); }
+                          } catch (e) { console.warn(e); alert('Failed to start OAuth'); }
+                        }} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
+
+                        <button onClick={() => { const ok = !!systemConfig.oauth.discord.clientId && !!systemConfig.oauth.discord.clientSecret; setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, connected: ok } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: ok ? 'Discord OAuth Configured' : 'Discord OAuth Missing Credentials', details: ok ? 'Discord OAuth configured' : 'Missing client id/secret', status: 'Success' }, ...prev]); alert(ok ? 'Connection simulated as successful.' : 'Missing client id or secret.'); }} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Test / Connect</button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm">Status: {systemConfig.oauth.discord.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, connected: true } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Discord Connected', details: 'Marked connected (simulated)', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Simulate Connect</button>
+                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, connected: false } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Discord Disconnected', details: 'Disconnected', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  </div>
+
+                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mt-6">API Keys</h4>
                 <div className="mt-2">
                   <div className="mb-2 flex gap-2">
                     <input id="newKeyName" placeholder="Key name" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />

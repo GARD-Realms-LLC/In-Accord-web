@@ -29,6 +29,10 @@ const schemasRoutes_1 = __importDefault(require("./routes/schemasRoutes"));
 app.use('/api/schemas', schemasRoutes_1.default);
 const usersRoutes_1 = __importDefault(require("./routes/usersRoutes"));
 app.use('/api/admin/users', usersRoutes_1.default);
+const oauthRoutes_1 = __importDefault(require("./routes/oauthRoutes"));
+app.use('/api/auth', oauthRoutes_1.default);
+const integrationRoutes_1 = __importDefault(require("./routes/integrationRoutes"));
+app.use('/api/integrations', integrationRoutes_1.default);
 const path_1 = __importDefault(require("path"));
 app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..', 'data')));
 /* SERVER */
