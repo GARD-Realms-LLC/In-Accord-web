@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 interface TeamMember {
   name: string;
+  jobTitle: string;
   description: string;
   imageUrl: string;
   email: string;
@@ -16,6 +17,7 @@ const Team = () => {
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
       {
         name: "Doc Cowles - DocRST",
+        jobTitle: "Founder & Manager",
         description: "Founder and Manager of In-Accord",
         imageUrl: "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/dic-irish-bear.jpeg",
         email: "member1@example.com",
@@ -25,6 +27,7 @@ const Team = () => {
       },
       ...Array.from({ length: 8 }, (_, i) => ({
         name: `Team Member ${i + 2}`,
+        jobTitle: "Team Member",
         description: `Information about team member ${i + 2}`,
         imageUrl: `https://example.com/member${i + 2}`,
         email: `member${i + 2}@example.com`,
@@ -39,11 +42,48 @@ const Team = () => {
       const savedMembers = localStorage.getItem('teamMembers');
       if (savedMembers) {
         try {
-          setTeamMembers(JSON.parse(savedMembers));
+          const parsed = JSON.parse(savedMembers) as any[];
+          const normalized: TeamMember[] = parsed.map((m) => ({
+            name: m.name,
+            jobTitle: m.jobTitle ?? 'Team Member',
+            description: m.description ?? '',
+            imageUrl: m.imageUrl ?? '',
+            email: m.email ?? '',
+            website: m.website ?? '',
+            github: m.github ?? '',
+            discord: m.discord ?? '',
+          }));
+          setTeamMembers(normalized);
         } catch (e) {
           console.error('Error loading team members:', e);
         }
       }
+    }, []);
+
+    useEffect(() => {
+      const handler = () => {
+        const savedMembers = localStorage.getItem('teamMembers');
+        if (savedMembers) {
+          try {
+            const parsed = JSON.parse(savedMembers) as any[];
+            const normalized: TeamMember[] = parsed.map((m) => ({
+              name: m.name,
+              jobTitle: m.jobTitle ?? 'Team Member',
+              description: m.description ?? '',
+              imageUrl: m.imageUrl ?? '',
+              email: m.email ?? '',
+              website: m.website ?? '',
+              github: m.github ?? '',
+              discord: m.discord ?? '',
+            }));
+            setTeamMembers(normalized);
+          } catch (e) {
+            console.error('Error loading team members:', e);
+          }
+        }
+      };
+      window.addEventListener('teamMembersUpdated', handler);
+      return () => window.removeEventListener('teamMembersUpdated', handler);
     }, []);
 
     return (
@@ -53,7 +93,8 @@ const Team = () => {
           {teamMembers.slice(0, 3).map((member, index) => (
             <div key={index} className="w-[300px] h-[300px] bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2 text-center">{member.name}</h2>
+                <h2 className="text-xl font-bold text-center">{member.name}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-300 text-center mb-2">{member.jobTitle}</p>
                 {member.imageUrl === `https://example.com/member${index + 1}` ? (
                   <div className="flex items-center justify-center w-full h-48 rounded mb-2 bg-gray-200 dark:bg-gray-700">
                     <svg className="w-64 h-64 text-blue-900 dark:text-blue-800" fill="currentColor" viewBox="0 0 24 24">
@@ -97,7 +138,8 @@ const Team = () => {
           {teamMembers.slice(3, 6).map((member, index) => (
             <div key={index + 3} className="w-[300px] h-[300px] bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2 text-center">{member.name}</h2>
+                <h2 className="text-xl font-bold text-center">{member.name}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-300 text-center mb-2">{member.jobTitle}</p>
                 {member.imageUrl === `https://example.com/member${index + 4}` ? (
                   <div className="flex items-center justify-center w-full h-48 rounded mb-2 bg-gray-200 dark:bg-gray-700">
                     <svg className="w-64 h-64 text-blue-900 dark:text-blue-800" fill="currentColor" viewBox="0 0 24 24">
@@ -141,7 +183,8 @@ const Team = () => {
           {teamMembers.slice(6, 9).map((member, index) => (
             <div key={index + 6} className="w-[300px] h-[300px] bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2 text-center">{member.name}</h2>
+                <h2 className="text-xl font-bold text-center">{member.name}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-300 text-center mb-2">{member.jobTitle}</p>
                 {member.imageUrl === `https://example.com/member${index + 7}` ? (
                   <div className="flex items-center justify-center w-full h-48 rounded mb-2 bg-gray-200 dark:bg-gray-700">
                     <svg className="w-64 h-64 text-blue-900 dark:text-blue-800" fill="currentColor" viewBox="0 0 24 24">
