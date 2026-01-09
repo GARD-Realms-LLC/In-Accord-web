@@ -1099,26 +1099,43 @@ const Administrator = (props: Props) => {
             {showUserForm && (
               <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
-                  <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Full name" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                  <input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="username" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Full name</label>
+                    <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Full name" className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Username</label>
+                    <input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="username" className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                  </div>
+
                   <div className="flex items-start gap-2">
                     <div className="flex-1">
-                      <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type={showPassword ? 'text' : 'password'} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Password</label>
+                      <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type={showPassword ? 'text' : 'password'} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
                       <div className="mt-1">
                         <PasswordStrength password={formPassword} />
                       </div>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center mt-6">
                       <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
                     </div>
                   </div>
-                  <input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@example.com" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                  <select value={formRole} onChange={e => setFormRole(e.target.value as User['role'])} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
-                    <option>Admin</option>
-                    <option>Manager</option>
-                    <option>User</option>
-                    <option>Viewer</option>
-                  </select>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email</label>
+                    <input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@example.com" className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Role</label>
+                    <select value={formRole} onChange={e => setFormRole(e.target.value as User['role'])} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full">
+                      <option>Admin</option>
+                      <option>Manager</option>
+                      <option>User</option>
+                      <option>Viewer</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="mb-3 flex items-center gap-4">
                   <div>
@@ -1131,7 +1148,7 @@ const Administrator = (props: Props) => {
                             const f = ev.target.files && ev.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => setFormAvatarUrl(String(r.result)); r.readAsDataURL(f);
                           }; input.click();
                         }} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Upload</button>
-                        <button onClick={() => setFormAvatarUrl(undefined)} className="ml-2 px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Clear</button>
+                        <button onClick={() => setFormAvatarUrl(undefined)} className="ml-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Clear</button>
                       </div>
                     </div>
                   </div>
