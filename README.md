@@ -78,13 +78,13 @@ This will create a local copy of this repository and navigate you to the root fo
 ### 2: Install Dependencies
 Run this command at the root folder to install dependencies:
 ```ps
-yarn install
+npm install
 ```
 
 ### 3: Run Build Script
 To run the installer in development mode, simply run the following command:
 ```ps
-yarn dev
+npm run dev
 ```
 
 ## Additional Scripts
