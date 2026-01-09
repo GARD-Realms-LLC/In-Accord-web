@@ -182,6 +182,7 @@ interface User {
   role: 'Admin' | 'Manager' | 'User' | 'Viewer';
   status: 'Active' | 'Suspended';
   createdAt: string;
+  passwordExpiresAt?: string;
 }
 
 interface Group {
@@ -192,9 +193,9 @@ interface Group {
 }
 
 const initialUsers: User[] = [
-  { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10' },
-  { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02' },
-  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12' }
+  { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10', passwordExpiresAt: '2025-01-10' },
+  { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02', passwordExpiresAt: '2026-05-02' },
+  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12', passwordExpiresAt: '2026-09-12' }
 ];
 
 const Administrator = (props: Props) => {
@@ -388,6 +389,7 @@ const Administrator = (props: Props) => {
     const [formUsername, setFormUsername] = useState('');
     const [formPassword, setFormPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [formPasswordExpiresAt, setFormPasswordExpiresAt] = useState<string | undefined>(undefined);
     // Bulk password migration state
     const [showBulkPasswords, setShowBulkPasswords] = useState(false);
     const [bulkPasswords, setBulkPasswords] = useState<Record<string,string>>({});
@@ -429,6 +431,7 @@ const Administrator = (props: Props) => {
       setFormRole('User');
       setFormUsername('');
       setFormPassword('');
+      setFormPasswordExpiresAt(undefined);
       setShowUserForm(true);
     };
 
@@ -439,6 +442,7 @@ const Administrator = (props: Props) => {
       setFormRole(u.role);
       setFormUsername(u.username ?? '');
       setFormPassword(u.password ?? '');
+      setFormPasswordExpiresAt(u.passwordExpiresAt);
       setShowUserForm(true);
     };
 
@@ -450,6 +454,7 @@ const Administrator = (props: Props) => {
       setFormRole('User');
       setFormUsername('');
       setFormPassword('');
+      setFormPasswordExpiresAt(undefined);
     };
 
     const saveUser = async () => {
@@ -461,7 +466,7 @@ const Administrator = (props: Props) => {
       if (editingUser) {
         if (formPassword && formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = formPassword ? await hashPassword(formPassword) : undefined;
-        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password } : x);
+        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt } : x);
         setUsers(updated as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
@@ -469,7 +474,7 @@ const Administrator = (props: Props) => {
         if (!formPassword) { alert('Password is required for new user'); return; }
         if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = await hashPassword(formPassword);
-        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
         setUsers([newUser, ...users] as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
         alert('User created.');

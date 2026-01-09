@@ -25,6 +25,8 @@ import supportRoutes from "./routes/supportRoutes";
 app.use('/api/support', supportRoutes);
 import schemasRoutes from './routes/schemasRoutes';
 app.use('/api/schemas', schemasRoutes);
+import usersRoutes from './routes/usersRoutes';
+app.use('/api/admin/users', usersRoutes);
 
 
 
