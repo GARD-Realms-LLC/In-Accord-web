@@ -423,6 +423,35 @@ const Administrator = (props: Props) => {
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Deleted API Key', details: `Key ${id} deleted`, status: 'Success' }, ...prev]);
     };
 
+    // --- Security & Permissions state ---
+    const defaultSecurity = {
+      require2FA: false,
+      sessionTimeout: 60,
+      allowedIPs: [] as string[],
+      blockedIPs: [] as string[],
+      passwordPolicy: { minLength: 8, requireNumbers: true, requireSpecial: true, expireDays: 90 }
+    };
+
+    type SecurityConfig = typeof defaultSecurity;
+    const [securityConfig, setSecurityConfig] = useState<SecurityConfig>(() => {
+      try { const raw = typeof window !== 'undefined' ? localStorage.getItem('security_config') : null; return raw ? JSON.parse(raw) : defaultSecurity; } catch { return defaultSecurity; }
+    });
+
+    useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('security_config', JSON.stringify(securityConfig)); } catch {} }, [securityConfig]);
+
+    const saveSecurityConfig = () => {
+      setSecurityConfig(prev => ({ ...prev }));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Security & Permissions', action: 'Saved Security Settings', details: `Security settings saved`, status: 'Success' }, ...prev]);
+      alert('Security settings saved.');
+    };
+
+    const resetSecurityDefaults = () => {
+      if (!confirm('Reset security settings to defaults?')) return;
+      setSecurityConfig(defaultSecurity);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Security & Permissions', action: 'Reset Security Defaults', details: `Security reset`, status: 'Success' }, ...prev]);
+      alert('Security settings reset to defaults.');
+    };
+
 
 /* Backup Code */
    
@@ -792,10 +821,79 @@ const Administrator = (props: Props) => {
         {/* Section 3 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">Security & Permissions</h2>
-          <p className="text-gray-600">
-            Manage authentication settings, configure two-factor authentication, and set security policies. 
-            Monitor suspicious activities, manage API keys, and enforce password requirements.
-          </p>
+          <p className="text-gray-600 mb-4">Manage authentication, two-factor settings, password policies, and access controls.</p>
+
+          {/* Security controls UI */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Authentication</h3>
+                <label className="flex items-center gap-3">
+                  <input type="checkbox" checked={securityConfig?.require2FA ?? false} onChange={e => setSecurityConfig(prev => ({ ...prev, require2FA: e.target.checked }))} />
+                  <span className="text-sm text-gray-700 dark:text-gray-200">Require Two-Factor Authentication for all admins</span>
+                </label>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Session Timeout (minutes)</label>
+                  <select value={securityConfig?.sessionTimeout ?? 60} onChange={e => setSecurityConfig(prev => ({ ...prev, sessionTimeout: Number(e.target.value) }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                    <option value={15}>15</option>
+                    <option value={30}>30</option>
+                    <option value={60}>60</option>
+                    <option value={120}>120</option>
+                    <option value={1440}>1440 (1 day)</option>
+                  </select>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Allowed IP Ranges (CIDR / one per line)</label>
+                  <textarea value={securityConfig?.allowedIPs?.join('\n') ?? ''} onChange={e => setSecurityConfig(prev => ({ ...prev, allowedIPs: e.target.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean) }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 h-24 text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Password Policy</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm text-gray-700 dark:text-gray-200">Minimum Length</label>
+                    <input type="number" value={securityConfig?.passwordPolicy?.minLength ?? 8} onChange={e => setSecurityConfig(prev => ({ ...prev, passwordPolicy: { ...prev.passwordPolicy, minLength: Number(e.target.value) } }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 dark:text-gray-200">Expire (days)</label>
+                    <input type="number" value={securityConfig?.passwordPolicy?.expireDays ?? 90} onChange={e => setSecurityConfig(prev => ({ ...prev, passwordPolicy: { ...prev.passwordPolicy, expireDays: Number(e.target.value) } }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" />
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={securityConfig?.passwordPolicy?.requireNumbers ?? true} onChange={e => setSecurityConfig(prev => ({ ...prev, passwordPolicy: { ...prev.passwordPolicy, requireNumbers: e.target.checked } }))} /> <span className="text-sm text-gray-700 dark:text-gray-200">Require numbers</span></label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={securityConfig?.passwordPolicy?.requireSpecial ?? true} onChange={e => setSecurityConfig(prev => ({ ...prev, passwordPolicy: { ...prev.passwordPolicy, requireSpecial: e.target.checked } }))} /> <span className="text-sm text-gray-700 dark:text-gray-200">Require special characters</span></label>
+                </div>
+
+                <div className="mt-6 flex gap-2">
+                  <button onClick={saveSecurityConfig} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save Security Settings</button>
+                  <button onClick={resetSecurityDefaults} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset Defaults</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-md font-semibold text-gray-900 dark:text-white">Blocked IPs</h4>
+              <div className="mt-2 flex gap-2">
+                <input id="blockIpInput" placeholder="e.g. 203.0.113.0/24" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                <button onClick={() => { const el: any = document.getElementById('blockIpInput'); if (!el || !el.value.trim()) { alert('Enter IP/CIDR to block'); return; } setSecurityConfig(prev => ({ ...prev, blockedIPs: [ ...(prev.blockedIPs||[]), el.value.trim() ] })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Security & Permissions', action: 'Blocked IP', details: `${el.value.trim()} blocked`, status: 'Success' }, ...prev]); el.value = ''; }} className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm">Block</button>
+              </div>
+              <div className="mt-3 space-y-2">
+                {(securityConfig?.blockedIPs || []).map((ip: string) => (
+                  <div key={ip} className="flex items-center justify-between p-2 border rounded-lg">
+                    <div className="text-sm">{ip}</div>
+                    <div>
+                      <button onClick={() => { setSecurityConfig(prev => ({ ...prev, blockedIPs: (prev.blockedIPs||[]).filter((x: string) => x !== ip) })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Security & Permissions', action: 'Unblocked IP', details: `${ip} unblocked`, status: 'Success' }, ...prev]); }} className="px-2 py-1 border rounded text-sm text-red-600">Unblock</button>
+                    </div>
+                  </div>
+                ))}
+                {(!(securityConfig?.blockedIPs || []).length) && <div className="text-sm text-gray-500">No blocked IPs</div>}
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Section 5 */}
