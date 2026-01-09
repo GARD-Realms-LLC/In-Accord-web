@@ -108,15 +108,10 @@ yarn dist
 
 For information on contributing to this project, please see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-## GitHub Contributors
+## GitHub Code Contributors
 
 <div align="center">
 
-## GitHub Contributors
-
-<div align="center">
-
-| Code Contributors |
 |:---:|
 | [Doc Cowles - Docrst](https://github.com/docrst) |
 | [Eli Copter- Harry James Potter](https://github.com/hogwartsworld47)
