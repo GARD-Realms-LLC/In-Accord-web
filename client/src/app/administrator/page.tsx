@@ -13,6 +13,7 @@ interface TeamMember {
   discord: string;
 }
 
+
 interface AuditLogEntry {
   timestamp: string;
   user: string;
@@ -148,16 +149,25 @@ const initialAuditLogs: AuditLogEntry[] = [
 interface User {
   id: string;
   name: string;
+  username: string;
+  password: string;
   email: string;
   role: 'Admin' | 'Manager' | 'User' | 'Viewer';
   status: 'Active' | 'Suspended';
   createdAt: string;
 }
 
+interface Group {
+  id: string;
+  name: string;
+  members: string[]; // user ids
+  description?: string;
+}
+
 const initialUsers: User[] = [
-  { id: 'u1', name: 'Doc Cowles', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10' },
-  { id: 'u2', name: 'Alice Johnson', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02' },
-  { id: 'u3', name: 'Bob Smith', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12' }
+  { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10' },
+  { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02' },
+  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12' }
 ];
 
 const Administrator = (props: Props) => {
@@ -313,12 +323,16 @@ const Administrator = (props: Props) => {
     const [formName, setFormName] = useState('');
     const [formEmail, setFormEmail] = useState('');
     const [formRole, setFormRole] = useState<User['role']>('User');
+    const [formUsername, setFormUsername] = useState('');
+    const [formPassword, setFormPassword] = useState('');
 
     const openCreateUser = () => {
       setEditingUser(null);
       setFormName('');
       setFormEmail('');
       setFormRole('User');
+      setFormUsername('');
+      setFormPassword('');
       setShowUserForm(true);
     };
 
@@ -327,6 +341,8 @@ const Administrator = (props: Props) => {
       setFormName(u.name);
       setFormEmail(u.email);
       setFormRole(u.role);
+      setFormUsername(u.username ?? '');
+      setFormPassword(u.password ?? '');
       setShowUserForm(true);
     };
 
@@ -336,20 +352,24 @@ const Administrator = (props: Props) => {
       setFormName('');
       setFormEmail('');
       setFormRole('User');
+      setFormUsername('');
+      setFormPassword('');
     };
 
     const saveUser = () => {
       if (!formName.trim()) { alert('Name is required'); return; }
+      if (!formUsername.trim()) { alert('Username is required'); return; }
       if (!isValidEmail(formEmail)) { alert('Invalid email address'); return; }
 
       if (editingUser) {
-        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole } : x);
-        setUsers(updated);
+        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: formPassword || x.password } : x);
+        setUsers(updated as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
       } else {
-        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
-        setUsers([newUser, ...users]);
+        if (!formPassword) { alert('Password is required for new user'); return; }
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: formPassword, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
+        setUsers([newUser, ...users] as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
         alert('User created.');
       }
@@ -361,13 +381,13 @@ const Administrator = (props: Props) => {
     const deleteUser = (id: string) => {
       if (!confirm('Delete this user?')) return;
       const toDelete = users.find(u => u.id === id);
-      setUsers(users.filter(u => u.id !== id));
+      setUsers(users.filter(u => u.id !== id) as User[]);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted User', details: `${toDelete?.name} deleted`, status: 'Success' }, ...prev]);
     };
 
     const toggleUserStatus = (id: string) => {
-      const updated = users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Suspended' : 'Active' } : u);
-      setUsers(updated);
+      const updated = users.map(u => u.id === id ? { ...u, status: (u.status === 'Active' ? 'Suspended' : 'Active') as User['status'] } : u);
+      setUsers(updated as User[]);
       const u = users.find(x => x.id === id);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Toggled User Status', details: `${u?.name} status toggled`, status: 'Success' }, ...prev]);
     };
@@ -385,10 +405,53 @@ const Administrator = (props: Props) => {
 
     useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('user_custom_tables', JSON.stringify(customTables)); } catch {} }, [customTables]);
 
+    // --- User Groups state (persisted locally) ---
+    const [groups, setGroups] = useState<Group[]>(() => {
+      try {
+        const raw = typeof window !== 'undefined' ? localStorage.getItem('user_groups') : null;
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    });
+
+    useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('user_groups', JSON.stringify(groups)); } catch {} }, [groups]);
+
+    const [newGroupName, setNewGroupName] = useState('');
+    const [newGroupDesc, setNewGroupDesc] = useState('');
+    const [newGroupMembers, setNewGroupMembers] = useState<string[]>([]);
+
+    const toggleNewGroupMember = (userId: string) => {
+      setNewGroupMembers(prev => prev.includes(userId) ? prev.filter(x => x !== userId) : [...prev, userId]);
+    };
+
+    const addGroup = () => {
+      const name = newGroupName.trim();
+      if (!name) { alert('Group name required'); return; }
+      const g: Group = { id: 'g' + Math.random().toString(36).slice(2,9), name, description: newGroupDesc, members: newGroupMembers };
+      setGroups(prev => [g, ...prev]);
+      setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created Group', details: `${name} created`, status: 'Success' }, ...prev]);
+    };
+
+    const deleteGroup = (id: string) => {
+      if (!confirm('Delete this group?')) return;
+      const g = groups.find(x => x.id === id);
+      setGroups(prev => prev.filter(x => x.id !== id));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted Group', details: `${g?.name} deleted`, status: 'Success' }, ...prev]);
+    };
+
+    const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+    const [editingGroupDraft, setEditingGroupDraft] = useState<Group | null>(null);
+
+    const startEditGroup = (id: string) => { const g = groups.find(x => x.id === id) || null; setEditingGroupDraft(g ? { ...g, members: [...g.members] } : null); setEditingGroupId(id); };
+    const cancelEditGroup = () => { setEditingGroupId(null); setEditingGroupDraft(null); };
+    const saveEditGroup = () => { if (!editingGroupDraft) return; setGroups(prev => prev.map(g => g.id === editingGroupDraft.id ? editingGroupDraft : g)); setEditingGroupId(null); setEditingGroupDraft(null); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated Group', details: `${editingGroupDraft.name} updated`, status: 'Success' }, ...prev]); };
+
     const getAllUserFields = () => {
       const defaultFields = [
         { table: 'users', name: 'id', type: 'string' },
         { table: 'users', name: 'name', type: 'string' },
+        { table: 'users', name: 'username', type: 'string' },
+        { table: 'users', name: 'password', type: 'string' },
         { table: 'users', name: 'email', type: 'string' },
         { table: 'users', name: 'role', type: 'string' },
         { table: 'users', name: 'status', type: 'string' },
@@ -410,6 +473,8 @@ const Administrator = (props: Props) => {
     const defaultUserFields = [
       { name: 'id', type: 'string', description: 'Unique identifier for the user', example: 'u1' },
       { name: 'name', type: 'string', description: 'Full name', example: 'Alice Johnson' },
+      { name: 'username', type: 'string', description: 'Login username', example: 'alice' },
+      { name: 'password', type: 'string', description: 'Login password (stored hashed in production)', example: '••••••' },
       { name: 'email', type: 'string', description: 'Email address used for login and notifications', example: 'alice@example.com' },
       { name: 'role', type: 'enum', description: 'Assigned role determining permissions', example: 'Admin | Manager | User | Viewer' },
       { name: 'status', type: 'enum', description: 'Account status', example: 'Active | Suspended' },
@@ -763,8 +828,10 @@ const Administrator = (props: Props) => {
 
             {showUserForm && (
               <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
                   <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Full name" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                  <input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="username" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                  <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type="password" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
                   <input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@example.com" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
                   <select value={formRole} onChange={e => setFormRole(e.target.value as User['role'])} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
                     <option>Admin</option>
@@ -840,7 +907,7 @@ const Administrator = (props: Props) => {
                     <div className="p-3 bg-white dark:bg-gray-800 border rounded mb-3">
                       <div className="flex gap-2 items-start">
                         <input value={newTableName} onChange={e => setNewTableName(e.target.value)} placeholder="New table name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
-                        <button onClick={addFieldToNewTable} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">+ Field</button>
+                        <button onClick={addFieldToNewTable} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">+ Field</button>
                         <button onClick={addCustomTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create</button>
                       </div>
 
@@ -925,6 +992,89 @@ const Administrator = (props: Props) => {
                 </div>
               </div>
             </div>
+          {/* User Groups */}
+          <div className="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-md font-semibold text-gray-900 dark:text-white">User Groups</h4>
+              <div className="text-sm text-gray-500">Create and manage user groups and their members.</div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Group Name</label>
+                <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Sales Team" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-3">Description</label>
+                <input value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} placeholder="Optional description" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+
+                <div className="text-sm font-medium mt-3">Members</div>
+                <div className="mt-2 max-h-40 overflow-auto grid grid-cols-1 gap-2">
+                  {users.map(u => (
+                    <label key={u.id} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={newGroupMembers.includes(u.id)} onChange={() => toggleNewGroupMember(u.id)} />
+                      <span className="text-sm">{u.name} — <span className="text-xs text-gray-500">{u.email}</span></span>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="mt-3 flex gap-2">
+                  <button onClick={addGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create Group</button>
+                  <button onClick={() => { setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]); }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Clear</button>
+                </div>
+              </div>
+
+              <div className="space-y-2 p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
+                {groups.length === 0 ? (
+                  <div className="text-sm text-gray-500">No groups defined.</div>
+                ) : (
+                  groups.map(g => (
+                    <div key={g.id} className="p-2 bg-white dark:bg-gray-800 border rounded">
+                      {editingGroupId === g.id ? (
+                        <div>
+                          <input value={editingGroupDraft?.name ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, name: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" />
+                          <input value={editingGroupDraft?.description ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, description: e.target.value } : prev)} className="mt-2 px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" placeholder="Description" />
+
+                          <div className="text-sm font-medium mt-2">Members</div>
+                          <div className="mt-2 max-h-40 overflow-auto grid grid-cols-1 gap-2">
+                            {users.map(u => (
+                              <label key={u.id} className="flex items-center gap-2 text-sm">
+                                <input type="checkbox" checked={editingGroupDraft?.members.includes(u.id) ?? false} onChange={() => setEditingGroupDraft(prev => prev ? { ...prev, members: prev.members.includes(u.id) ? prev.members.filter(x => x !== u.id) : [...prev.members, u.id] } : prev)} />
+                                <span>{u.name}</span>
+                              </label>
+                            ))}
+                          </div>
+
+                          <div className="mt-3 flex gap-2">
+                            <button onClick={saveEditGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Save</button>
+                            <button onClick={cancelEditGroup} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">{g.name}</div>
+                              {g.description && <div className="text-xs text-gray-500">{g.description}</div>}
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => startEditGroup(g.id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Edit</button>
+                              <button onClick={() => deleteGroup(g.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Delete</button>
+                            </div>
+                          </div>
+
+                          <div className="mt-2 text-sm">
+                            <div className="text-xs text-gray-500">Members ({g.members.length}):</div>
+                            <div className="mt-1 flex flex-wrap gap-2">
+                              {g.members.map(mid => <span key={mid} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 border rounded text-xs">{users.find(u => u.id === mid)?.name ?? mid}</span>)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Section 2 */}
