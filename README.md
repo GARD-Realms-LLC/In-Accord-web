@@ -63,10 +63,12 @@ Updated soon!
 > This is a tutorial designed for people looking to contribute to, or work directly with the installer's source code. If you are just looking to download and install InAccord, visit the [releases](https://github.com/docrst/InAccord/) page of this repository.
 
 ## Prerequisites is "UNDER CONSTRUCTION!"
-- [Git](https://git-scm.com)
+- [Github](https://github.com/)
+- [VB-Code](https://code.visualstudio.com/)
 - [Node.js](https://nodejs.org/en/)
+- [React.js](https://react.dev/)
 - [yarn](https://yarnpkg.com)
-- Command line of your choice.
+
 
 ## Building is "UNDER CONSTRUCTION!"
 
