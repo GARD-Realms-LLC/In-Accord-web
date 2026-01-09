@@ -318,6 +318,28 @@ const Administrator = (props: Props) => {
       } catch {}
     }, [users]);
 
+    // Migration: ensure all users have username and password fields
+    useEffect(() => {
+      try {
+        const needsMigration = users.some(u => !('username' in u) || !u.username || !('password' in u));
+        if (needsMigration) {
+          const migrated = users.map(u => ({
+            id: u.id,
+            name: u.name,
+            username: (u as any).username ?? (u.email ? u.email.split('@')[0] : ''),
+            password: (u as any).password ?? '',
+            email: u.email,
+            role: u.role,
+            status: u.status,
+            createdAt: u.createdAt
+          } as User));
+          setUsers(migrated as User[]);
+        }
+      } catch (e) { console.warn('User migration failed', e); }
+      // run only once on mount
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const [showUserForm, setShowUserForm] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formName, setFormName] = useState('');
@@ -852,6 +874,7 @@ const Administrator = (props: Props) => {
                 <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Name</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Username</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Email</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Role</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
@@ -863,6 +886,7 @@ const Administrator = (props: Props) => {
                   {users.map(u => (
                     <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-4 py-3 text-gray-900 dark:text-white">{u.name}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.username}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.email}</td>
                       <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">{u.role}</span></td>
                       <td className="px-4 py-3">{u.status === 'Active' ? <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Active</span> : <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Suspended</span>}</td>
