@@ -112,13 +112,12 @@ For information on contributing to this project, please see [CONTRIBUTING.md](/C
 
 <div align="center">
 
-| Contributor |
+## GitHub Contributors
+
+<div align="center">
+
+| Code Contributors |
 |:---:|
-```
 | [Doc Cowles - Docrst](https://github.com/docrst) |
 | [Eli Copter- Harry James Potter](https://github.com/hogwartsworld47)
 </div>
-```
-  <img src = "https://contrib.rocks/image?repo = GARD-Realms-LLC/In-Accord-web"/>
-</a>
-```
