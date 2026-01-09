@@ -122,6 +122,8 @@ const Administrator = (props: Props) => {
       alert('Audit logs refreshed! Latest entries loaded.');
     };
 
+
+    
     // Run backup immediately
     const runBackup = () => {
       const now = new Date();
@@ -179,6 +181,8 @@ const Administrator = (props: Props) => {
         alert('Backup completed successfully! 492 MB backed up to local storage and Cloudflare R2.');
       }, 3000);
     };
+
+
 
     useEffect(() => {
       const savedMembers = localStorage.getItem('teamMembers');
