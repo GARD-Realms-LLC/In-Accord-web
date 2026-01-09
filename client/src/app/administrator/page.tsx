@@ -382,6 +382,8 @@ const Administrator = (props: Props) => {
       integrations: { github: true, sentry: false, analytics: true },
       backupSchedule: 'daily',
       apiKeys: [] as { id: string; name: string; key: string; createdAt: string }[],
+      sidebarLogo: '',
+      sidebarUrl: '',
     };
 
     type SystemConfig = typeof defaultSystemConfig;
@@ -408,6 +410,17 @@ const Administrator = (props: Props) => {
       setSystemConfig(defaultSystemConfig as SystemConfig);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Reset Defaults', details: `Configuration reset to defaults`, status: 'Success' }, ...prev]);
       alert('System configuration reset to defaults.');
+    };
+
+    const handleSidebarLogoUpload = (file?: File | null) => {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string | ArrayBuffer | null;
+        if (!result) return;
+        setSystemConfig(prev => ({ ...prev, sidebarLogo: String(result) }));
+      };
+      reader.readAsDataURL(file);
     };
 
     const addApiKey = (name: string) => {
@@ -748,6 +761,32 @@ const Administrator = (props: Props) => {
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                   </select>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Sidebar Top Logo (Image URL or upload)</label>
+                  <input value={(systemConfig as any).sidebarLogo || ''} onChange={e => setSystemConfig(prev => ({ ...prev, sidebarLogo: e.target.value }))} placeholder="https://example.com/logo.png or data:image/..." className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-3">Sidebar Top Link (URL)</label>
+                  <input value={(systemConfig as any).sidebarUrl || ''} onChange={e => setSystemConfig(prev => ({ ...prev, sidebarUrl: e.target.value }))} placeholder="https://example.com" className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="w-24 h-12 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded border overflow-hidden">
+                      {(systemConfig as any).sidebarLogo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={(systemConfig as any).sidebarLogo} alt="Sidebar Logo" className="max-h-12 object-contain" />
+                      ) : (
+                        <div className="text-xs text-gray-500">No logo set</div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input id="sidebarLogoFile" type="file" accept="image/*" onChange={e => handleSidebarLogoUpload(e.target.files?.[0] ?? null)} className="hidden" />
+                      <button onClick={() => (document.getElementById('sidebarLogoFile') as HTMLInputElement)?.click()} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Upload</button>
+                      <button onClick={() => { setSystemConfig(prev => ({ ...prev, sidebarLogo: '', sidebarUrl: '' })); }} className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm">Clear</button>
+                      <button onClick={() => { navigator.clipboard && (systemConfig as any).sidebarLogo && navigator.clipboard.writeText((systemConfig as any).sidebarLogo); alert('Logo URL copied'); }} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm">Copy Logo URL</button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-6 flex gap-2">
