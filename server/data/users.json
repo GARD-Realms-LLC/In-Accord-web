@@ -1,0 +1,8 @@
+{
+  "users": [
+    {
+      "id": "3b0fd66b-a4d6-4d95-94e4-01940c99aedb",
+      "password": "pbkdf2$100000$c8e7319dfa9add9de26a144fe39e3f20$6a4f9b9d707df50fc38340029c9fde7746985e514a485c91db44bea949cb22cf"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 // Minimal MD5 for Gravatar (lightweight implementation)
 function md5cycle(x: number[], k: number[]) {
@@ -109,8 +110,9 @@ function md5(s: string) { return hex(md51(s)); }
 
 function gravatarUrlForEmail(email: string, size = 64) {
   if (!email) return '';
-  try { return `https://www.gravatar.com/avatar/${md5(email.trim().toLowerCase())}?s=${size}&d=404`; } catch { return ''; }
+  try { return `https://www.gravatar.com/avatar/${md5(email.trim().toLowerCase())}?s=${size}&d=identicon`; } catch { return ''; }
 }
+
 
 // Password strength helper component
 function PasswordStrength({ password }: { password: string }) {
@@ -451,6 +453,111 @@ const Administrator = (props: Props) => {
       } catch {}
     }, [users]);
 
+    // --- Online sessions (simulated) ---
+    interface OnlineSession {
+      id: string; // session id
+      userId: string;
+      name: string;
+      username: string;
+      ip: string;
+      since: string; // ISO
+      avatar?: string;
+    }
+
+    const [onlineUsers, setOnlineUsers] = useState<OnlineSession[]>(() => {
+      try {
+        // Try to seed from users list; pick active users
+        return (initialUsers.filter(u => u.status === 'Active').slice(0, 3).map((u, i) => ({ id: 'sess-' + u.id, userId: u.id, name: u.name, username: u.username, ip: `192.168.1.${100 + i}`, since: new Date().toISOString(), avatar: u.avatarUrl || gravatarUrlForEmail(u.email, 40) })));
+      } catch {
+        return [];
+      }
+    });
+
+    // Try to load real session data from server; fall back to simulated local sessions
+    useEffect(() => {
+      let mounted = true;
+      (async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/sessions`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!Array.isArray(data.sessions)) return;
+          const mapped: OnlineSession[] = data.sessions.map((s: any) => ({
+            id: s.id || s.sessionId || ('sess-' + (s.userId || Math.random().toString(36).slice(2,8))),
+            userId: s.userId || s.user?.id || s.userId,
+            name: s.user?.name || s.name || s.username || 'Unknown',
+            username: s.user?.username || s.username || s.user?.email || '',
+            ip: s.ip || s.remoteAddr || '0.0.0.0',
+            since: s.since || s.createdAt || new Date().toISOString(),
+            avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
+          }));
+          if (mounted && mapped.length > 0) setOnlineUsers(mapped);
+        } catch (e) {
+          // ignore; keep simulated
+        }
+      })();
+      return () => { mounted = false; };
+    }, []);
+
+    // Boot a single session (simulate terminating a session)
+    const bootSession = async (sessionId: string) => {
+      if (!confirm('Boot this user session?')) return;
+      const s = onlineUsers.find(x => x.id === sessionId);
+      setOnlineUsers(prev => prev.filter(x => x.id !== sessionId));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Booted Session', details: `${s?.name} (${s?.username}) booted from ${s?.ip}`, status: 'Success' }, ...prev]);
+      try {
+        await fetch(`${API_BASE}/api/admin/sessions/terminate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+      } catch (e) { /* best-effort */ }
+      alert(`${s?.name ?? 'User'} has been booted.`);
+    };
+
+    const [refreshingOnline, setRefreshingOnline] = useState(false);
+
+    // Boot all online sessions
+    const bootAllSessions = async () => {
+      if (!confirm('Boot ALL online sessions?')) return;
+      const copy = [...onlineUsers];
+      setOnlineUsers([]);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Booted All Sessions', details: `Booted ${copy.length} online sessions`, status: 'Success' }, ...prev]);
+      try { await fetch(`${API_BASE}/api/admin/sessions/terminate-all`, { method: 'POST' }); } catch (e) {}
+      alert(`Booted ${copy.length} sessions.`);
+    };
+
+    // Refresh online sessions from server (best-effort)
+    const refreshOnlineUsers = async () => {
+      setRefreshingOnline(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/sessions`);
+        if (!res.ok) {
+          console.warn('refreshOnlineUsers: non-ok response', res.status);
+          alert('Failed to refresh sessions from server');
+          return;
+        }
+        const data = await res.json();
+        if (!Array.isArray(data.sessions)) {
+          console.warn('refreshOnlineUsers: unexpected payload', data);
+          alert('No session data returned');
+          return;
+        }
+        const mapped: OnlineSession[] = data.sessions.map((s: any) => ({
+          id: s.id || s.sessionId || ('sess-' + (s.userId || Math.random().toString(36).slice(2,8))),
+          userId: s.userId || s.user?.id || s.userId,
+          name: s.user?.name || s.name || s.username || 'Unknown',
+          username: s.user?.username || s.username || s.user?.email || '',
+          ip: s.ip || s.remoteAddr || '0.0.0.0',
+          since: s.since || s.createdAt || new Date().toISOString(),
+          avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
+        }));
+        setOnlineUsers(mapped);
+        setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Refreshed Online Users', details: `Loaded ${mapped.length} sessions`, status: 'Success' }, ...prev]);
+      } catch (e) {
+        console.warn('refreshOnlineUsers failed', e);
+        alert('Network error while refreshing sessions');
+      } finally {
+        setRefreshingOnline(false);
+      }
+    };
+
     // Migration: ensure all users have username and password fields
     // Helpers: hash passwords and detect hashed values
     const hashPassword = async (pwd: string) => {
@@ -548,7 +655,7 @@ const Administrator = (props: Props) => {
           exportRows.push({ id: u.id, username: u.username ?? u.email ?? '', password: plain });
           const hashed = await hashPassword(plain);
           // try sending to server (best-effort)
-          try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: u.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
+          try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: u.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
           return { ...u, password: hashed } as User;
         }
         return u;
@@ -629,7 +736,7 @@ const Administrator = (props: Props) => {
         const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt, avatarUrl: formAvatarUrl ?? x.avatarUrl } : x);
         setUsers(updated as User[]);
         if (hashed) {
-          try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
+          try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
         }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
@@ -639,7 +746,7 @@ const Administrator = (props: Props) => {
         const hashed = await hashPassword(formPassword);
         const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
         setUsers([newUser, ...users] as User[]);
-        try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
+        try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
         alert('User created.');
       }
@@ -1201,7 +1308,12 @@ const Administrator = (props: Props) => {
                   <div>
                     <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Avatar</label>
                     <div className="flex items-center gap-2">
-                      <img src={formAvatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'))} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
+                      <img
+                        src={formAvatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'))}
+                        alt="avatar"
+                        className="w-12 h-12 rounded-full object-cover"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'); }}
+                      />
                       <div>
                         <button onClick={() => {
                           const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = (ev: any) => {
@@ -1223,6 +1335,60 @@ const Administrator = (props: Props) => {
                 </div>
               </div>
             )}
+
+            {/* Online Users panel (top of users list) - always visible, shows empty state when none online */}
+            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                <div className="flex items-center justify-between mb-3">
+                <div className="font-semibold">Online Users ({onlineUsers.length})</div>
+                <div className="flex gap-2">
+                  <button onClick={refreshOnlineUsers} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Refresh</button>
+                  <button
+                    onClick={bootAllSessions}
+                    disabled={onlineUsers.length === 0}
+                    aria-disabled={onlineUsers.length === 0}
+                    className={onlineUsers.length === 0 ? 'px-3 py-1 bg-gray-300 text-gray-600 text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded'}
+                  >
+                    Boot All
+                  </button>
+                </div>
+              </div>
+
+              {onlineUsers.length === 0 ? (
+                <div className="text-sm text-gray-600">No users are currently online.</div>
+              ) : (
+                // Render columns: each column contains up to 4 users stacked vertically.
+                <div className="flex gap-3 overflow-x-auto h-56 py-1">
+                  {(() => {
+                    const chunkSize = 4;
+                    const cols: OnlineSession[][] = [];
+                    for (let i = 0; i < onlineUsers.length; i += chunkSize) {
+                      cols.push(onlineUsers.slice(i, i + chunkSize));
+                    }
+                    return cols.map((col, idx) => (
+                      <div key={idx} className="flex-shrink-0 min-w-[240px] flex flex-col gap-2">
+                        {col.map(s => (
+                          <div key={s.id} className="flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2">
+                            <img
+                              src={s.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name))}
+                              alt=""
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name); }}
+                            />
+                            <div className="text-sm flex-1">
+                              <div className="font-medium">{s.name} <span className="text-xs text-gray-500">({s.username})</span></div>
+                              <div className="text-xs text-gray-500">IP: {s.ip} • since {new Date(s.since).toLocaleTimeString()}</div>
+                            </div>
+                            <div>
+                              <button onClick={() => bootSession(s.id)} className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded">Boot</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

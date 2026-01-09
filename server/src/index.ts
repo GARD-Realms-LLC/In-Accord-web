@@ -31,6 +31,10 @@ import oauthRoutes from './routes/oauthRoutes';
 app.use('/api/auth', oauthRoutes);
 import integrationRoutes from './routes/integrationRoutes';
 app.use('/api/integrations', integrationRoutes);
+import sessionsRoutes from './routes/sessionsRoutes';
+app.use('/api/admin/sessions', sessionsRoutes);
+import authRoutes from './routes/authRoutes';
+app.use('/api/admin/auth', authRoutes);
 import path from 'path';
 app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
 

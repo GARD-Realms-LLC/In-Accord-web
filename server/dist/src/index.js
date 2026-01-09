@@ -33,6 +33,10 @@ const oauthRoutes_1 = __importDefault(require("./routes/oauthRoutes"));
 app.use('/api/auth', oauthRoutes_1.default);
 const integrationRoutes_1 = __importDefault(require("./routes/integrationRoutes"));
 app.use('/api/integrations', integrationRoutes_1.default);
+const sessionsRoutes_1 = __importDefault(require("./routes/sessionsRoutes"));
+app.use('/api/admin/sessions', sessionsRoutes_1.default);
+const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
+app.use('/api/admin/auth', authRoutes_1.default);
 const path_1 = __importDefault(require("path"));
 app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..', 'data')));
 /* SERVER */

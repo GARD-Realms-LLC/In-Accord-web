@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 const router = Router();
 const dataFile = path.resolve(__dirname, '..', '..', 'data', 'users.json');
@@ -43,18 +44,38 @@ router.get('/', (req: Request, res: Response) => {
   return res.json({ ok: true, users: data.users || [] });
 });
 
-// POST update password for a user: { id, passwordHash }
+// POST update password for a user: { id, passwordHash } OR { id, passwordPlain }
 router.post('/password', (req: Request, res: Response) => {
-  const { id, passwordHash } = req.body;
-  if (!id || !passwordHash || typeof id !== 'string' || typeof passwordHash !== 'string') return res.status(400).json({ ok: false, error: 'id and passwordHash are required' });
+  const { id, passwordHash, passwordPlain } = req.body;
+  if (!id || typeof id !== 'string') return res.status(400).json({ ok: false, error: 'id required' });
+  if (!passwordHash && !passwordPlain) return res.status(400).json({ ok: false, error: 'passwordHash or passwordPlain required' });
   const data = readUsersFile();
   const users = Array.isArray(data.users) ? data.users : [];
   const idx = users.findIndex((u: any) => u.id === id);
+
+  let storeValue = '';
+  if (passwordPlain) {
+    // create PBKDF2 hash
+    const salt = crypto.randomBytes(16).toString('hex');
+    const iterations = 100000;
+    const keyLen = 32;
+    const digest = 'sha256';
+    const derived = crypto.pbkdf2Sync(passwordPlain, salt, iterations, keyLen, digest).toString('hex');
+    storeValue = `pbkdf2$${iterations}$${salt}$${derived}`;
+  } else if (passwordHash && typeof passwordHash === 'string') {
+    // store provided sha256 hash in clearable format
+    if (/^[0-9a-f]{64}$/i.test(passwordHash)) {
+      storeValue = `sha256$${passwordHash}`;
+    } else {
+      // unknown format - store as-is
+      storeValue = passwordHash;
+    }
+  }
+
   if (idx === -1) {
-    // if user not found, append new minimal record
-    users.push({ id, password: passwordHash });
+    users.push({ id, password: storeValue });
   } else {
-    users[idx] = { ...users[idx], password: passwordHash };
+    users[idx] = { ...users[idx], password: storeValue };
   }
   const ok = writeUsersFile({ users });
   if (!ok) return res.status(500).json({ ok: false, error: 'failed to write' });
