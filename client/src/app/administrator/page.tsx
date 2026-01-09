@@ -373,6 +373,57 @@ const Administrator = (props: Props) => {
     };
 
 
+    // --- System Configuration state & handlers ---
+    const defaultSystemConfig = {
+      appName: 'In-Accord',
+      maintenanceMode: false,
+      loggingLevel: 'info',
+      allowedOrigins: ['http://localhost:3000'],
+      integrations: { github: true, sentry: false, analytics: true },
+      backupSchedule: 'daily',
+      apiKeys: [] as { id: string; name: string; key: string; createdAt: string }[],
+    };
+
+    type SystemConfig = typeof defaultSystemConfig;
+
+    const [systemConfig, setSystemConfig] = useState<SystemConfig>(() => {
+      try {
+        const raw = typeof window !== 'undefined' ? localStorage.getItem('system_config') : null;
+        return raw ? JSON.parse(raw) : defaultSystemConfig;
+      } catch { return defaultSystemConfig; }
+    });
+
+    useEffect(() => {
+      try { if (typeof window !== 'undefined') localStorage.setItem('system_config', JSON.stringify(systemConfig)); } catch {}
+    }, [systemConfig]);
+
+    const saveSystemConfig = () => {
+      setSystemConfig(prev => ({ ...prev }));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Saved Configuration', details: `Config saved`, status: 'Success' }, ...prev]);
+      alert('System configuration saved.');
+    };
+
+    const resetSystemDefaults = () => {
+      if (!confirm('Reset system configuration to defaults?')) return;
+      setSystemConfig(defaultSystemConfig as SystemConfig);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Reset Defaults', details: `Configuration reset to defaults`, status: 'Success' }, ...prev]);
+      alert('System configuration reset to defaults.');
+    };
+
+    const addApiKey = (name: string) => {
+      const newKey = { id: 'k' + Math.random().toString(36).slice(2,9), name, key: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2), createdAt: new Date().toISOString() };
+      setSystemConfig(prev => ({ ...prev, apiKeys: [newKey, ...prev.apiKeys] }));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Added API Key', details: `${name} added`, status: 'Success' }, ...prev]);
+      return newKey;
+    };
+
+    const deleteApiKey = (id: string) => {
+      if (!confirm('Delete API key?')) return;
+      setSystemConfig(prev => ({ ...prev, apiKeys: prev.apiKeys.filter(k => k.id !== id) }));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Deleted API Key', details: `Key ${id} deleted`, status: 'Success' }, ...prev]);
+    };
+
+
 /* Backup Code */
    
     // Backup logs state
@@ -628,10 +679,114 @@ const Administrator = (props: Props) => {
         {/* Section 2 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">System Configuration</h2>
-          <p className="text-gray-600">
-            Configure system settings, manage integrations, and monitor application health. 
-            Update security policies, backup data, and view system logs and performance metrics.
+          <p className="text-gray-600 mb-4">
+            Configure system settings, manage integrations, and monitor application health.
           </p>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Application Name</label>
+                <input value={systemConfig.appName} onChange={e => setSystemConfig(prev => ({ ...prev, appName: e.target.value }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" />
+
+                <div className="mt-4 flex items-center gap-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={systemConfig.maintenanceMode} onChange={e => setSystemConfig(prev => ({ ...prev, maintenanceMode: e.target.checked }))} />
+                    <span className="text-sm text-gray-700 dark:text-gray-200">Maintenance Mode</span>
+                  </label>
+                  <span className="text-xs text-gray-500">When enabled, non-admin access is limited.</span>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Logging Level</label>
+                  <select value={systemConfig.loggingLevel} onChange={e => setSystemConfig(prev => ({ ...prev, loggingLevel: e.target.value }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                    <option value="debug">Debug</option>
+                    <option value="info">Info</option>
+                    <option value="warn">Warn</option>
+                    <option value="error">Error</option>
+                  </select>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Allowed Origins (one per line)</label>
+                  <textarea value={systemConfig.allowedOrigins.join('\n')} onChange={e => setSystemConfig(prev => ({ ...prev, allowedOrigins: e.target.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean) }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 h-24 text-sm" />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Backup Schedule</label>
+                  <select value={systemConfig.backupSchedule} onChange={e => setSystemConfig(prev => ({ ...prev, backupSchedule: e.target.value }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+
+                <div className="mt-6 flex gap-2">
+                  <button onClick={saveSystemConfig} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save Configuration</button>
+                  <button onClick={resetSystemDefaults} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset Defaults</button>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-md font-semibold text-gray-900 dark:text-white">Integrations</h4>
+                <div className="mt-2 space-y-2">
+                  <label className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium text-sm">GitHub</div>
+                      <div className="text-xs text-gray-500">Enable GitHub integration for issue syncing.</div>
+                    </div>
+                    <input type="checkbox" checked={systemConfig.integrations.github} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, github: e.target.checked } }))} />
+                  </label>
+
+                  <label className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium text-sm">Sentry</div>
+                      <div className="text-xs text-gray-500">Enable error monitoring (Sentry DSN required).</div>
+                    </div>
+                    <input type="checkbox" checked={systemConfig.integrations.sentry} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, sentry: e.target.checked } }))} />
+                  </label>
+
+                  <label className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium text-sm">Analytics</div>
+                      <div className="text-xs text-gray-500">Enable usage analytics collection.</div>
+                    </div>
+                    <input type="checkbox" checked={systemConfig.integrations.analytics} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, analytics: e.target.checked } }))} />
+                  </label>
+                </div>
+
+                <h4 className="text-md font-semibold text-gray-900 dark:text-white mt-6">API Keys</h4>
+                <div className="mt-2">
+                  <div className="mb-2 flex gap-2">
+                    <input id="newKeyName" placeholder="Key name" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                    <button onClick={() => {
+                      const el: any = document.getElementById('newKeyName');
+                      if (!el || !el.value.trim()) { alert('Enter a key name'); return; }
+                      const newKey = addApiKey(el.value.trim());
+                      alert(`New API Key created: ${newKey.key}`);
+                      el.value = '';
+                    }} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Create</button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {systemConfig.apiKeys.map(k => (
+                      <div key={k.id} className="flex items-center justify-between p-2 border rounded-lg">
+                        <div>
+                          <div className="font-medium text-sm">{k.name}</div>
+                          <div className="text-xs text-gray-500">Created: {new Date(k.createdAt).toLocaleString()}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => { navigator.clipboard.writeText(k.key); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
+                          <button onClick={() => deleteApiKey(k.id)} className="text-sm px-2 py-1 border rounded text-red-600">Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                    {systemConfig.apiKeys.length === 0 && <div className="text-sm text-gray-500">No API keys configured.</div>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Section 3 */}
