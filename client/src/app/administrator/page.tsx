@@ -372,6 +372,101 @@ const Administrator = (props: Props) => {
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Toggled User Status', details: `${u?.name} status toggled`, status: 'Success' }, ...prev]);
     };
 
+    // --- Custom user tables (persisted locally and optionally server-backed) ---
+    interface CustomField { id: string; name: string; type: string }
+    interface CustomTable { id: string; name: string; fields: CustomField[] }
+
+    const [customTables, setCustomTables] = useState<CustomTable[]>(() => {
+      try {
+        const raw = typeof window !== 'undefined' ? localStorage.getItem('user_custom_tables') : null;
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    });
+
+    useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('user_custom_tables', JSON.stringify(customTables)); } catch {} }, [customTables]);
+
+    const getAllUserFields = () => {
+      const defaultFields = [
+        { table: 'users', name: 'id', type: 'string' },
+        { table: 'users', name: 'name', type: 'string' },
+        { table: 'users', name: 'email', type: 'string' },
+        { table: 'users', name: 'role', type: 'string' },
+        { table: 'users', name: 'status', type: 'string' },
+        { table: 'users', name: 'createdAt', type: 'date' },
+      ];
+      const custom = customTables.flatMap(t => t.fields.map(f => ({ table: t.name, name: f.name, type: f.type })));
+      return [...defaultFields, ...custom];
+    };
+
+    const refreshTablesFromServer = async () => {
+      try {
+        const res = await fetch('/api/schemas');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && Array.isArray(data.tables)) setCustomTables(data.tables as CustomTable[]);
+      } catch (e) { console.warn('Failed to refresh tables from server', e); }
+    };
+
+    const defaultUserFields = [
+      { name: 'id', type: 'string', description: 'Unique identifier for the user', example: 'u1' },
+      { name: 'name', type: 'string', description: 'Full name', example: 'Alice Johnson' },
+      { name: 'email', type: 'string', description: 'Email address used for login and notifications', example: 'alice@example.com' },
+      { name: 'role', type: 'enum', description: 'Assigned role determining permissions', example: 'Admin | Manager | User | Viewer' },
+      { name: 'status', type: 'enum', description: 'Account status', example: 'Active | Suspended' },
+      { name: 'createdAt', type: 'date', description: 'Account creation date', example: '2024-01-10' }
+    ];
+
+    // UI state & handlers for adding/editing custom user tables/fields
+    const [editingTableId, setEditingTableId] = useState<string | null>(null);
+    const [editingTableDraft, setEditingTableDraft] = useState<CustomTable | null>(null);
+    const [newTableName, setNewTableName] = useState('');
+    const [newTableFields, setNewTableFields] = useState<CustomField[]>([]);
+
+    const addFieldToNewTable = () => {
+      setNewTableFields(prev => [...prev, { id: 'f' + Math.random().toString(36).slice(2,9), name: '', type: 'string' }]);
+    };
+
+    const updateNewField = (id: string, patch: Partial<CustomField>) => {
+      setNewTableFields(prev => prev.map(f => f.id === id ? { ...f, ...patch } : f));
+    };
+
+    const removeNewField = (id: string) => {
+      setNewTableFields(prev => prev.filter(f => f.id !== id));
+    };
+
+    const addCustomTable = () => {
+      const name = newTableName.trim();
+      if (!name) { alert('Table name required'); return; }
+      const table: CustomTable = { id: 't' + Math.random().toString(36).slice(2,9), name, fields: newTableFields.map(f => ({ ...f })) };
+      setCustomTables(prev => [table, ...prev]);
+      setNewTableName('');
+      setNewTableFields([]);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created Custom Table', details: `${name} created`, status: 'Success' }, ...prev]);
+    };
+
+    const startEditTable = (id: string) => {
+      const t = customTables.find(x => x.id === id) || null;
+      setEditingTableDraft(t ? { id: t.id, name: t.name, fields: t.fields.map(f => ({ ...f })) } : null);
+      setEditingTableId(id);
+    };
+
+    const cancelEditTable = () => { setEditingTableId(null); setEditingTableDraft(null); };
+
+    const saveEditedTable = () => {
+      if (!editingTableDraft) return;
+      setCustomTables(prev => prev.map(t => t.id === editingTableDraft.id ? editingTableDraft : t));
+      setEditingTableId(null);
+      setEditingTableDraft(null);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated Custom Table', details: `${editingTableDraft.name} updated`, status: 'Success' }, ...prev]);
+    };
+
+    const deleteCustomTableById = (id: string) => {
+      if (!confirm('Delete this custom table?')) return;
+      const t = customTables.find(x => x.id === id);
+      setCustomTables(prev => prev.filter(x => x.id !== id));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted Custom Table', details: `${t?.name} deleted`, status: 'Success' }, ...prev]);
+    };
+
 
     // --- System Configuration state & handlers ---
     const defaultSystemConfig = {
@@ -715,7 +810,121 @@ const Administrator = (props: Props) => {
                 </tbody>
               </table>
             </div>
-          </div>
+              {/* All User Fields & Custom Tables */}
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-md font-semibold text-gray-900 dark:text-white">All User Fields</h4>
+                  <div className="flex items-center gap-2">
+                    <button onClick={refreshTablesFromServer} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Refresh from Server</button>
+                    <button onClick={() => { const payload = JSON.stringify({ tables: customTables }, null, 2); const blob = new Blob([payload], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'custom_tables.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }} className="px-3 py-1 bg-green-500 hover:bg-green-600 text-sm text-white rounded">Export</button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm font-medium mb-2">Default User Fields</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                      {defaultUserFields.map(f => (
+                        <div key={f.name} className="p-2 bg-white dark:bg-gray-800 border rounded text-xs">
+                          <div className="font-medium text-sm text-gray-900 dark:text-white">{f.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{f.type} — {f.description}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">Example: <span className="font-mono text-xs">{f.example}</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-medium mb-2">Custom Tables ({customTables.length})</div>
+
+                    <div className="p-3 bg-white dark:bg-gray-800 border rounded mb-3">
+                      <div className="flex gap-2 items-start">
+                        <input value={newTableName} onChange={e => setNewTableName(e.target.value)} placeholder="New table name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                        <button onClick={addFieldToNewTable} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">+ Field</button>
+                        <button onClick={addCustomTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create</button>
+                      </div>
+
+                      {newTableFields.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {newTableFields.map(f => (
+                            <div key={f.id} className="flex gap-2 items-center">
+                              <input value={f.name} onChange={e => updateNewField(f.id, { name: e.target.value })} placeholder="field name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                              <select value={f.type} onChange={e => updateNewField(f.id, { type: e.target.value })} className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm">
+                                <option value="string">string</option>
+                                <option value="number">number</option>
+                                <option value="date">date</option>
+                                <option value="boolean">boolean</option>
+                                <option value="enum">enum</option>
+                              </select>
+                              <button onClick={() => removeNewField(f.id)} className="px-2 py-1 text-red-600">Remove</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {customTables.length === 0 ? (
+                      <div className="text-sm text-gray-500">No custom tables defined.</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {customTables.map(t => {
+                          const isEditing = editingTableId === t.id;
+                          return (
+                            <div key={t.id} className="p-2 bg-white dark:bg-gray-800 border rounded">
+                              <div className="flex items-center justify-between">
+                                <div className="font-medium">{t.name}</div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-xs text-gray-500">{t.fields.length} fields</div>
+                                </div>
+                              </div>
+
+                              {isEditing ? (
+                                <div className="mt-2 space-y-2">
+                                  <input value={editingTableDraft?.name ?? ''} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, name: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" />
+
+                                  <div className="space-y-2">
+                                    {editingTableDraft?.fields.map(f => (
+                                      <div key={f.id} className="flex gap-2 items-center">
+                                        <input value={f.name} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.map(ff => ff.id === f.id ? { ...ff, name: e.target.value } : ff) } : prev)} placeholder="field name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                                        <select value={f.type} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.map(ff => ff.id === f.id ? { ...ff, type: e.target.value } : ff) } : prev)} className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm">
+                                          <option value="string">string</option>
+                                          <option value="number">number</option>
+                                          <option value="date">date</option>
+                                          <option value="boolean">boolean</option>
+                                          <option value="enum">enum</option>
+                                        </select>
+                                        <button onClick={() => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.filter(ff => ff.id !== f.id) } : prev)} className="px-2 py-1 text-red-600">Remove</button>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  <div className="flex gap-2 mt-2">
+                                    <button onClick={() => setEditingTableDraft(prev => prev ? { ...prev, fields: [...prev.fields, { id: 'f' + Math.random().toString(36).slice(2,9), name: '', type: 'string' }] } : prev)} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Add Field</button>
+                                    <button onClick={saveEditedTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Save</button>
+                                    <button onClick={cancelEditTable} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Cancel</button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    {t.fields.map(f => <span key={f.id} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 border rounded text-xs text-gray-700 dark:text-gray-200">{f.name} ({f.type})</span>)}
+                                  </div>
+
+                                  <div className="mt-2 flex gap-2">
+                                    <button onClick={() => startEditTable(t.id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Edit</button>
+                                    <button onClick={() => deleteCustomTableById(t.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Delete</button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
         </section>
 
         {/* Section 2 */}

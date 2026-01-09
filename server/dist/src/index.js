@@ -25,6 +25,8 @@ app.use((0, cors_1.default)());
 app.use("/dashboard", dashboardRoutes_1.default);
 const supportRoutes_1 = __importDefault(require("./routes/supportRoutes"));
 app.use('/api/support', supportRoutes_1.default);
+const schemasRoutes_1 = __importDefault(require("./routes/schemasRoutes"));
+app.use('/api/schemas', schemasRoutes_1.default);
 /* SERVER */
 const port = process.env.PORT || 8000;
 app.listen(port, () => {
