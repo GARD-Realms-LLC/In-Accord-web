@@ -29,25 +29,22 @@ In-Accord is The Premier Discord Customization and Management App for Users and 
   </a>
   <a href="https://github.com/InAccord/Installer/blob/mian/LICENSE" target="_blank">
     <img src="https://img.shields.io/github/license/InAccord/installer?labelColor=0c0d10&color=3a71c1&style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsia0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwLjk2ODQgMi4zMjQ2NUMxMS41ODMgMS44NzYxNiAxMi40MTcgMS44NzYxNiAxMy4wMzE2IDIuMzI0NjVMMjAuNDUzNCA3Ljc0MDZDMjEuNDI5OSA4LjQ1MzE1IDIwLjkyNjggOS45OTgzNSAxOS43MTg5IDEwLjAwMDNINC4yODEwOEMzLjA3MzE4IDkuOTk4MzUgMi41NzAxMSA4LjQ1MzE1IDMuNTQ2NTcgNy43NDA2TDEwLjk2ODQgMi4zMjQ2NVpNMTMgNi4yNTAzNEMxMyA1LjY5ODA1IDEyLjU1MjMgNS4yNTAzNCAxMiA1LjI1MDM0QzExLjQ0NzcgNS4yNTAzNCAxMSA1LjY5ODA1IDExIDYuMjUwMzRDMTEgNi44MDI2MiAxMS40NDc3IDcuMjUwMzQgMTIgNy4yNTAzNEMxMi41NTIzIDcuMjUwMzQgMTMgNi44MDI2MiAxMyA2LjI1MDM0WiIgZmlsia0iIzNhNzFjMSIvPgo8cGF0aCBkPSJNMTEuMjUgMTYuMDAwM0g5LjI1VjExLjAwMDNIMTEuMjVWMTYuMDAwM1oiIGZpbGw9IiMzYTcxYzEiLz4KPHBhdGggZD0iTTE0Ljc1IDE2LjAwMDNIMTIuNzVWMTEuMDAwM0gxNC43NVYxNi4wMDAzWiIgZmlsia0iIzNhNzFjMSIvPgo8cGF0aCBkPSJNMTguNSAxNi4wMDAzSDE2LjI1VjExLjAwMDNIMTguNVYxNi4wMDAzWiIgZmlsia0iIzNhNzFjMSIvPgo8cGF0aCBkPSJNMTguNzUgMTcuMDAwM0g1LjI1QzQuMDA3MzYgMTcuMDAwMyAzIDE4LjAwNzcgMyAxOS4yNTAzVjE5Ljc1MDNDMyAyMC4xNjQ1IDMuMzM1NzkgMjAuNTAwMyAzLjc1IDIwLjUwMDNIMjAuMjVDMjAuNjY0MiAyMC41MDAzIDIxIDIwLjE2NDUgMjEgMTkuNzUwM1YxOS4yNTAzQzIxIDE4LjAwNzcgMTkuOTkyNiAxNy4wMDAzIDE4Ljc1IDE3LjAwMDNiaiBmaWxsPSIjM2E3MWMxIi8+CjxwYXRoIGQ9Ik03Ljc1IDE2LjAwMDNINS41VjExLjAwMDNINy43NVYxNi4wMDAzWiIgZmlsia0iIzNhNzFjMSIvPgo8L3N2Zz4K" alt="License"/>
-Origin/Development
   </a>
 </p>
 
 ---
 
-# Overview
+# Overview:
 
 This repository contians the source code for the In-Accord Website. This installer is written with [electron-webpack](https://webpack.electron.build/) and [Svelte 3](https://svelte.dev/).
 
-## Downloads
+## Downloads:
 
 These will link you to the latest builds found in the [releases](https://github.com/InAccord/installer/releases/) tab of this repository.
 
 
 
-## Codebase
-
-Updated soon!
+## Codebase: Updated soon!
 ```
 ├──client                  // Contians Client structor.
 |  └──
@@ -58,11 +55,11 @@ Updated soon!
 
 ---
 
-# Development
+# Development:
 
 > This is a tutorial designed for people looking to contribute to, or work directly with the installer's source code. If you are just looking to download and install InAccord, visit the [releases](https://github.com/docrst/InAccord/) page of this repository.
 
-## Prerequisites is "UNDER CONSTRUCTION!"
+## Prerequisites:
 - [Github](https://github.com/)
 - [VB-Code](https://code.visualstudio.com/)
 - [Node.js](https://nodejs.org/en/)
@@ -70,7 +67,7 @@ Updated soon!
 - [yarn](https://yarnpkg.com)
 
 
-## Building is "UNDER CONSTRUCTION!"
+## Building: is "UNDER CONSTRUCTION!"
 
 ### 1: Clone the repository.
 ```ps
@@ -98,7 +95,7 @@ This project uses [ESLint](https://eslint.org/). Run this command to lint your c
 yarn lint
 ```
 
-### Compiling & Distribution
+### Compiling & Distribution:
 
 ```ps
 yarn dist
@@ -106,11 +103,11 @@ yarn dist
 
 ---
 
-# Contributors
+# Contributors:
 
 For information on contributing to this project, please see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-## GitHub Code Contributors
+## GitHub Code Contributors:
 
 | [Doc Cowles - Docrst](https://github.com/docrst) |
 | [Eli Copter- Harry James Potter](https://github.com/hogwartsworld47)
