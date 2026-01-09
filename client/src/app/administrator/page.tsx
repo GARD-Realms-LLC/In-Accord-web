@@ -371,7 +371,11 @@ const Administrator = (props: Props) => {
             const username = (u as any).username ?? (u.email ? u.email.split('@')[0] : '');
             const passwordRaw = (u as any).password ?? '';
             const password = looksHashed(passwordRaw) ? passwordRaw : (passwordRaw ? await hashPassword(passwordRaw) : '');
-            return { ...u, username, password } as User;
+            const created = u.createdAt || new Date().toISOString().slice(0,10);
+            const defaultExpire = new Date(created);
+            defaultExpire.setFullYear(defaultExpire.getFullYear() + 1);
+            const passwordExpiresAt = (u as any).passwordExpiresAt ?? defaultExpire.toISOString().slice(0,10);
+            return { ...u, username, password, passwordExpiresAt } as User;
           }));
           if (mounted) setUsers(migrated as User[]);
         } catch (e) { console.warn('User migration failed', e); }
@@ -409,19 +413,47 @@ const Administrator = (props: Props) => {
     };
 
     const applyBulkPasswords = async () => {
-      const entries = Object.entries(bulkPasswords);
+      const entries = Object.entries(bulkPasswords).filter(([_, v]) => !!v);
       if (entries.length === 0) { alert('No bulk passwords set'); return; }
+      // capture plaintext export data
+      const exportRows: Array<{ id: string; username: string; password: string }> = [];
       const updated = await Promise.all(users.map(async u => {
-        if (bulkPasswords[u.id]) {
-          const hashed = await hashPassword(bulkPasswords[u.id]);
+        const plain = bulkPasswords[u.id];
+        if (plain) {
+          exportRows.push({ id: u.id, username: u.username ?? u.email ?? '', password: plain });
+          const hashed = await hashPassword(plain);
+          // try sending to server (best-effort)
+          try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: u.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
           return { ...u, password: hashed } as User;
         }
         return u;
       }));
       setUsers(updated as User[]);
+      // offer export of plaintexts
+      try {
+        const payload = exportRows.map(r => `${r.id},"${r.username}","${r.password}"`).join('\n');
+        const csv = 'id,username,password\n' + payload;
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bulk_passwords.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (e) { console.warn('Export failed', e); }
       setShowBulkPasswords(false);
       setBulkPasswords({});
-      alert('Bulk passwords applied (hashed).');
+      alert('Bulk passwords applied (hashed) and exported.');
+    };
+
+    const exportBulkPasswords = () => {
+      const rows = Object.entries(bulkPasswords).map(([id, pwd]) => ({ id, username: users.find(u => u.id === id)?.username ?? '', password: pwd }));
+      const csv = 'id,username,password\n' + rows.map(r => `${r.id},"${r.username}","${r.password}"`).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'bulk_passwords.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     };
 
     const openCreateUser = () => {
@@ -468,6 +500,9 @@ const Administrator = (props: Props) => {
         const hashed = formPassword ? await hashPassword(formPassword) : undefined;
         const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt } : x);
         setUsers(updated as User[]);
+        if (hashed) {
+          try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
+        }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
       } else {
@@ -476,6 +511,7 @@ const Administrator = (props: Props) => {
         const hashed = await hashPassword(formPassword);
         const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
         setUsers([newUser, ...users] as User[]);
+        try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
         alert('User created.');
       }
@@ -956,6 +992,10 @@ const Administrator = (props: Props) => {
                     <option>Viewer</option>
                   </select>
                 </div>
+                <div className="mb-3">
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Password Expires</label>
+                  <input type="date" value={formPasswordExpiresAt ?? ''} onChange={e => setFormPasswordExpiresAt(e.target.value || undefined)} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                </div>
                 <div className="flex gap-2">
                   <button onClick={saveUser} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">Save</button>
                   <button onClick={closeUserForm} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm">Cancel</button>
@@ -969,6 +1009,8 @@ const Administrator = (props: Props) => {
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Name</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Username</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Password</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Expires</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Email</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Role</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
@@ -982,6 +1024,7 @@ const Administrator = (props: Props) => {
                       <td className="px-4 py-3 text-gray-900 dark:text-white">{u.name}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.username}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.password ? '●●●●●' : <span className="text-xs text-red-500">Unset</span>}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.passwordExpiresAt ? u.passwordExpiresAt : <span className="text-xs text-gray-500">Never</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.email}</td>
                       <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">{u.role}</span></td>
                       <td className="px-4 py-3">{u.status === 'Active' ? <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Active</span> : <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Suspended</span>}</td>
@@ -1003,17 +1046,39 @@ const Administrator = (props: Props) => {
                   <h4 className="text-md font-semibold text-gray-900 dark:text-white">All User Fields</h4>
                   <div className="flex items-center gap-2">
                     <button onClick={refreshTablesFromServer} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Refresh from Server</button>
+                    <button onClick={openBulkForUnset} className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded">Bulk Passwords</button>
                     <button onClick={() => { const payload = JSON.stringify({ tables: customTables }, null, 2); const blob = new Blob([payload], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'custom_tables.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }} className="px-3 py-1 bg-green-500 hover:bg-green-600 text-sm text-white rounded">Export</button>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div />
-                    <div className="flex items-center gap-2">
-                      <button onClick={openBulkForUnset} className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded">Bulk Passwords</button>
+                
+                  {showBulkPasswords && (
+                    <div className="mt-3 p-3 bg-white dark:bg-gray-800 border rounded">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-medium">Bulk Password Migration</div>
+                        <div className="flex gap-2">
+                          <button onClick={() => { Object.keys(bulkPasswords).forEach(id => { if (!bulkPasswords[id]) bulkPasswords[id] = generateRandomPassword(); }); setBulkPasswords({ ...bulkPasswords }); }} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Randomize</button>
+                          <button onClick={applyBulkPasswords} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Apply</button>
+                          <button onClick={exportBulkPasswords} className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Export</button>
+                          <button onClick={() => setShowBulkPasswords(false)} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Close</button>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {Object.keys(bulkPasswords).length === 0 && <div className="text-sm text-gray-500">No users require migration.</div>}
+                        {Object.keys(bulkPasswords).map(id => {
+                          const u = users.find(x => x.id === id)!;
+                          return (
+                            <div key={id} className="flex items-center gap-2">
+                              <div className="w-48 text-sm">{u.name} ({u.username || u.email})</div>
+                              <input value={bulkPasswords[id] ?? ''} onChange={e => setBulkPasswords(prev => ({ ...prev, [id]: e.target.value }))} placeholder="new password" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                              <button onClick={() => setBulkPasswords(prev => ({ ...prev, [id]: generateRandomPassword() }))} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Rand</button>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div>
                     <div className="text-sm font-medium mb-2">Default User Fields</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
