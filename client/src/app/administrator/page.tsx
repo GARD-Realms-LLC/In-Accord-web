@@ -50,41 +50,6 @@ const Administrator = (props: Props) => {
     const [memoryUsage, setMemoryUsage] = useState(8.2);
     const [lastUpdated, setLastUpdated] = useState(new Date());
 
-    // Backup logs state
-    interface BackupLog {
-      timestamp: string;
-      user: string;
-      page: string;
-      action: string;
-      details: string;
-      status: 'Success' | 'In Progress' | 'Failed';
-    }
-    const [backupLogs, setBackupLogs] = useState<BackupLog[]>([
-      {
-        timestamp: '2026-01-08 02:00:47',
-        user: 'System',
-        page: 'Backup & Recovery',
-        action: 'Backup Completed',
-        details: 'Full backup (DB + Files) 487 MB to Local + Cloud',
-        status: 'Success'
-      },
-      {
-        timestamp: '2026-01-07 02:00:33',
-        user: 'System',
-        page: 'Backup & Recovery',
-        action: 'Backup Completed',
-        details: 'Full backup (DB + Files) 465 MB to Local + Cloud',
-        status: 'Success'
-      },
-      {
-        timestamp: '2026-01-01 08:30:22',
-        user: 'DocRST',
-        page: 'Backup & Recovery',
-        action: 'DR Test Executed',
-        details: 'Disaster recovery test - Recovery time: 6m 14s',
-        status: 'Success'
-      }
-    ]);
 
     const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const isValidURL = (url: string) => {
@@ -123,7 +88,44 @@ const Administrator = (props: Props) => {
     };
 
 
-    
+/* Backup Code */
+   
+    // Backup logs state
+    interface BackupLog {
+      timestamp: string;
+      user: string;
+      page: string;
+      action: string;
+      details: string;
+      status: 'Success' | 'In Progress' | 'Failed';
+    }
+    const [backupLogs, setBackupLogs] = useState<BackupLog[]>([
+      {
+        timestamp: '2026-01-08 02:00:47',
+        user: 'System',
+        page: 'Backup & Recovery',
+        action: 'Backup Completed',
+        details: 'Full backup (DB + Files) 487 MB to Local + Cloud',
+        status: 'Success'
+      },
+      {
+        timestamp: '2026-01-07 02:00:33',
+        user: 'System',
+        page: 'Backup & Recovery',
+        action: 'Backup Completed',
+        details: 'Full backup (DB + Files) 465 MB to Local + Cloud',
+        status: 'Success'
+      },
+      {
+        timestamp: '2026-01-01 08:30:22',
+        user: 'DocRST',
+        page: 'Backup & Recovery',
+        action: 'DR Test Executed',
+        details: 'Disaster recovery test - Recovery time: 6m 14s',
+        status: 'Success'
+      }
+    ]);
+
     // Run backup immediately
     const runBackup = () => {
       const now = new Date();
@@ -182,7 +184,7 @@ const Administrator = (props: Props) => {
       }, 3000);
     };
 
-
+/* Backup Code */
 
     useEffect(() => {
       const savedMembers = localStorage.getItem('teamMembers');
