@@ -110,8 +110,6 @@ For information on contributing to this project, please see [CONTRIBUTING.md](/C
 
 ## GitHub Code Contributors
 
-<div align="center">
-
 |:---:|
 | [Doc Cowles - Docrst](https://github.com/docrst) |
 | [Eli Copter- Harry James Potter](https://github.com/hogwartsworld47)
