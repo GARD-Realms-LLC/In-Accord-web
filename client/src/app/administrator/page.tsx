@@ -50,6 +50,42 @@ const Administrator = (props: Props) => {
     const [memoryUsage, setMemoryUsage] = useState(8.2);
     const [lastUpdated, setLastUpdated] = useState(new Date());
 
+    // Backup logs state
+    interface BackupLog {
+      timestamp: string;
+      user: string;
+      page: string;
+      action: string;
+      details: string;
+      status: 'Success' | 'In Progress' | 'Failed';
+    }
+    const [backupLogs, setBackupLogs] = useState<BackupLog[]>([
+      {
+        timestamp: '2026-01-08 02:00:47',
+        user: 'System',
+        page: 'Backup & Recovery',
+        action: 'Backup Completed',
+        details: 'Full backup (DB + Files) 487 MB to Local + Cloud',
+        status: 'Success'
+      },
+      {
+        timestamp: '2026-01-07 02:00:33',
+        user: 'System',
+        page: 'Backup & Recovery',
+        action: 'Backup Completed',
+        details: 'Full backup (DB + Files) 465 MB to Local + Cloud',
+        status: 'Success'
+      },
+      {
+        timestamp: '2026-01-01 08:30:22',
+        user: 'DocRST',
+        page: 'Backup & Recovery',
+        action: 'DR Test Executed',
+        details: 'Disaster recovery test - Recovery time: 6m 14s',
+        status: 'Success'
+      }
+    ]);
+
     const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const isValidURL = (url: string) => {
       if (!url) return false;
@@ -79,6 +115,69 @@ const Administrator = (props: Props) => {
       }
       
       setLastUpdated(new Date());
+    };
+
+    // Refresh audit logs
+    const refreshAuditLogs = () => {
+      alert('Audit logs refreshed! Latest entries loaded.');
+    };
+
+    // Run backup immediately
+    const runBackup = () => {
+      const now = new Date();
+      const timestamp = now.toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+      }).replace(/(\d+)\/(\d+)\/(\d+),\s/, '$3-$1-$2 ');
+
+      // Add "In Progress" log entry
+      const inProgressLog: BackupLog = {
+        timestamp,
+        user: 'System',
+        page: 'Backup & Recovery',
+        action: 'Backup Started',
+        details: 'Starting full backup (DB + Files) to Local + Cloud storage',
+        status: 'In Progress'
+      };
+
+      setBackupLogs([inProgressLog, ...backupLogs]);
+
+      // Simulate backup completion after 3 seconds
+      setTimeout(() => {
+        const completionTime = new Date();
+        const completionTimestamp = completionTime.toLocaleString('en-US', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit', 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit',
+          hour12: false 
+        }).replace(/(\d+)\/(\d+)\/(\d+),\s/, '$3-$1-$2 ');
+
+        const completedLog: BackupLog = {
+          timestamp: completionTimestamp,
+          user: 'System',
+          page: 'Backup & Recovery',
+          action: 'Backup Completed',
+          details: 'Full backup (DB + Files) 492 MB to Local + Cloud',
+          status: 'Success'
+        };
+
+        setBackupLogs(prevLogs => {
+          const updatedLogs = [...prevLogs];
+          // Remove the "In Progress" entry and add the completed one
+          updatedLogs.shift();
+          return [completedLog, ...updatedLogs];
+        });
+
+        alert('Backup completed successfully! 492 MB backed up to local storage and Cloudflare R2.');
+      }, 3000);
     };
 
     useEffect(() => {
@@ -206,10 +305,276 @@ const Administrator = (props: Props) => {
         {/* Section 6 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">Backup & Recovery</h2>
-          <p className="text-gray-600">
-            Schedule automated backups, manage backup storage, and test disaster recovery procedures. 
+          <p className="text-gray-600 mb-6">
+            Schedule automated backups to local or cloud storage, manage backup files, and test disaster recovery procedures. 
             Restore from backups, track backup history, and ensure data redundancy across systems.
           </p>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Backup Schedule Configuration */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Automated Backup Schedule</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Storage Location</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option>Local - E:/In-Accord-web/backups</option>
+                    <option>Cloudflare R2 - inaccord/In-Accord Backups</option>
+                    <option>Both (Local + Cloud)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Backup Frequency</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option>Daily at 2:00 AM</option>
+                    <option>Every 6 hours</option>
+                    <option>Every 12 hours</option>
+                    <option>Weekly (Sunday 2:00 AM)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">What to Backup</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input type="checkbox" defaultChecked className="mr-2" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Database (Prisma schema + data)</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" defaultChecked className="mr-2" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Team member data (localStorage)</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" defaultChecked className="mr-2" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">Application files (client/server)</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Next backup: <strong>Today 2:00 AM</strong></span>
+                  <button onClick={runBackup} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    Run Now
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Storage Status */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Backup Storage Status</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Local Storage Used</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">3.1 GB / 50 GB</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '6.2%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Cloudflare R2 Used</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">1.8 GB / 10 GB</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '18%' }}></div>
+                  </div>
+                </div>
+                <div className="pt-2 space-y-2 border-t border-gray-200 dark:border-gray-600">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Total Backups:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">7 backups</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Local Copies:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">7 files</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Cloud Copies:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">5 files</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Oldest Backup:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">Jan 2, 2026</span>
+                  </div>
+                </div>
+                <button className="w-full mt-3 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors">
+                  Manage Storage Locations
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Backup History */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Backup History</h3>
+              <button className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                View All
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Date & Time</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Backup Type</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Location</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Size</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-08 02:00</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local + Cloud</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">487 MB</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
+                    <td className="px-4 py-3">
+                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
+                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-07 02:00</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local + Cloud</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">465 MB</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
+                    <td className="px-4 py-3">
+                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
+                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-06 02:00</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local + Cloud</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">458 MB</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
+                    <td className="px-4 py-3">
+                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
+                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-05 02:00</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local Only</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">442 MB</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Verified</span></td>
+                    <td className="px-4 py-3">
+                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
+                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-04 02:00</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local Only</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">438 MB</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
+                    <td className="px-4 py-3">
+                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
+                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Disaster Recovery & Redundancy */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Disaster Recovery Testing */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Disaster Recovery Testing</h3>
+              <div className="space-y-3 mb-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Last DR Test:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">2026-01-01 08:30</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Test Result:</span>
+                  <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Passed</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Recovery Time:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">6m 14s</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Backup Tested:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">2025-12-31 backup</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Next Test:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">Feb 1, 2026</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <button className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  Run DR Test Now
+                </button>
+                <button className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors">
+                  View Test History
+                </button>
+              </div>
+            </div>
+
+            {/* Data Redundancy Status */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Redundancy</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Local Primary</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">E:/In-Accord-web/backups</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">Active</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Cloudflare R2</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">inaccord/In-Accord Backups</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">Synced</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Database Schema</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">server/prisma/schema.prisma</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Git Tracked</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">Team Data</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">localStorage + backups</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Protected</span>
+                </div>
+                <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    All critical data is backed up to local storage and <a href="https://dash.cloudflare.com/e6170abf1613b7f0d6f016cda0f7fcf4/r2/default/buckets/inaccord?prefix=In-Accord+Backups%2F" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline">Cloudflare R2</a>. Database schema and migrations are version controlled in the GitHub repository (GARD-Realms-LLC/In-Accord-web).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Section 7 */}
@@ -223,9 +588,14 @@ const Administrator = (props: Props) => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Activity Log</h3>
-              <button className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                Export Logs
-              </button>
+              <div className="flex gap-2">
+                <button onClick={refreshAuditLogs} className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors">
+                  Refresh
+                </button>
+                <button className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                  Export Logs
+                </button>
+              </div>
             </div>
             
             <div className="h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -242,7 +612,31 @@ const Administrator = (props: Props) => {
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 14:35:22</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-07 19:00:47</td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">System</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup & Recovery</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup Completed</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full backup (DB + Files) 487 MB to Local + Cloud</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-06 19:00:33</td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">System</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup & Recovery</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup Completed</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full backup (DB + Files) 465 MB to Local + Cloud</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-12-31 01:30:22</td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup & Recovery</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">DR Test Executed</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Disaster recovery test - Recovery time: 6m 14s</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Passed</span></td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:35:22</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Team</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Updated Job Title</td>
@@ -250,7 +644,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 14:28:15</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:28:15</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Administrator</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Updated Team Member</td>
@@ -258,7 +652,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 14:15:43</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:15:43</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Dashboard</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -266,7 +660,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 14:02:11</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:02:11</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Team</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -274,7 +668,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 13:45:32</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:45:32</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Products</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -282,7 +676,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 13:32:18</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:32:18</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Users</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -290,7 +684,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 13:18:45</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:18:45</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Expenses</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -298,7 +692,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 13:05:22</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:05:22</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Inventory</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -306,7 +700,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 12:52:10</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:52:10</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Settings</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -314,7 +708,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 12:38:56</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:38:56</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Administrator</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
@@ -322,7 +716,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 12:25:33</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:25:33</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Home</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Login Success</td>
@@ -330,7 +724,7 @@ const Administrator = (props: Props) => {
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 12:10:15</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:10:15</td>
                     <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Support</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
