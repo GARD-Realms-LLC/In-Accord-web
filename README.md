@@ -47,12 +47,12 @@ These will link you to the latest builds found in the [releases](https://github.
 
 ## Codebase
 
+Updated soon!
 ```
-.
-├──assets                  // Contians static assets (such as images) used by the installer.
-|  └──images               // Images (logos, backgrounds, etc...) used by the installer.
-├──scripts                 // Scripts needed for development and contributing.
-└──src                     // The installer's source code.
+├──client                  // Contians Client structor.
+|  └──
+├──server                 // Contians Server structor.
+|  └──
 
 ```
 
@@ -62,7 +62,7 @@ These will link you to the latest builds found in the [releases](https://github.
 
 > This is a tutorial designed for people looking to contribute to, or work directly with the installer's source code. If you are just looking to download and install InAccord, visit the [releases](https://github.com/docrst/InAccord/) page of this repository.
 
-## Prerequisites
+## Prerequisites is "UNDER CONSTRUCTION!"
 - [Git](https://git-scm.com)
 - [Node.js](https://nodejs.org/en/)
 - [yarn](https://yarnpkg.com)
