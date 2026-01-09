@@ -2,6 +2,33 @@
 
 import { useEffect, useState } from 'react';
 
+// Password strength helper component
+function PasswordStrength({ password }: { password: string }) {
+  const score = (() => {
+    if (!password) return 0;
+    let s = 0;
+    if (password.length >= 8) s += 1;
+    if (password.length >= 12) s += 1;
+    if (/[A-Z]/.test(password)) s += 1;
+    if (/[0-9]/.test(password)) s += 1;
+    if (/[^A-Za-z0-9]/.test(password)) s += 1;
+    return s;
+  })();
+
+  const pct = Math.min(100, Math.round((score / 5) * 100));
+  const color = score <= 1 ? 'bg-red-500' : score <= 3 ? 'bg-yellow-400' : 'bg-green-500';
+
+  return (
+    <div>
+      <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded overflow-hidden">
+        <div className={`${color} h-2`} style={{ width: `${pct}%` }} />
+      </div>
+      <div className="text-xs text-gray-500 mt-1">Strength: {pct}% {score >= 4 ? '(Strong)' : score >= 2 ? '(Medium)' : '(Weak)'}</div>
+      <div className="text-xs text-gray-500 mt-1">Rules: min 8 chars, uppercase, number, special</div>
+    </div>
+  );
+}
+
 interface TeamMember {
   name: string;
   jobTitle: string;
@@ -319,24 +346,37 @@ const Administrator = (props: Props) => {
     }, [users]);
 
     // Migration: ensure all users have username and password fields
+    // Helpers: hash passwords and detect hashed values
+    const hashPassword = async (pwd: string) => {
+      if (!pwd) return '';
+      const enc = new TextEncoder();
+      const data = enc.encode(pwd);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    const looksHashed = (p: string | undefined) => {
+      return typeof p === 'string' && /^[0-9a-f]{64}$/.test(p);
+    };
+
+    // Migration: hash any plaintext passwords and ensure username exists
     useEffect(() => {
-      try {
-        const needsMigration = users.some(u => !('username' in u) || !u.username || !('password' in u));
-        if (needsMigration) {
-          const migrated = users.map(u => ({
-            id: u.id,
-            name: u.name,
-            username: (u as any).username ?? (u.email ? u.email.split('@')[0] : ''),
-            password: (u as any).password ?? '',
-            email: u.email,
-            role: u.role,
-            status: u.status,
-            createdAt: u.createdAt
-          } as User));
-          setUsers(migrated as User[]);
-        }
-      } catch (e) { console.warn('User migration failed', e); }
-      // run only once on mount
+      let mounted = true;
+      (async () => {
+        try {
+          const needs = users.some(u => !u.username || !looksHashed(u.password));
+          if (!needs) return;
+          const migrated = await Promise.all(users.map(async (u) => {
+            const username = (u as any).username ?? (u.email ? u.email.split('@')[0] : '');
+            const passwordRaw = (u as any).password ?? '';
+            const password = looksHashed(passwordRaw) ? passwordRaw : (passwordRaw ? await hashPassword(passwordRaw) : '');
+            return { ...u, username, password } as User;
+          }));
+          if (mounted) setUsers(migrated as User[]);
+        } catch (e) { console.warn('User migration failed', e); }
+      })();
+      return () => { mounted = false; };
+      // run once
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -348,6 +388,39 @@ const Administrator = (props: Props) => {
     const [formUsername, setFormUsername] = useState('');
     const [formPassword, setFormPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    // Bulk password migration state
+    const [showBulkPasswords, setShowBulkPasswords] = useState(false);
+    const [bulkPasswords, setBulkPasswords] = useState<Record<string,string>>({});
+
+    const generateRandomPassword = (len = 12) => {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
+      let out = '';
+      for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+      return out;
+    };
+
+    const openBulkForUnset = () => {
+      const map: Record<string,string> = {};
+      users.forEach(u => { if (!looksHashed(u.password)) map[u.id] = ''; });
+      setBulkPasswords(map);
+      setShowBulkPasswords(true);
+    };
+
+    const applyBulkPasswords = async () => {
+      const entries = Object.entries(bulkPasswords);
+      if (entries.length === 0) { alert('No bulk passwords set'); return; }
+      const updated = await Promise.all(users.map(async u => {
+        if (bulkPasswords[u.id]) {
+          const hashed = await hashPassword(bulkPasswords[u.id]);
+          return { ...u, password: hashed } as User;
+        }
+        return u;
+      }));
+      setUsers(updated as User[]);
+      setShowBulkPasswords(false);
+      setBulkPasswords({});
+      alert('Bulk passwords applied (hashed).');
+    };
 
     const openCreateUser = () => {
       setEditingUser(null);
@@ -379,7 +452,7 @@ const Administrator = (props: Props) => {
       setFormPassword('');
     };
 
-    const saveUser = () => {
+    const saveUser = async () => {
       const minPasswordLen = 8;
       if (!formName.trim()) { alert('Name is required'); return; }
       if (!formUsername.trim()) { alert('Username is required'); return; }
@@ -387,14 +460,16 @@ const Administrator = (props: Props) => {
 
       if (editingUser) {
         if (formPassword && formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
-        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: formPassword || x.password } : x);
+        const hashed = formPassword ? await hashPassword(formPassword) : undefined;
+        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password } : x);
         setUsers(updated as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
       } else {
         if (!formPassword) { alert('Password is required for new user'); return; }
         if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
-        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: formPassword, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
+        const hashed = await hashPassword(formPassword);
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
         setUsers([newUser, ...users] as User[]);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
         alert('User created.');
@@ -857,9 +932,16 @@ const Administrator = (props: Props) => {
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-3">
                   <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Full name" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
                   <input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="username" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                  <div className="flex items-center gap-2">
-                    <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type={showPassword ? 'text' : 'password'} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                    <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type={showPassword ? 'text' : 'password'} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                      <div className="mt-1">
+                        <PasswordStrength password={formPassword} />
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
+                    </div>
                   </div>
                   <input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@example.com" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
                   <select value={formRole} onChange={e => setFormRole(e.target.value as User['role'])} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
@@ -921,6 +1003,12 @@ const Administrator = (props: Props) => {
                 </div>
 
                 <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div />
+                    <div className="flex items-center gap-2">
+                      <button onClick={openBulkForUnset} className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-sm rounded">Bulk Passwords</button>
+                    </div>
+                  </div>
                   <div>
                     <div className="text-sm font-medium mb-2">Default User Fields</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
@@ -2151,6 +2239,31 @@ const Administrator = (props: Props) => {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Avg Response Time</span>
                     <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{responseTime}ms</span>
+                        {showBulkPasswords && (
+                          <div className="mt-3 p-3 bg-white dark:bg-gray-800 border rounded">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="font-medium">Bulk Password Migration</div>
+                              <div className="flex gap-2">
+                                <button onClick={() => { Object.keys(bulkPasswords).forEach(id => { if (!bulkPasswords[id]) bulkPasswords[id] = generateRandomPassword(); }); setBulkPasswords({ ...bulkPasswords }); }} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Randomize</button>
+                                <button onClick={applyBulkPasswords} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Apply</button>
+                                <button onClick={() => setShowBulkPasswords(false)} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Close</button>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              {Object.keys(bulkPasswords).length === 0 && <div className="text-sm text-gray-500">No users require migration.</div>}
+                              {Object.keys(bulkPasswords).map(id => {
+                                const u = users.find(x => x.id === id)!;
+                                return (
+                                  <div key={id} className="flex items-center gap-2">
+                                    <div className="w-48 text-sm">{u.name} ({u.username || u.email})</div>
+                                    <input value={bulkPasswords[id] ?? ''} onChange={e => setBulkPasswords(prev => ({ ...prev, [id]: e.target.value }))} placeholder="new password" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                                    <button onClick={() => setBulkPasswords(prev => ({ ...prev, [id]: generateRandomPassword() }))} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Rand</button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div className={`h-2 rounded-full ${
