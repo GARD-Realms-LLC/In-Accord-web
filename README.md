@@ -108,8 +108,17 @@ yarn dist
 
 For information on contributing to this project, please see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
+## GitHub Contributors
+
+<div align="center">
+
+| Contributor |
+|:---:|
 ```
-<a href = "https://github.com/GARD-Realms-LLC/In-Accord-web/graphs/contributors">
+| [Doc Cowles - Docrst](https://github.com/docrst) |
+| [Eli Copter- Harry James Potter](https://github.com/hogwartsworld47)
+</div>
+```
   <img src = "https://contrib.rocks/image?repo = GARD-Realms-LLC/In-Accord-web"/>
 </a>
 ```
