@@ -1,5 +1,6 @@
-*.html linguist-detectable=false
-*.ts linguist-language=Javascript
+*.js linguist-language=Javascript
+*.json linguist-language=Javascript
 *.ts linguist-language=NextJs
 *.ts linguist-language=Tailwinds
-*.tsx linguist-language=react
+*.tsx linguist-language=React
+*.mjs linguist-language=eslint
