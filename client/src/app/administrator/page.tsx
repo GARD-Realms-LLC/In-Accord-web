@@ -13,6 +13,153 @@ interface TeamMember {
   discord: string;
 }
 
+interface AuditLogEntry {
+  timestamp: string;
+  user: string;
+  page: string;
+  action: string;
+  details: string;
+  status: 'Success' | 'Passed';
+}
+
+const initialAuditLogs: AuditLogEntry[] = [
+  {
+    timestamp: '2026-01-07 19:00:47',
+    user: 'System',
+    page: 'Backup & Recovery',
+    action: 'Backup Completed',
+    details: 'Full backup (DB + Files) 487 MB to Local + Cloud',
+    status: 'Success'
+  },
+  {
+    timestamp: '2026-01-06 19:00:33',
+    user: 'System',
+    page: 'Backup & Recovery',
+    action: 'Backup Completed',
+    details: 'Full backup (DB + Files) 465 MB to Local + Cloud',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-12-31 01:30:22',
+    user: 'DocRST',
+    page: 'Backup & Recovery',
+    action: 'DR Test Executed',
+    details: 'Disaster recovery test - Recovery time: 6m 14s',
+    status: 'Passed'
+  },
+  {
+    timestamp: '2025-01-08 07:35:22',
+    user: 'DocRST',
+    page: 'Team',
+    action: 'Updated Job Title',
+    details: 'Doc Cowles: Founder & Manager',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 07:28:15',
+    user: 'DocRST',
+    page: 'Administrator',
+    action: 'Updated Team Member',
+    details: 'Member #2: Email updated',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 07:15:43',
+    user: 'DocRST',
+    page: 'Dashboard',
+    action: 'Page Accessed',
+    details: 'View dashboard metrics',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 07:02:11',
+    user: 'DocRST',
+    page: 'Team',
+    action: 'Page Accessed',
+    details: 'View team members list',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 06:45:32',
+    user: 'DocRST',
+    page: 'Products',
+    action: 'Page Accessed',
+    details: 'View product inventory',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 06:32:18',
+    user: 'DocRST',
+    page: 'Users',
+    action: 'Page Accessed',
+    details: 'View system users',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 06:18:45',
+    user: 'DocRST',
+    page: 'Expenses',
+    action: 'Page Accessed',
+    details: 'View expense reports',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 06:05:22',
+    user: 'DocRST',
+    page: 'Inventory',
+    action: 'Page Accessed',
+    details: 'View inventory status',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 05:52:10',
+    user: 'DocRST',
+    page: 'Settings',
+    action: 'Page Accessed',
+    details: 'View system settings',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 05:38:56',
+    user: 'DocRST',
+    page: 'Administrator',
+    action: 'Page Accessed',
+    details: 'View admin panel',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 05:25:33',
+    user: 'DocRST',
+    page: 'Home',
+    action: 'Login Success',
+    details: 'User authenticated',
+    status: 'Success'
+  },
+  {
+    timestamp: '2025-01-08 05:10:15',
+    user: 'DocRST',
+    page: 'Support',
+    action: 'Page Accessed',
+    details: 'View support tickets',
+    status: 'Success'
+  }
+];
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'Admin' | 'Manager' | 'User' | 'Viewer';
+  status: 'Active' | 'Suspended';
+  createdAt: string;
+}
+
+const initialUsers: User[] = [
+  { id: 'u1', name: 'Doc Cowles', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10' },
+  { id: 'u2', name: 'Alice Johnson', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02' },
+  { id: 'u3', name: 'Bob Smith', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12' }
+];
+
 const Administrator = (props: Props) => {
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
       {
@@ -39,6 +186,8 @@ const Administrator = (props: Props) => {
 
     // Validation state per member index and field
     const [errors, setErrors] = useState<{ [key: number]: Partial<Record<keyof TeamMember, string>> }>({});
+
+    const [auditLogEntries, setAuditLogEntries] = useState<AuditLogEntry[]>(initialAuditLogs);
 
     // System Health state
     const [appStatus, setAppStatus] = useState('Operational');
@@ -84,7 +233,143 @@ const Administrator = (props: Props) => {
 
     // Refresh audit logs
     const refreshAuditLogs = () => {
+      setAuditLogEntries(initialAuditLogs);
       alert('Audit logs refreshed! Latest entries loaded.');
+    };
+
+    const clearAuditLogs = () => {
+      setAuditLogEntries([]);
+      alert('Audit logs cleared.');
+    };
+
+    const openBackupLog = () => {
+      alert('Viewing backup log: 2026-01-07 19:00:47 — Full backup (DB + Files) 487 MB to Local + Cloud.');
+    };
+
+    // Database Management Functions
+    const runMaintenance = () => {
+      alert('Database maintenance task started. This may take 5-10 minutes. Status will be updated in the Audit Logs.');
+    };
+
+    const optimizeIndexes = () => {
+      alert('Index optimization started. Query performance will be improved. Process: Rebuilding 12 indexes...');
+    };
+
+    const verifyIntegrity = () => {
+      alert('Database integrity verification started. Checking all tables for consistency and data corruption...');
+    };
+
+    const viewQueryLogs = () => {
+      alert('Scrolling to Database Query Logs section in Audit Logs. All database queries are logged with execution times.');
+      document.querySelector('#query-logs-section')?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const refreshSchema = () => {
+      alert('Database schema refreshed! Table definitions and statistics updated.');
+    };
+
+    const editTable = (tableName: string) => {
+      alert(`Opening schema editor for table: ${tableName}. You can view and modify column definitions here.`);
+    };
+
+    const viewTableDetails = (tableName: string) => {
+      alert(`Displaying detailed information for table: ${tableName}.\n\nIndexes: Multiple indexes configured\nRelationships: Connected to other tables\nConstraints: Primary keys and foreign keys defined`);
+    };
+
+    const rebuildIndexes = () => {
+      alert('Rebuilding all database indexes to improve query performance. This process will run in the background.');
+    };
+
+    const analyzeTables = () => {
+      alert('Analyzing table statistics to help the query optimizer make better decisions. Process started...');
+    };
+
+    const vacuumDatabase = () => {
+      alert('Database vacuum operation started. This will reclaim space from deleted rows and optimize the database file.');
+    };
+
+    const checkIntegrity = () => {
+      alert('Running comprehensive data integrity check. Verifying referential integrity, constraints, and data consistency...');
+    };
+
+    // --- User Management state and handlers ---
+    const [users, setUsers] = useState<User[]>(() => {
+      try {
+        const raw = typeof window !== 'undefined' ? window.localStorage.getItem('users') : null;
+        return raw ? (JSON.parse(raw) as User[]) : initialUsers;
+      } catch {
+        return initialUsers;
+      }
+    });
+
+    useEffect(() => {
+      try {
+        if (typeof window !== 'undefined') window.localStorage.setItem('users', JSON.stringify(users));
+      } catch {}
+    }, [users]);
+
+    const [showUserForm, setShowUserForm] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [formName, setFormName] = useState('');
+    const [formEmail, setFormEmail] = useState('');
+    const [formRole, setFormRole] = useState<User['role']>('User');
+
+    const openCreateUser = () => {
+      setEditingUser(null);
+      setFormName('');
+      setFormEmail('');
+      setFormRole('User');
+      setShowUserForm(true);
+    };
+
+    const openEditUser = (u: User) => {
+      setEditingUser(u);
+      setFormName(u.name);
+      setFormEmail(u.email);
+      setFormRole(u.role);
+      setShowUserForm(true);
+    };
+
+    const closeUserForm = () => {
+      setShowUserForm(false);
+      setEditingUser(null);
+      setFormName('');
+      setFormEmail('');
+      setFormRole('User');
+    };
+
+    const saveUser = () => {
+      if (!formName.trim()) { alert('Name is required'); return; }
+      if (!isValidEmail(formEmail)) { alert('Invalid email address'); return; }
+
+      if (editingUser) {
+        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole } : x);
+        setUsers(updated);
+        setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
+        alert('User updated.');
+      } else {
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, status: 'Active', createdAt: new Date().toISOString().slice(0,10) };
+        setUsers([newUser, ...users]);
+        setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
+        alert('User created.');
+      }
+
+      closeUserForm();
+      try { window.dispatchEvent(new CustomEvent('teamMembersUpdated', { detail: { type: 'users' } })); } catch {}
+    };
+
+    const deleteUser = (id: string) => {
+      if (!confirm('Delete this user?')) return;
+      const toDelete = users.find(u => u.id === id);
+      setUsers(users.filter(u => u.id !== id));
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted User', details: `${toDelete?.name} deleted`, status: 'Success' }, ...prev]);
+    };
+
+    const toggleUserStatus = (id: string) => {
+      const updated = users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Suspended' : 'Active' } : u);
+      setUsers(updated);
+      const u = users.find(x => x.id === id);
+      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Toggled User Status', details: `${u?.name} status toggled`, status: 'Success' }, ...prev]);
     };
 
 
@@ -275,10 +560,69 @@ const Administrator = (props: Props) => {
         {/* Section 1 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">User Management</h2>
-          <p className="text-gray-600">
-            Manage system users, permissions, and access control. View user activity, 
-            reset passwords, and configure role-based access levels for different departments.
+          <p className="text-gray-600 mb-4">
+            Manage system users, permissions, and access control. View user activity, reset passwords, and configure role-based access levels.
           </p>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Users</h3>
+              <div className="flex items-center gap-2">
+                <button onClick={openCreateUser} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Create User</button>
+                <button onClick={() => { setUsers(initialUsers); alert('Reset users to seed data.'); }} className="px-3 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset</button>
+              </div>
+            </div>
+
+            {showUserForm && (
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-3">
+                  <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Full name" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                  <input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@example.com" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                  <select value={formRole} onChange={e => setFormRole(e.target.value as User['role'])} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+                    <option>Admin</option>
+                    <option>Manager</option>
+                    <option>User</option>
+                    <option>Viewer</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={saveUser} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">Save</button>
+                  <button onClick={closeUserForm} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm">Cancel</button>
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Name</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Email</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Role</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Created</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {users.map(u => (
+                    <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{u.name}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.email}</td>
+                      <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">{u.role}</span></td>
+                      <td className="px-4 py-3">{u.status === 'Active' ? <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Active</span> : <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Suspended</span>}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.createdAt}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => openEditUser(u)} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Edit</button>
+                        <button onClick={() => deleteUser(u.id)} className="text-red-600 hover:text-red-700 text-sm font-medium mr-3">Delete</button>
+                        <button onClick={() => toggleUserStatus(u.id)} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Toggle Status</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </section>
 
         {/* Section 2 */}
@@ -302,10 +646,251 @@ const Administrator = (props: Props) => {
         {/* Section 5 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">Database Management</h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-6">
             Monitor database performance, manage schemas, and optimize queries. 
             View connection statistics, manage data integrity, and execute maintenance tasks.
           </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Database Status */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Database Status</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Status:</span>
+                  <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Connected
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Type:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">PostgreSQL (Prisma)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Size:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">245 MB</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Tables:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">8</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Last Check:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">2 min ago</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Connection Statistics */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Connections</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Active Connections</span>
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">12</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '60%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Max Pool:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">20</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Idle Connections:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">3</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Avg Query Time:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">8ms</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Actions</h3>
+              <div className="space-y-2">
+                <button onClick={runMaintenance} className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  Run Maintenance
+                </button>
+                <button onClick={optimizeIndexes} className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  Optimize Indexes
+                </button>
+                <button onClick={verifyIntegrity} className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  Verify Integrity
+                </button>
+                <button onClick={viewQueryLogs} className="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+                  View Query Logs
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Schema Management */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Database Tables</h3>
+              <button onClick={refreshSchema} className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                Refresh Schema
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Table Name</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Rows</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Size</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Indexes</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">users</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">9</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">128 KB</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Healthy</span></td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => editTable('users')} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-2">Edit</button>
+                      <button onClick={() => viewTableDetails('users')} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Details</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">products</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">156</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">892 KB</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">3</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Healthy</span></td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => editTable('products')} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-2">Edit</button>
+                      <button onClick={() => viewTableDetails('products')} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Details</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">orders</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">342</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">1.8 MB</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">4</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Healthy</span></td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => editTable('orders')} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-2">Edit</button>
+                      <button onClick={() => viewTableDetails('orders')} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Details</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">inventory</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2,847</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">4.2 MB</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">5</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Healthy</span></td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => editTable('inventory')} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-2">Edit</button>
+                      <button onClick={() => viewTableDetails('inventory')} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Details</button>
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">migrations</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">12</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">64 KB</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">1</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">Tracking</span></td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => editTable('migrations')} className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-2">Edit</button>
+                      <button onClick={() => viewTableDetails('migrations')} className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Details</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Maintenance Tasks */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Database Optimization */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Optimization</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Rebuild Indexes</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Improve query performance</p>
+                  </div>
+                  <button onClick={rebuildIndexes} className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded">Run</button>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Analyze Tables</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Update table statistics</p>
+                  </div>
+                  <button onClick={analyzeTables} className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded">Run</button>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Vacuum Database</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Clean up dead rows</p>
+                  </div>
+                  <button onClick={vacuumDatabase} className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded">Run</button>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Check Integrity</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Verify data consistency</p>
+                  </div>
+                  <button onClick={checkIntegrity} className="px-3 py-1 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded">Run</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Database Monitoring */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Performance Metrics</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-600 dark:text-gray-400">CPU Usage</span>
+                    <span className="font-medium text-gray-900 dark:text-white">34%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '34%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-600 dark:text-gray-400">Memory Usage</span>
+                    <span className="font-medium text-gray-900 dark:text-white">58%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '58%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-600 dark:text-gray-400">Disk I/O</span>
+                    <span className="font-medium text-gray-900 dark:text-white">22%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '22%' }}></div>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Last updated: 1 minute ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Section 6 */}
@@ -415,7 +1000,7 @@ const Administrator = (props: Props) => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Backup History</h3>
-              <button className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+              <button className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                 View All
               </button>
             </div>
@@ -598,6 +1183,9 @@ const Administrator = (props: Props) => {
                 <button onClick={refreshAuditLogs} className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors">
                   Refresh
                 </button>
+                <button onClick={clearAuditLogs} className="px-4 py-2 text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/60 dark:hover:bg-red-800 text-red-700 dark:text-red-100 font-medium rounded-lg transition-colors">
+                  Clear Logs
+                </button>
                 <button className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                   Export Logs
                 </button>
@@ -617,128 +1205,199 @@ const Administrator = (props: Props) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {auditLogEntries.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-6 text-center text-gray-600 dark:text-gray-400">No audit log entries. Click Refresh to reload.</td>
+                    </tr>
+                  ) : (
+                    auditLogEntries.map((log, idx) => {
+                      const badgeClass = log.status === 'Success'
+                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                        : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
+                      return (
+                        <tr key={`${log.timestamp}-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
+                            {log.timestamp === '2026-01-07 19:00:47' ? (
+                              <button onClick={openBackupLog} className="text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-200 underline font-medium">
+                                {log.timestamp}
+                              </button>
+                            ) : (
+                              log.timestamp
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-gray-900 dark:text-white">{log.user}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{log.page}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{log.action}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{log.details}</td>
+                          <td className="px-4 py-3"><span className={`px-2 py-1 ${badgeClass} text-xs font-medium rounded`}>{log.status}</span></td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Database Query Logs */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Database Query Logs</h3>
+              <div className="flex gap-2">
+                <select className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                  <option>All Queries</option>
+                  <option>SELECT</option>
+                  <option>INSERT</option>
+                  <option>UPDATE</option>
+                  <option>DELETE</option>
+                  <option>Slow Queries (&gt;100ms)</option>
+                  <option>Failed Queries</option>
+                </select>
+                <button className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors">
+                  Clear Logs
+                </button>
+              </div>
+            </div>
+            
+            <div className="h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Timestamp</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Query Type</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Table</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Execution Time</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Rows Affected</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-07 19:00:47</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">System</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup & Recovery</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup Completed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full backup (DB + Files) 487 MB to Local + Cloud</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:45:32 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">SELECT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">users</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">3ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">9</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-06 19:00:33</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">System</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup & Recovery</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup Completed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full backup (DB + Files) 465 MB to Local + Cloud</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:44:18 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">INSERT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">products</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">5ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">1</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-12-31 01:30:22</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Backup & Recovery</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">DR Test Executed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Disaster recovery test - Recovery time: 6m 14s</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Passed</span></td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:35:22</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Team</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Updated Job Title</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Doc Cowles: Founder & Manager</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:43:05 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium rounded">UPDATE</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">inventory</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">8ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">47</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:28:15</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Administrator</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Updated Team Member</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Member #2: Email updated</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:41:52 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-medium rounded">DELETE</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">orders</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">4ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">1</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:15:43</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Dashboard</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View dashboard metrics</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:40:38 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">SELECT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">products</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">12ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">156</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 07:02:11</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Team</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View team members list</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:39:21 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium rounded">UPDATE</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">users</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">1</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:45:32</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Products</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View product inventory</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:38:07 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">SELECT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">orders</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">18ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">342</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Slow</span></td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:36:54 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">INSERT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">inventory</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">6ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">15</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:32:18</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Users</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View system users</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:35:42 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">SELECT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">users</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">9</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:18:45</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Expenses</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View expense reports</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:34:15 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">SELECT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">products</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">7ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">24</td>
                     <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 06:05:22</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Inventory</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View inventory status</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:33:08 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-medium rounded">UPDATE</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">products</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">125ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">3</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Slow</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:52:10</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Settings</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View system settings</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:31:52 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">SELECT</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">inventory</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">34ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2847</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Slow</span></td>
                   </tr>
                   <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:38:56</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Administrator</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View admin panel</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:25:33</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Home</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Login Success</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">User authenticated</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2025-01-08 05:10:15</td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">DocRST</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Support</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Page Accessed</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">View support tickets</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Success</span></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">2026-01-09 12:30:18 UTC−07:00</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs font-medium rounded">DELETE</span></td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white">orders</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">3ms</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">0</td>
+                    <td className="px-4 py-3"><span className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 text-xs font-medium rounded">No Data</span></td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            {/* Query Statistics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Queries</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">15,847</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Avg Execution Time</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">8.2ms</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Slow Queries</p>
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">34</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Failed Queries</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">0</p>
+              </div>
             </div>
           </div>
         </section>
@@ -880,7 +1539,7 @@ const Administrator = (props: Props) => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Commits</h3>
-              <a href="https://github.com/GARD-Realms-LLC/In-Accord-web" target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-lg transition-colors">
+              <a href="https://github.com/GARD-Realms-LLC/In-Accord-web" target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                 View on GitHub
               </a>
             </div>
