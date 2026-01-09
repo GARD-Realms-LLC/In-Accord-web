@@ -36,7 +36,7 @@ In-Accord is The Premier Discord Customization and Management App for Users and 
 
 # Overview:
 
-This repository contians the source code for the In-Accord Website. This installer is written with [electron-webpack](https://webpack.electron.build/) and [Svelte 3](https://svelte.dev/).
+This repository contians the source code for the In-Accord App. This App is written with [NodeJs/Next]().
 
 ## Downloads:
 
@@ -57,7 +57,7 @@ These will link you to the latest builds found in the [releases](https://github.
 
 # Development:
 
-> This is a tutorial designed for people looking to contribute to, or work directly with the installer's source code. If you are just looking to download and install InAccord, visit the [releases](https://github.com/docrst/InAccord/) page of this repository.
+> This is a tutorial designed for people looking to contribute to, or work directly with the In-Accords App source code. If you are just looking to download and install InAccord, visit the [releases](https://github.com/GARD-Realms-LLC/In-Accord-web/) page of this repository.
 
 ## Prerequisites:
 - [Github](https://github.com/)
@@ -71,7 +71,7 @@ These will link you to the latest builds found in the [releases](https://github.
 
 ### 1: Clone the repository.
 ```ps
-git clone https://github.com/
+git clone https://github.com/GARD-Realms-LLC/In-Accord-web
 ```
 This will create a local copy of this repository and navigate you to the root folder of the repository.
 
