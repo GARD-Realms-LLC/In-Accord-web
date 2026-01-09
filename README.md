@@ -108,7 +108,8 @@ yarn dist
 
 For information on contributing to this project, please see [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-
+```
 <a href = "https://github.com/GARD-Realms-LLC/In-Accord-web/graphs/contributors">
   <img src = "https://contrib.rocks/image?repo = GARD-Realms-LLC/In-Accord-web"/>
 </a>
+```
