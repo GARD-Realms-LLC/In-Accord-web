@@ -27,6 +27,8 @@ import schemasRoutes from './routes/schemasRoutes';
 app.use('/api/schemas', schemasRoutes);
 import usersRoutes from './routes/usersRoutes';
 app.use('/api/admin/users', usersRoutes);
+import path from 'path';
+app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
 
 
 

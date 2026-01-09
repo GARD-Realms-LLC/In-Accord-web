@@ -67,4 +67,31 @@ router.post('/password', (req, res) => {
         return res.status(500).json({ ok: false, error: 'failed to write' });
     return res.json({ ok: true, id });
 });
+// POST upload avatar: { id, dataUrl }
+router.post('/avatar', (req, res) => {
+    const { id, dataUrl } = req.body;
+    if (!id || !dataUrl || typeof id !== 'string' || typeof dataUrl !== 'string')
+        return res.status(400).json({ ok: false, error: 'id and dataUrl are required' });
+    try {
+        const m = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+        if (!m)
+            return res.status(400).json({ ok: false, error: 'invalid dataUrl' });
+        const mime = m[1];
+        const base64 = m[2];
+        const ext = mime.split('/')[1] || 'png';
+        const buf = Buffer.from(base64, 'base64');
+        const dir = path_1.default.resolve(__dirname, '..', '..', 'data', 'avatars');
+        if (!fs_1.default.existsSync(dir))
+            fs_1.default.mkdirSync(dir, { recursive: true });
+        const filename = `${id.replace(/[^a-z0-9_-]/gi, '')}-${Date.now()}.${ext}`;
+        const filePath = path_1.default.join(dir, filename);
+        fs_1.default.writeFileSync(filePath, buf);
+        const urlPath = `/data/avatars/${filename}`;
+        return res.json({ ok: true, url: urlPath });
+    }
+    catch (e) {
+        console.error('[UsersRoute] avatar upload error', e);
+        return res.status(500).json({ ok: false, error: 'failed to write avatar' });
+    }
+});
 exports.default = router;

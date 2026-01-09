@@ -2,6 +2,116 @@
 
 import { useEffect, useState } from 'react';
 
+// Minimal MD5 for Gravatar (lightweight implementation)
+function md5cycle(x: number[], k: number[]) {
+  let [a, b, c, d] = x;
+  a = ff(a, b, c, d, k[0], 7, -680876936);
+  d = ff(d, a, b, c, k[1], 12, -389564586);
+  c = ff(c, d, a, b, k[2], 17, 606105819);
+  b = ff(b, c, d, a, k[3], 22, -1044525330);
+  a = ff(a, b, c, d, k[4], 7, -176418897);
+  d = ff(d, a, b, c, k[5], 12, 1200080426);
+  c = ff(c, d, a, b, k[6], 17, -1473231341);
+  b = ff(b, c, d, a, k[7], 22, -45705983);
+  a = ff(a, b, c, d, k[8], 7, 1770035416);
+  d = ff(d, a, b, c, k[9], 12, -1958414417);
+  c = ff(c, d, a, b, k[10], 17, -42063);
+  b = ff(b, c, d, a, k[11], 22, -1990404162);
+  a = ff(a, b, c, d, k[12], 7, 1804603682);
+  d = ff(d, a, b, c, k[13], 12, -40341101);
+  c = ff(c, d, a, b, k[14], 17, -1502002290);
+  b = ff(b, c, d, a, k[15], 22, 1236535329);
+  a = gg(a, b, c, d, k[1], 5, -165796510);
+  d = gg(d, a, b, c, k[6], 9, -1069501632);
+  c = gg(c, d, a, b, k[11], 14, 643717713);
+  b = gg(b, c, d, a, k[0], 20, -373897302);
+  a = gg(a, b, c, d, k[5], 5, -701558691);
+  d = gg(d, a, b, c, k[10], 9, 38016083);
+  c = gg(c, d, a, b, k[15], 14, -660478335);
+  b = gg(b, c, d, a, k[4], 20, -405537848);
+  a = gg(a, b, c, d, k[9], 5, 568446438);
+  d = gg(d, a, b, c, k[14], 9, -1019803690);
+  c = gg(c, d, a, b, k[3], 14, -187363961);
+  b = gg(b, c, d, a, k[8], 20, 1163531501);
+  a = gg(a, b, c, d, k[13], 5, -1444681467);
+  d = gg(d, a, b, c, k[2], 9, -51403784);
+  c = gg(c, d, a, b, k[7], 14, 1735328473);
+  b = gg(b, c, d, a, k[12], 20, -1926607734);
+  a = hh(a, b, c, d, k[5], 4, -378558);
+  d = hh(d, a, b, c, k[8], 11, -2022574463);
+  c = hh(c, d, a, b, k[11], 16, 1839030562);
+  b = hh(b, c, d, a, k[14], 23, -35309556);
+  a = hh(a, b, c, d, k[1], 4, -1530992060);
+  d = hh(d, a, b, c, k[4], 11, 1272893353);
+  c = hh(c, d, a, b, k[7], 16, -155497632);
+  b = hh(b, c, d, a, k[10], 23, -1094730640);
+  a = hh(a, b, c, d, k[13], 4, 681279174);
+  d = hh(d, a, b, c, k[0], 11, -358537222);
+  c = hh(c, d, a, b, k[3], 16, -722521979);
+  b = hh(b, c, d, a, k[6], 23, 76029189);
+  a = hh(a, b, c, d, k[9], 4, -640364487);
+  d = hh(d, a, b, c, k[12], 11, -421815835);
+  c = hh(c, d, a, b, k[15], 16, 530742520);
+  b = hh(b, c, d, a, k[2], 23, -995338651);
+  a = ii(a, b, c, d, k[0], 6, -198630844);
+  d = ii(d, a, b, c, k[7], 10, 1126891415);
+  c = ii(c, d, a, b, k[14], 15, -1416354905);
+  b = ii(b, c, d, a, k[5], 21, -57434055);
+  a = ii(a, b, c, d, k[12], 6, 1700485571);
+  d = ii(d, a, b, c, k[3], 10, -1894986606);
+  c = ii(c, d, a, b, k[10], 15, -1051523);
+  b = ii(b, c, d, a, k[1], 21, -2054922799);
+  a = ii(a, b, c, d, k[8], 6, 1873313359);
+  d = ii(d, a, b, c, k[15], 10, -30611744);
+  c = ii(c, d, a, b, k[6], 15, -1560198380);
+  b = ii(b, c, d, a, k[13], 21, 1309151649);
+  a = ii(a, b, c, d, k[4], 6, -145523070);
+  d = ii(d, a, b, c, k[11], 10, -1120210379);
+  c = ii(c, d, a, b, k[2], 15, 718787259);
+  b = ii(b, c, d, a, k[9], 21, -343485551);
+  x[0] = (x[0] + a) | 0;
+  x[1] = (x[1] + b) | 0;
+  x[2] = (x[2] + c) | 0;
+  x[3] = (x[3] + d) | 0;
+}
+function cmn(q: number, a: number, b: number, x: number, s: number, t: number) { return (a + ((q + x + t) | 0) << s) | 0; }
+function ff(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn((b & c) | (~b & d), a, b, x, s, t); }
+function gg(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn((b & d) | (c & ~d), a, b, x, s, t); }
+function hh(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn(b ^ c ^ d, a, b, x, s, t); }
+function ii(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn(c ^ (b | ~d), a, b, x, s, t); }
+function md51(s: string) {
+  const n = s.length;
+  const state = [1732584193, -271733879, -1732584194, 271733878];
+  let i;
+  for (i = 64; i <= n; i += 64) md5cycle(state, md5blk(s.substring(i - 64, i)));
+  s = s.substring(i - 64);
+  const tail = new Array(16).fill(0);
+  for (i = 0; i < s.length; i++) tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+  tail[i >> 2] |= 0x80 << ((i % 4) << 3);
+  if (i > 55) {
+    md5cycle(state, tail);
+    for (let j = 0; j < 16; j++) tail[j] = 0;
+  }
+  tail[14] = n * 8;
+  md5cycle(state, tail);
+  return state;
+}
+function md5blk(s: string) {
+  const md5blks = [] as number[];
+  for (let i = 0; i < 64; i += 4) {
+    md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
+  }
+  return md5blks;
+}
+function rhex(n: number) { const s = '0123456789abcdef'; let j = 0; let str = ''; for (; j < 4; j++) { str += s[(n >> (j * 8 + 4)) & 0x0f] + s[(n >> (j * 8)) & 0x0f]; } return str; }
+function hex(x: number[]) { for (let i = 0; i < x.length; i++) x[i] = x[i] | 0; return rhex(x[0]) + rhex(x[1]) + rhex(x[2]) + rhex(x[3]); }
+function md5(s: string) { return hex(md51(s)); }
+
+function gravatarUrlForEmail(email: string, size = 64) {
+  if (!email) return '';
+  try { return `https://www.gravatar.com/avatar/${md5(email.trim().toLowerCase())}?s=${size}&d=404`; } catch { return ''; }
+}
+
 // Password strength helper component
 function PasswordStrength({ password }: { password: string }) {
   const score = (() => {
@@ -14,30 +124,13 @@ function PasswordStrength({ password }: { password: string }) {
     if (/[^A-Za-z0-9]/.test(password)) s += 1;
     return s;
   })();
-
   const pct = Math.min(100, Math.round((score / 5) * 100));
-  const color = score <= 1 ? 'bg-red-500' : score <= 3 ? 'bg-yellow-400' : 'bg-green-500';
-
   return (
     <div>
-      <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded overflow-hidden">
-        <div className={`${color} h-2`} style={{ width: `${pct}%` }} />
-      </div>
       <div className="text-xs text-gray-500 mt-1">Strength: {pct}% {score >= 4 ? '(Strong)' : score >= 2 ? '(Medium)' : '(Weak)'}</div>
       <div className="text-xs text-gray-500 mt-1">Rules: min 8 chars, uppercase, number, special</div>
     </div>
   );
-}
-
-interface TeamMember {
-  name: string;
-  jobTitle: string;
-  description: string;
-  imageUrl: string;
-  email: string;
-  website: string;
-  github: string;
-  discord: string;
 }
 
 
@@ -178,6 +271,7 @@ interface User {
   name: string;
   username: string;
   password: string;
+  avatarUrl?: string;
   email: string;
   role: 'Admin' | 'Manager' | 'User' | 'Viewer';
   status: 'Active' | 'Suspended';
@@ -192,10 +286,21 @@ interface Group {
   description?: string;
 }
 
+interface TeamMember {
+  name: string;
+  jobTitle: string;
+  description?: string;
+  imageUrl?: string;
+  email?: string;
+  website?: string;
+  github?: string;
+  discord?: string;
+}
+
 const initialUsers: User[] = [
-  { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10', passwordExpiresAt: '2025-01-10' },
-  { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02', passwordExpiresAt: '2026-05-02' },
-  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12', passwordExpiresAt: '2026-09-12' }
+  { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', avatarUrl: '', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10', passwordExpiresAt: '2025-01-10' },
+  { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', avatarUrl: '', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02', passwordExpiresAt: '2026-05-02' },
+  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', avatarUrl: '', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12', passwordExpiresAt: '2026-09-12' }
 ];
 
 const Administrator = (props: Props) => {
@@ -393,6 +498,7 @@ const Administrator = (props: Props) => {
     const [formUsername, setFormUsername] = useState('');
     const [formPassword, setFormPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [formAvatarUrl, setFormAvatarUrl] = useState<string | undefined>(undefined);
     const [formPasswordExpiresAt, setFormPasswordExpiresAt] = useState<string | undefined>(undefined);
     // Bulk password migration state
     const [showBulkPasswords, setShowBulkPasswords] = useState(false);
@@ -410,6 +516,25 @@ const Administrator = (props: Props) => {
       users.forEach(u => { if (!looksHashed(u.password)) map[u.id] = ''; });
       setBulkPasswords(map);
       setShowBulkPasswords(true);
+    };
+
+    const uploadAvatarForUser = (userId: string) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (ev: any) => {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const data = reader.result as string | ArrayBuffer | null;
+          if (!data) return;
+          setUsers(prev => prev.map(u => u.id === userId ? { ...u, avatarUrl: String(data) } : u));
+          setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated Avatar', details: `Avatar updated for ${userId}`, status: 'Success' }, ...prev]);
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
     };
 
     const applyBulkPasswords = async () => {
@@ -464,6 +589,7 @@ const Administrator = (props: Props) => {
       setFormUsername('');
       setFormPassword('');
       setFormPasswordExpiresAt(undefined);
+      setFormAvatarUrl(undefined);
       setShowUserForm(true);
     };
 
@@ -475,6 +601,7 @@ const Administrator = (props: Props) => {
       setFormUsername(u.username ?? '');
       setFormPassword(u.password ?? '');
       setFormPasswordExpiresAt(u.passwordExpiresAt);
+      setFormAvatarUrl(u.avatarUrl ?? undefined);
       setShowUserForm(true);
     };
 
@@ -487,6 +614,7 @@ const Administrator = (props: Props) => {
       setFormUsername('');
       setFormPassword('');
       setFormPasswordExpiresAt(undefined);
+      setFormAvatarUrl(undefined);
     };
 
     const saveUser = async () => {
@@ -498,7 +626,7 @@ const Administrator = (props: Props) => {
       if (editingUser) {
         if (formPassword && formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = formPassword ? await hashPassword(formPassword) : undefined;
-        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt } : x);
+        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt, avatarUrl: formAvatarUrl ?? x.avatarUrl } : x);
         setUsers(updated as User[]);
         if (hashed) {
           try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
@@ -509,7 +637,7 @@ const Administrator = (props: Props) => {
         if (!formPassword) { alert('Password is required for new user'); return; }
         if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = await hashPassword(formPassword);
-        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
         setUsers([newUser, ...users] as User[]);
         try { await fetch('/api/admin/users/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
@@ -991,6 +1119,22 @@ const Administrator = (props: Props) => {
                     <option>User</option>
                     <option>Viewer</option>
                   </select>
+                </div>
+                <div className="mb-3 flex items-center gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Avatar</label>
+                    <div className="flex items-center gap-2">
+                      <img src={formAvatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'))} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
+                      <div>
+                        <button onClick={() => {
+                          const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = (ev: any) => {
+                            const f = ev.target.files && ev.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => setFormAvatarUrl(String(r.result)); r.readAsDataURL(f);
+                          }; input.click();
+                        }} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Upload</button>
+                        <button onClick={() => setFormAvatarUrl(undefined)} className="ml-2 px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Clear</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="mb-3">
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Password Expires</label>
