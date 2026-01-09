@@ -30,7 +30,7 @@ const SidebarLink = ({
     "/dashboard",
     "/inventory",
     "/products",
-    "/settings",
+    "/profile",
     "/expenses",
     "/bots",
     "/servers",
@@ -229,9 +229,9 @@ const Sidebar = () => {
         isCollapsed={isSidebarCollapsed} 
       />
         <SidebarLink 
-        href="/settings" 
+        href="/profile" 
         icon={Settings}
-        label="My Settings" 
+        label="My Profile" 
         isCollapsed={isSidebarCollapsed} 
       />
         <SidebarLink 

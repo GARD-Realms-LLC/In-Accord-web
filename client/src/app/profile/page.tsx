@@ -1,13 +1,13 @@
-const Settings = (props: Props) => {
+const Profile = (props: Props) => {
     return (
       <div>
               <hr></hr>
       <p></p>
       <p></p>
-        Settings
+        My Profile
         Under Construction
       </div>
     )
 }
 
-export default Settings
+export default Profile
