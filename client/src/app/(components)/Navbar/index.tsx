@@ -57,6 +57,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [showLogoutToast, setShowLogoutToast] = useState(false);
   const avatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=Not+Logged+In';
   const isGeneratedAvatar = typeof avatarUrl === 'string' && avatarUrl.includes('ui-avatars.com');
 
@@ -236,11 +237,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
                   // Clear user immediately and notify listeners
                   try { localStorage.removeItem('currentUser'); } catch {}
                   setCurrentUser(null);
+                  setShowLogoutToast(true);
                   try {
                     // Emit dedicated logout and general update events
                     window.dispatchEvent(new Event('logout'));
                     window.dispatchEvent(new Event('userUpdated'));
                   } catch {}
+                  // Auto-dismiss toast after 3 seconds
+                  setTimeout(() => setShowLogoutToast(false), 3000);
                   // Prefer a hard navigation to ensure protected pages unload
                   try { router.replace('/home'); } catch {}
                   // Fallback in case router navigation is blocked
@@ -253,7 +257,17 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
             )}
           </div>
           </div>
-         </div> 
+         </div>
+         {/* Logout Toast Notification */}
+         {showLogoutToast && (
+           <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50">
+             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+             </svg>
+             <span>Logged out successfully</span>
+           </div>
+         )}
+    </div>
     );
   };
-export default Navbar;
+  export default Navbar;
