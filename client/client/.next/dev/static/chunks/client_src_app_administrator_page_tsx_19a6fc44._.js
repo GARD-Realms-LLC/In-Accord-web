@@ -159,11 +159,11 @@ function gravatarUrlForEmail(email, size = 64) {
 // Password strength helper component
 function PasswordStrength(t0) {
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(9);
-    if ($[0] !== "070b1565d670aaf47ab3c694ac22e480669c43f49ded655d06b41c511a5c44d0") {
+    if ($[0] !== "f7de91ad7df9979e6fabaff24854e21aa107a3910900dff4e73219feffe4fff6") {
         for(let $i = 0; $i < 9; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "070b1565d670aaf47ab3c694ac22e480669c43f49ded655d06b41c511a5c44d0";
+        $[0] = "f7de91ad7df9979e6fabaff24854e21aa107a3910900dff4e73219feffe4fff6";
     }
     const { password } = t0;
     let t1;
@@ -2371,9 +2371,9 @@ const Administrator = (props)=>{
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
                                         lineNumber: 1844,
                                         columnNumber: 43
-                                    }, ("TURBOPACK compile-time value", void 0)) : // Render online users in a responsive grid: 4 per row, unlimited rows, vertical scroll
+                                    }, ("TURBOPACK compile-time value", void 0)) : // Render online users in a responsive grid: 4 per row, unlimited rows, fixed height with custom scrollbar
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 max-h-56 overflow-y-auto py-1",
+                                        className: "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 h-56 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800",
                                         children: onlineUsers.map((s_2)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2",
                                                 children: [

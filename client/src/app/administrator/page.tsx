@@ -1320,8 +1320,8 @@ const Administrator = (props: Props) => {
               {onlineUsers.length === 0 ? (
                 <div className="text-sm text-gray-600">No users are currently online.</div>
               ) : (
-                // Render online users in a responsive grid: 4 per row, unlimited rows, vertical scroll
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 max-h-56 overflow-y-auto py-1">
+                // Render online users in a responsive grid: 4 per row, unlimited rows, fixed height with custom scrollbar
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 h-56 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
                   {onlineUsers.map(s => (
                     <div key={s.id} className="flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2">
                       <img
