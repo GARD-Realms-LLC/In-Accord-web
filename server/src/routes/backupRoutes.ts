@@ -83,15 +83,37 @@ router.get('/settings', (_req: Request, res: Response) => {
   return res.json({ ok: true, settings });
 });
 
+// Helper to convert ISO string to MST/MDT (America/Denver, DST-aware)
+function toMST(iso: string) {
+  try {
+    const date = new Date(iso);
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone: 'America/Denver',
+      timeZoneName: 'short',
+    };
+    const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(date);
+    const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+    // Compose as YYYY-MM-DD HH:mm:ss MST/MDT
+    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')} ${get('timeZoneName')}`;
+  } catch {
+    return iso;
+  }
+}
+
 router.get('/list', (_req: Request, res: Response) => {
   try {
     const settings = loadBackupSettings();
     const localPath = settings.localBackupPath || backupDir;
-    
     if (!fs.existsSync(localPath)) {
-      return res.json({ ok: true, backups: [] });
+      return res.json({ ok: true, backups: [], logs: [] });
     }
-
     const files = fs.readdirSync(localPath);
     const backupFiles = files
       .filter(f => f.startsWith('backup-') && f.endsWith('.json'))
@@ -107,7 +129,31 @@ router.get('/list', (_req: Request, res: Response) => {
       })
       .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
 
-    return res.json({ ok: true, backups: backupFiles });
+    // Build backup logs for Activity Log (most recent first)
+    const logs = backupFiles.map(b => {
+      // Try to read backup file for more details
+      let note = '';
+      let location = '';
+      let includes: any = {};
+      try {
+        const filePath = path.join(localPath, b.name + '.json');
+        const raw = fs.readFileSync(filePath, 'utf8');
+        const parsed = JSON.parse(raw);
+        note = parsed.note || '';
+        location = parsed.location || '';
+        includes = parsed.includes || {};
+      } catch {}
+      return {
+        timestamp: toMST(b.created),
+        user: 'System',
+        page: 'Backup & Recovery',
+        action: location === 'cloud' ? 'Cloud Backup Completed' : (location === 'both' ? 'Backup (Local+Cloud) Completed' : 'Backup Completed'),
+        details: `${note}${includes && typeof includes.users !== 'undefined' ? ` | Users: ${includes.users}` : ''}${includes && typeof includes.sessions !== 'undefined' ? ` | Sessions: ${includes.sessions}` : ''}`.trim(),
+        status: 'Success',
+      };
+    });
+
+    return res.json({ ok: true, backups: backupFiles, logs });
   } catch (err) {
     console.error('[backup] failed to list backups', err);
     return res.status(500).json({ ok: false, error: 'Failed to list backups', detail: String((err as Error)?.message || err) });

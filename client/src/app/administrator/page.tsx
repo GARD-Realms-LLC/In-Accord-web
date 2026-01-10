@@ -733,7 +733,11 @@ const Administrator = (props: Props) => {
             since: s.since || s.createdAt || new Date().toISOString(),
             avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
           }));
-          if (mounted) setOnlineUsers(mapped);
+          // Deduplicate by userId
+          const deduped = mapped.filter((user, idx, arr) =>
+            arr.findIndex(u => u.userId === user.userId) === idx
+          );
+          if (mounted) setOnlineUsers(deduped);
         } catch (e) {
           console.error('Failed to load sessions:', e);
         }
@@ -760,7 +764,11 @@ const Administrator = (props: Props) => {
               since: s.since || s.createdAt || new Date().toISOString(),
               avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
             }));
-            setOnlineUsers(mapped);
+            // Deduplicate by userId
+            const deduped = mapped.filter((user, idx, arr) =>
+              arr.findIndex(u => u.userId === user.userId) === idx
+            );
+            setOnlineUsers(deduped);
           } catch (e) {}
         })();
       }
@@ -1275,7 +1283,13 @@ const Administrator = (props: Props) => {
     const [integrationSaveMessage, setIntegrationSaveMessage] = useState('');
 
     useEffect(() => {
-      try { if (typeof window !== 'undefined') localStorage.setItem('system_config', JSON.stringify(systemConfig)); } catch {}
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('system_config', JSON.stringify(systemConfig));
+          // Dispatch custom event for live update in same tab
+          window.dispatchEvent(new Event('systemConfigUpdated'));
+        }
+      } catch {}
     }, [systemConfig]);
 
     const saveSystemConfig = async () => {
@@ -1302,6 +1316,8 @@ const Administrator = (props: Props) => {
         setIntegrationSaveStatus('error');
         setIntegrationSaveMessage('Network or server error');
       }
+      // Dispatch custom event for live update in same tab
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('systemConfigUpdated'));
       alert('System configuration saved.');
       setTimeout(() => { setIntegrationSaveStatus('idle'); setIntegrationSaveMessage(''); }, 3500);
     };
@@ -1310,6 +1326,8 @@ const Administrator = (props: Props) => {
       if (!confirm('Reset system configuration to defaults?')) return;
       setSystemConfig(defaultSystemConfig as SystemConfig);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Reset Defaults', details: `Configuration reset to defaults`, status: 'Success' }, ...prev]);
+      // Dispatch custom event for live update in same tab
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('systemConfigUpdated'));
       alert('System configuration reset to defaults.');
     };
 
@@ -1378,32 +1396,7 @@ const Administrator = (props: Props) => {
       details: string;
       status: 'Success' | 'In Progress' | 'Failed';
     }
-    const [backupLogs, setBackupLogs] = useState<BackupLog[]>([
-      {
-        timestamp: '2026-01-08 02:00:47',
-        user: 'System',
-        page: 'Backup & Recovery',
-        action: 'Backup Completed',
-        details: 'Full backup (DB + Files) 487 MB to Local + Cloud',
-        status: 'Success'
-      },
-      {
-        timestamp: '2026-01-07 02:00:33',
-        user: 'System',
-        page: 'Backup & Recovery',
-        action: 'Backup Completed',
-        details: 'Full backup (DB + Files) 465 MB to Local + Cloud',
-        status: 'Success'
-      },
-      {
-        timestamp: '2026-01-01 08:30:22',
-        user: 'DocRST',
-        page: 'Backup & Recovery',
-        action: 'DR Test Executed',
-        details: 'Disaster recovery test - Recovery time: 6m 14s',
-        status: 'Success'
-      }
-    ]);
+    const [backupLogs, setBackupLogs] = useState<BackupLog[]>([]);
 
     const [backupStorageLocation, setBackupStorageLocation] = useState<'local' | 'cloud' | 'both'>('local');
 
@@ -1467,7 +1460,7 @@ const Administrator = (props: Props) => {
       return true; // 'Both' shows all backups
     });
 
-    // Load available backups from server
+    // Load available backups and backup logs from server
     const loadAvailableBackups = async () => {
       try {
         setLoadingBackups(true);
@@ -1488,6 +1481,10 @@ const Administrator = (props: Props) => {
               setSelectedBackup(allBackups[0]);
             }
           }
+          // Also update backup logs if present
+          if (data.logs && Array.isArray(data.logs)) {
+            setBackupLogs(data.logs);
+          }
         } else {
           // API call failed, keep default backups
           console.warn('Backup list API returned non-OK status');
@@ -1504,6 +1501,21 @@ const Administrator = (props: Props) => {
       loadAvailableBackups();
       loadBackupSettings();
     }, []);
+
+    // Manual refresh for backup logs
+    const refreshBackupLogs = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/backup/list`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.logs && Array.isArray(data.logs)) {
+            setBackupLogs(data.logs);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to refresh backup logs:', error);
+      }
+    };
 
     // Load backup settings from server
     const loadBackupSettings = async () => {
@@ -1793,12 +1805,37 @@ const Administrator = (props: Props) => {
           status: 'Success'
         };
 
-        setBackupLogs(prevLogs => {
-          const updatedLogs = [...prevLogs];
-          const idx = updatedLogs.findIndex(l => l.action === 'Backup Started');
-          if (idx >= 0) updatedLogs.splice(idx, 1);
-          return [completedLog, ...updatedLogs];
-        });
+        // After backup completes, reload logs from server if available
+        try {
+          const logsRes = await fetch(`${API_BASE}/api/backup/list`);
+          if (logsRes.ok) {
+            const logsData = await logsRes.json();
+            if (logsData.logs && Array.isArray(logsData.logs)) {
+              setBackupLogs(logsData.logs);
+            } else {
+              setBackupLogs(prevLogs => {
+                const updatedLogs = [...prevLogs];
+                const idx = updatedLogs.findIndex(l => l.action === 'Backup Started');
+                if (idx >= 0) updatedLogs.splice(idx, 1);
+                return [completedLog, ...updatedLogs];
+              });
+            }
+          } else {
+            setBackupLogs(prevLogs => {
+              const updatedLogs = [...prevLogs];
+              const idx = updatedLogs.findIndex(l => l.action === 'Backup Started');
+              if (idx >= 0) updatedLogs.splice(idx, 1);
+              return [completedLog, ...updatedLogs];
+            });
+          }
+        } catch {
+          setBackupLogs(prevLogs => {
+            const updatedLogs = [...prevLogs];
+            const idx = updatedLogs.findIndex(l => l.action === 'Backup Started');
+            if (idx >= 0) updatedLogs.splice(idx, 1);
+            return [completedLog, ...updatedLogs];
+          });
+        }
 
         if (backupProgressTimer.current) {
           clearInterval(backupProgressTimer.current);
@@ -3059,9 +3096,14 @@ const Administrator = (props: Props) => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Backup History</h3>
-              <button className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                View All
-              </button>
+              <div className="flex gap-2">
+                <button className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                  View All
+                </button>
+                <button onClick={refreshBackupLogs} className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors">
+                  Refresh Logs
+                </button>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

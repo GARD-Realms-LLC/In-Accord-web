@@ -1,12 +1,36 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { io, Socket } from "socket.io-client";
 import { useRouter, usePathname } from "next/navigation";
 import Navbar from "@/app/(components)/Navbar";
 import Sidebar from "@/app/(components)/Sidebar";
 import StoreProvider, { useAppSelector } from "./redux";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  // Socket.IO client instance (singleton per component instance)
+  let socket: Socket | null = null;
+  useEffect(() => {
+    if (!socket) {
+      socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000");
+    }
+    const handleLiveUpdate = (data: any) => {
+      // You can replace this with a toast/notification or state update
+      console.log("Live update received:", data);
+      // Example: show a browser notification (optional)
+      if (window.Notification && Notification.permission === "granted") {
+        new Notification("Live Update", { body: data.message });
+      }
+    };
+    socket.on("liveUpdate", handleLiveUpdate);
+    // Request notification permission if not already granted
+    if (window.Notification && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+    return () => {
+      socket?.off("liveUpdate", handleLiveUpdate);
+    };
+  }, []);
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );

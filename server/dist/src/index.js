@@ -4,6 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const http_1 = require("http");
+const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
@@ -13,6 +15,17 @@ const dashboardRoutes_1 = __importDefault(require("./routes/dashboardRoutes")); 
 /* CONFIGURATION */
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+const httpServer = (0, http_1.createServer)(app);
+const io = new socket_io_1.Server(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+// Example: Broadcast a test event every 10 seconds (remove or replace in production)
+setInterval(() => {
+    io.emit('liveUpdate', { message: 'This is a live update from the server', timestamp: Date.now() });
+}, 10000);
 app.use(express_1.default.json({ limit: '50mb' }));
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 app.use((0, helmet_1.default)());
@@ -54,6 +67,6 @@ const path_1 = __importDefault(require("path"));
 app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..', 'data')));
 /* SERVER */
 const port = process.env.PORT || 8000;
-app.listen(port, () => {
+httpServer.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

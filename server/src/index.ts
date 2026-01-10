@@ -1,4 +1,6 @@
 import express from "express";
+import { createServer } from "http";
+import { Server as SocketIOServer } from "socket.io";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -11,6 +13,18 @@ import dashboardRoutes from "./routes/dashboardRoutes"; // http://localhost:8000
 /* CONFIGURATION */
 dotenv.config();
 const app = express();
+const httpServer = createServer(app);
+const io = new SocketIOServer(httpServer, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+
+// Example: Broadcast a test event every 10 seconds (remove or replace in production)
+setInterval(() => {
+    io.emit('liveUpdate', { message: 'This is a live update from the server', timestamp: Date.now() });
+}, 10000);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(helmet());
@@ -57,8 +71,8 @@ app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
 
 /* SERVER */
 const port = process.env.PORT || 8000;
-app.listen(port, () => {
+httpServer.listen(port, () => {
     console.log(`Server is running on port ${port}`);
-}); 
+});
 
 

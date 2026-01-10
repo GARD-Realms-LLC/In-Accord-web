@@ -85,9 +85,44 @@ const SectionLabel = ({ text, isCollapsed }: { text: string; isCollapsed: boolea
 );
 
 const Sidebar = () => {
-  // Restore original static logo/link
-  const sidebarLogoSrc = "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg";
-  const sidebarLink = "/home";
+  // State for sidebar logo and link, live updates
+  const [sidebarLogoSrc, setSidebarLogoSrc] = React.useState("https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg");
+  const [sidebarLink, setSidebarLink] = React.useState("/home");
+
+  // Function to sync from localStorage
+  const syncSidebarConfig = React.useCallback(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('system_config');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setSidebarLogoSrc(parsed.sidebarLogo || "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg");
+        setSidebarLink(parsed.sidebarUrl || "/home");
+      } else {
+        setSidebarLogoSrc("https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg");
+        setSidebarLink("/home");
+      }
+    } catch {
+      setSidebarLogoSrc("https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg");
+      setSidebarLink("/home");
+    }
+  }, []);
+
+  React.useEffect(() => {
+    syncSidebarConfig();
+    // Listen for storage changes (from other tabs/windows)
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'system_config') syncSidebarConfig();
+    };
+    window.addEventListener('storage', onStorage);
+    // Listen for local changes (same tab)
+    const onCustom = () => syncSidebarConfig();
+    window.addEventListener('systemConfigUpdated', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('systemConfigUpdated', onCustom);
+    };
+  }, [syncSidebarConfig]);
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
@@ -234,6 +269,7 @@ const Sidebar = () => {
       }}
     >
 
+
     {/* TOP LOGO */}
     <div className={`flex justify-center items-center pt-4 pb-4 ${
       isSidebarCollapsed ? 'px-2' : 'px-4'
@@ -241,7 +277,7 @@ const Sidebar = () => {
     >
       <Link href={sidebarLink || '/home'} aria-label="Go to home">
         <img 
-          src={sidebarLogoSrc || fallbackLogo} 
+          src={sidebarLogoSrc} 
           alt="In-Accord" 
           className={`${isSidebarCollapsed ? 'w-10 h-10' : 'w-full'} object-contain`}
         />
