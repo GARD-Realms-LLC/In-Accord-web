@@ -1303,8 +1303,8 @@ const Administrator = (props: Props) => {
                 <div className="flex items-center justify-between mb-3">
                 <div className="font-semibold">Online Users ({onlineUsers.length})</div>
                 <div className="flex gap-2">
-                  <button onClick={refreshOnlineUsers} disabled={refreshing} className={refreshing ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
-                    {refreshing ? 'Refreshing...' : 'Refresh'}
+                  <button onClick={refreshOnlineUsers} disabled={refreshingOnline} className={refreshingOnline ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
+                    {refreshingOnline ? 'Refreshing...' : 'Refresh'}
                   </button>
                   <button
                     onClick={bootAllSessions}
@@ -1320,36 +1320,25 @@ const Administrator = (props: Props) => {
               {onlineUsers.length === 0 ? (
                 <div className="text-sm text-gray-600">No users are currently online.</div>
               ) : (
-                // Render columns: each column contains up to 4 users stacked vertically.
-                <div className="flex gap-3 overflow-x-auto h-56 py-1">
-                  {(() => {
-                    const chunkSize = 4;
-                    const cols: OnlineSession[][] = [];
-                    for (let i = 0; i < onlineUsers.length; i += chunkSize) {
-                      cols.push(onlineUsers.slice(i, i + chunkSize));
-                    }
-                    return cols.map((col, idx) => (
-                      <div key={idx} className="flex-shrink-0 min-w-[240px] flex flex-col gap-2">
-                        {col.map(s => (
-                          <div key={s.id} className="flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2">
-                            <img
-                              src={s.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name))}
-                              alt=""
-                              className="w-10 h-10 rounded-full object-cover"
-                              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name); }}
-                            />
-                            <div className="text-sm flex-1">
-                              <div className="font-medium">{s.name} <span className="text-xs text-gray-500">({s.username})</span></div>
-                              <div className="text-xs text-gray-500">IP: {s.ip} • since {new Date(s.since).toLocaleTimeString()}</div>
-                            </div>
-                            <div>
-                              <button onClick={() => bootSession(s.id)} className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded">Boot</button>
-                            </div>
-                          </div>
-                        ))}
+                // Render online users in a responsive grid: 4 per row, unlimited rows, vertical scroll
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 max-h-56 overflow-y-auto py-1">
+                  {onlineUsers.map(s => (
+                    <div key={s.id} className="flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2">
+                      <img
+                        src={s.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name))}
+                        alt=""
+                        className="w-10 h-10 rounded-full object-cover"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name); }}
+                      />
+                      <div className="text-sm flex-1">
+                        <div className="font-medium">{s.name} <span className="text-xs text-gray-500">({s.username})</span></div>
+                        <div className="text-xs text-gray-500">IP: {s.ip} • since {new Date(s.since).toLocaleTimeString()}</div>
                       </div>
-                    ));
-                  })()}
+                      <div>
+                        <button onClick={() => bootSession(s.id)} className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded">Boot</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

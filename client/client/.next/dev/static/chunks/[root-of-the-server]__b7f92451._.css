@@ -840,6 +840,10 @@
     max-height: calc(var(--spacing) * 40);
   }
 
+  .max-h-56 {
+    max-height: calc(var(--spacing) * 56);
+  }
+
   .min-h-screen {
     min-height: 100vh;
   }
