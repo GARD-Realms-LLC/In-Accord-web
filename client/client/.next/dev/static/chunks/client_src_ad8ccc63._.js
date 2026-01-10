@@ -395,11 +395,556 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
 }),
-"[project]/client/src/app/(components)/Navbar/index.tsx [app-client] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"[project]/client/src/app/(components)/Navbar/index.tsx [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
 
-const e = new Error("Could not parse module '[project]/client/src/app/(components)/Navbar/index.tsx'\n\nExpected ',', got '{'");
-e.code = 'MODULE_UNPARSABLE';
-throw e;
+__turbopack_context__.s([
+    "default",
+    ()=>__TURBOPACK__default__export__
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/client/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/src/app/redux.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$state$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/src/state/index.ts [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$bell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Bell$3e$__ = __turbopack_context__.i("[project]/client/node_modules/lucide-react/dist/esm/icons/bell.js [app-client] (ecmascript) <export default as Bell>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$menu$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Menu$3e$__ = __turbopack_context__.i("[project]/client/node_modules/lucide-react/dist/esm/icons/menu.js [app-client] (ecmascript) <export default as Menu>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$moon$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Moon$3e$__ = __turbopack_context__.i("[project]/client/node_modules/lucide-react/dist/esm/icons/moon.js [app-client] (ecmascript) <export default as Moon>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sun$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Sun$3e$__ = __turbopack_context__.i("[project]/client/node_modules/lucide-react/dist/esm/icons/sun.js [app-client] (ecmascript) <export default as Sun>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__ = __turbopack_context__.i("[project]/client/node_modules/lucide-react/dist/esm/icons/user.js [app-client] (ecmascript) <export default as User>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$LoginModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/src/app/(components)/Navbar/LoginModal.tsx [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/navigation.js [app-client] (ecmascript)");
+;
+var _s = __turbopack_context__.k.signature();
+"use client";
+;
+;
+;
+;
+;
+;
+const API_BASE = ("TURBOPACK compile-time value", "http://localhost:8000") || 'http://localhost:8000';
+const Navbar = ()=>{
+    _s();
+    const dispatch = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppDispatch"])();
+    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const isSidebarCollapsed = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])({
+        "Navbar.useAppSelector[isSidebarCollapsed]": (state)=>state.global.isSidebarCollapsed
+    }["Navbar.useAppSelector[isSidebarCollapsed]"]);
+    // Simple local auth state for UI (persisted to localStorage)
+    const [currentUser, setCurrentUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({
+        "Navbar.useState": ()=>{
+            try {
+                if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+                ;
+                const raw = localStorage.getItem('currentUser');
+                return raw ? JSON.parse(raw) : null;
+            } catch  {
+                return null;
+            }
+        }
+    }["Navbar.useState"]);
+    // Listen for localStorage changes (e.g., when profile is updated)
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Navbar.useEffect": ()=>{
+            const handleStorageChange = {
+                "Navbar.useEffect.handleStorageChange": ()=>{
+                    try {
+                        const raw_0 = localStorage.getItem('currentUser');
+                        const updated = raw_0 ? JSON.parse(raw_0) : null;
+                        setCurrentUser(updated);
+                    } catch  {}
+                }
+            }["Navbar.useEffect.handleStorageChange"];
+            // Listen for storage events (from other tabs) and custom events (from same tab)
+            window.addEventListener('storage', handleStorageChange);
+            window.addEventListener('userUpdated', handleStorageChange);
+            return ({
+                "Navbar.useEffect": ()=>{
+                    window.removeEventListener('storage', handleStorageChange);
+                    window.removeEventListener('userUpdated', handleStorageChange);
+                }
+            })["Navbar.useEffect"];
+        }
+    }["Navbar.useEffect"], []);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Navbar.useEffect": ()=>{
+            try {
+                if ("TURBOPACK compile-time truthy", 1) {
+                    if (currentUser) localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    else localStorage.removeItem('currentUser');
+                }
+            } catch  {}
+        }
+    }["Navbar.useEffect"], [
+        currentUser
+    ]);
+    const [showLoginModal, setShowLoginModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [avatarError, setAvatarError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [showLogoutToast, setShowLogoutToast] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const avatarUrl = currentUser?.avatar || currentUser?.avatarUrl || 'https://ui-avatars.com/api/?name=Not+Logged+In';
+    const isGeneratedAvatar = typeof avatarUrl === 'string' && avatarUrl.includes('ui-avatars.com');
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Navbar.useEffect": ()=>{
+            setAvatarError(false);
+        }
+    }["Navbar.useEffect"], [
+        avatarUrl
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Navbar.useEffect": ()=>{
+            try {
+                // Debugging: log current avatar state to help diagnose why navbar shows fallback
+                // Remove these logs once the issue is resolved.
+                // eslint-disable-next-line no-console
+                console.log('Navbar avatar debug:', {
+                    avatarUrl,
+                    isGeneratedAvatar,
+                    avatarError,
+                    currentUser
+                });
+            } catch (e) {}
+        }
+    }["Navbar.useEffect"], [
+        avatarUrl,
+        isGeneratedAvatar,
+        avatarError,
+        currentUser
+    ]);
+    async function handleLogin(username, password) {
+        const name = (username || '').trim();
+        if (!name) return {
+            ok: false,
+            error: 'Username required'
+        };
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: name,
+                    password
+                })
+            });
+            if (!res.ok) {
+                const j = await res.json().catch(()=>({}));
+                return {
+                    ok: false,
+                    error: j.error || 'Login failed'
+                };
+            }
+            const j_0 = await res.json();
+            const user = j_0.user || {
+                name: name,
+                username: name
+            };
+            console.log('Login response user:', user);
+            console.log('User role from backend:', user.role);
+            try {
+                const sres = await fetch(`${API_BASE}/api/admin/sessions/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user
+                    })
+                });
+                const sjson = await sres.json().catch(()=>({}));
+                if (sjson?.ok && sjson.session) {
+                    try {
+                        localStorage.setItem('sessionId', sjson.session.id);
+                    } catch  {}
+                }
+            } catch (e_1) {
+                console.warn('Failed to create session', e_1);
+            }
+            const fullUser = {
+                id: user.id || user.userId,
+                userId: user.id || user.userId,
+                name: user.name || name,
+                username: user.username || name,
+                email: user.email,
+                role: user.role || 'User',
+                avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}`
+            };
+            console.log('Setting currentUser:', fullUser);
+            setCurrentUser(fullUser);
+            // Save to localStorage immediately and notify
+            try {
+                localStorage.setItem('currentUser', JSON.stringify(fullUser));
+                console.log('Saved to localStorage:', fullUser);
+            } catch (e_2) {
+                console.error('Failed to save to localStorage', e_2);
+            }
+            // notify other parts of the app that a session was created
+            try {
+                window.dispatchEvent(new CustomEvent('sessionCreated', {
+                    detail: {
+                        user: fullUser,
+                        sessionId: ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('sessionId') : "TURBOPACK unreachable"
+                    }
+                }));
+                window.dispatchEvent(new Event('userUpdated'));
+            } catch  {}
+            return {
+                ok: true,
+                user: fullUser
+            };
+        } catch (e_0) {
+            console.error('Login error', e_0);
+            // If backend is not reachable, provide a helpful error message
+            const errorMsg = e_0 instanceof TypeError && e_0.message.includes('fetch') ? 'Backend server not reachable. Please make sure the server is running on ' + API_BASE : 'Network error';
+            return {
+                ok: false,
+                error: errorMsg
+            };
+        }
+    }
+    const isDarkMode = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])({
+        "Navbar.useAppSelector[isDarkMode]": (state_0)=>state_0.global.isDarkMode
+    }["Navbar.useAppSelector[isDarkMode]"]);
+    const toggleSidebar = ()=>{
+        dispatch((0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$state$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["setIsSidebarCollapsed"])(!isSidebarCollapsed));
+    };
+    const toggleDarkMode = ()=>{
+        console.log('Dark mode toggle clicked. Current isDarkMode state:', isDarkMode);
+        const newState = !isDarkMode;
+        console.log('Dispatching new state:', newState);
+        dispatch((0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$state$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["setIsDarkMode"])(newState));
+    };
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "flex justify-between items-center w-full mb-7 px-4 py-3 rounded-lg",
+                style: {
+                    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                    color: isDarkMode ? '#f3f4f6' : '#111827'
+                },
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex justify-between items-center gap-5",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "hidden md:flex justify-between items-center gap-5"
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 193,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            currentUser && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                className: "px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600",
+                                onClick: toggleSidebar,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$menu$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Menu$3e$__["Menu"], {
+                                    className: "w-4 h-4 dark:text-gray-300"
+                                }, void 0, false, {
+                                    fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                    lineNumber: 196,
+                                    columnNumber: 17
+                                }, ("TURBOPACK compile-time value", void 0))
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 195,
+                                columnNumber: 29
+                            }, ("TURBOPACK compile-time value", void 0))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                        lineNumber: 192,
+                        columnNumber: 11
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "relative",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                type: "search",
+                                placeholder: "Start typing  to search",
+                                className: "pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 201,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "absolute inset-y-0 left-0 pl- flex items-center pointer-events-none",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$bell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Bell$3e$__["Bell"], {
+                                    className: "text-gray-500 dark:text-gray-400",
+                                    size: 20
+                                }, void 0, false, {
+                                    fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                    lineNumber: 203,
+                                    columnNumber: 15
+                                }, ("TURBOPACK compile-time value", void 0))
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 202,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                        lineNumber: 200,
+                        columnNumber: 11
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex justify-between items-center gap-5",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "hidden md:flex justify-between items-center gap-5"
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 209,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                onClick: toggleDarkMode,
+                                className: "px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600 z-50",
+                                type: "button",
+                                children: isDarkMode ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$sun$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Sun$3e$__["Sun"], {
+                                    className: "cursor-pointer text-gray-500 dark:text-yellow-400",
+                                    size: 24
+                                }, void 0, false, {
+                                    fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                    lineNumber: 212,
+                                    columnNumber: 29
+                                }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$moon$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Moon$3e$__["Moon"], {
+                                    className: "cursor-pointer text-gray-500 dark:text-gray-300",
+                                    size: 24
+                                }, void 0, false, {
+                                    fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                    lineNumber: 212,
+                                    columnNumber: 111
+                                }, ("TURBOPACK compile-time value", void 0))
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 211,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "relative",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$bell$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Bell$3e$__["Bell"], {
+                                        className: "cursor-pointer text-gray-500",
+                                        size: 24
+                                    }, void 0, false, {
+                                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                        lineNumber: 215,
+                                        columnNumber: 15
+                                    }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "absolute -top-2 -right-2 inline-flex items-center justify-center  px-[0.4rem] py-1 text-xs leading-none text-red-100 bg-red-600 rounded-full",
+                                        children: "3"
+                                    }, void 0, false, {
+                                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                        lineNumber: 216,
+                                        columnNumber: 15
+                                    }, ("TURBOPACK compile-time value", void 0))
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 214,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {
+                                className: "w-0 h-7 border border-solid border-l border-gray-300 mx-3"
+                            }, void 0, false, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 221,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-3",
+                                children: [
+                                    !avatarError && !isGeneratedAvatar ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                        src: avatarUrl,
+                                        alt: currentUser?.name ?? 'user',
+                                        className: "w-9 h-9 rounded-full object-cover bg-gray-200",
+                                        onError: ()=>setAvatarError(true)
+                                    }, void 0, false, {
+                                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                        lineNumber: 223,
+                                        columnNumber: 53
+                                    }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center",
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__User$3e$__["User"], {
+                                            className: "text-gray-600",
+                                            size: 18
+                                        }, void 0, false, {
+                                            fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                            lineNumber: 224,
+                                            columnNumber: 19
+                                        }, ("TURBOPACK compile-time value", void 0))
+                                    }, void 0, false, {
+                                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                        lineNumber: 223,
+                                        columnNumber: 208
+                                    }, ("TURBOPACK compile-time value", void 0)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: "font-semibold",
+                                        children: currentUser?.name ?? 'Not Logged In'
+                                    }, void 0, false, {
+                                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                        lineNumber: 226,
+                                        columnNumber: 15
+                                    }, ("TURBOPACK compile-time value", void 0))
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 222,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    !currentUser && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                onClick: ()=>setShowLoginModal(true),
+                                                className: "px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded",
+                                                children: "Login"
+                                            }, void 0, false, {
+                                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                                lineNumber: 230,
+                                                columnNumber: 19
+                                            }, ("TURBOPACK compile-time value", void 0)),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$LoginModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                                show: showLoginModal,
+                                                onClose: ()=>setShowLoginModal(false),
+                                                onSubmit: handleLogin
+                                            }, void 0, false, {
+                                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                                lineNumber: 231,
+                                                columnNumber: 19
+                                            }, ("TURBOPACK compile-time value", void 0))
+                                        ]
+                                    }, void 0, true),
+                                    currentUser && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: async ()=>{
+                                            try {
+                                                const sessionId = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('sessionId') : "TURBOPACK unreachable";
+                                                if (sessionId) {
+                                                    await fetch(`${API_BASE}/api/admin/sessions/terminate`, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json'
+                                                        },
+                                                        body: JSON.stringify({
+                                                            sessionId
+                                                        })
+                                                    }).catch(()=>null);
+                                                    try {
+                                                        localStorage.removeItem('sessionId');
+                                                    } catch  {}
+                                                }
+                                                await fetch(`${API_BASE}/api/admin/auth/logout`, {
+                                                    method: 'POST'
+                                                }).catch(()=>null);
+                                            } catch (e_3) {
+                                                console.warn('Logout error', e_3);
+                                            }
+                                            // Clear user immediately and notify listeners
+                                            try {
+                                                localStorage.removeItem('currentUser');
+                                            } catch  {}
+                                            setCurrentUser(null);
+                                            setShowLogoutToast(true);
+                                            try {
+                                                // Emit dedicated logout and general update events
+                                                window.dispatchEvent(new Event('logout'));
+                                                window.dispatchEvent(new Event('userUpdated'));
+                                            } catch  {}
+                                            // Auto-dismiss toast after 3 seconds
+                                            setTimeout(()=>setShowLogoutToast(false), 3000);
+                                            // Prefer a hard navigation to ensure protected pages unload
+                                            try {
+                                                router.replace('/home');
+                                            } catch  {}
+                                            // Fallback in case router navigation is blocked
+                                            try {
+                                                setTimeout(()=>{
+                                                    window.location.assign('/home');
+                                                }, 50);
+                                            } catch  {}
+                                        },
+                                        className: "px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded",
+                                        children: "Logoff"
+                                    }, void 0, false, {
+                                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                        lineNumber: 233,
+                                        columnNumber: 31
+                                    }, ("TURBOPACK compile-time value", void 0))
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                                lineNumber: 228,
+                                columnNumber: 13
+                            }, ("TURBOPACK compile-time value", void 0))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                        lineNumber: 208,
+                        columnNumber: 11
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                lineNumber: 186,
+                columnNumber: 9
+            }, ("TURBOPACK compile-time value", void 0)),
+            showLogoutToast && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                        className: "w-5 h-5",
+                        fill: "currentColor",
+                        viewBox: "0 0 20 20",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                            fillRule: "evenodd",
+                            d: "M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z",
+                            clipRule: "evenodd"
+                        }, void 0, false, {
+                            fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                            lineNumber: 288,
+                            columnNumber: 15
+                        }, ("TURBOPACK compile-time value", void 0))
+                    }, void 0, false, {
+                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                        lineNumber: 287,
+                        columnNumber: 13
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        children: "Logged out successfully"
+                    }, void 0, false, {
+                        fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                        lineNumber: 290,
+                        columnNumber: 13
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
+                lineNumber: 286,
+                columnNumber: 29
+            }, ("TURBOPACK compile-time value", void 0))
+        ]
+    }, void 0, true);
+};
+_s(Navbar, "NWQlsr6c1RI7krM2zPeyuCg+z5k=", false, function() {
+    return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppDispatch"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"]
+    ];
+});
+_c = Navbar;
+const __TURBOPACK__default__export__ = Navbar;
+var _c;
+__turbopack_context__.k.register(_c, "Navbar");
+if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
+    __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
+}
 }),
 "[project]/client/src/app/(components)/Sidebar/index.tsx [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
