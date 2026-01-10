@@ -1533,7 +1533,7 @@ const Administrator = (props: Props) => {
       // Smoothly advance progress while the request is running
       backupProgressTimer.current = window.setInterval(() => {
         setBackupProgress(prev => {
-          const next = Math.min(prev.percent + 12, 90);
+          const next = Math.min(prev.percent + 12, 98);
           return { ...prev, percent: next };
         });
       }, 180);

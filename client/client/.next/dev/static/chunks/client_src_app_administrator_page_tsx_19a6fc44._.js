@@ -177,11 +177,11 @@ async function hashPassword(password) {
 // Password strength helper component
 function PasswordStrength(t0) {
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(9);
-    if ($[0] !== "2159c8ea89388674314cd96adecf3c4d2f4f6c15b85ec51d5b395b7083de0389") {
+    if ($[0] !== "dde266412665d83682b286c7a39916295b6fdfbf63903ef773b1e049884e3cc0") {
         for(let $i = 0; $i < 9; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "2159c8ea89388674314cd96adecf3c4d2f4f6c15b85ec51d5b395b7083de0389";
+        $[0] = "dde266412665d83682b286c7a39916295b6fdfbf63903ef773b1e049884e3cc0";
     }
     const { password } = t0;
     let t1;
@@ -2341,7 +2341,7 @@ const Administrator = (props)=>{
         // Smoothly advance progress while the request is running
         backupProgressTimer.current = window.setInterval(()=>{
             setBackupProgress((prev_48)=>{
-                const next = Math.min(prev_48.percent + 12, 90);
+                const next = Math.min(prev_48.percent + 12, 98);
                 return {
                     ...prev_48,
                     percent: next
