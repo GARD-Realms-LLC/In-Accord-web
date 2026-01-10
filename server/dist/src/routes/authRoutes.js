@@ -70,7 +70,12 @@ router.post('/login', (req, res) => {
             return false;
         if ((u.username || '').toLowerCase() === lower)
             return true;
-        if ((u.email || '').split('@')[0].toLowerCase() === lower)
+        const email = (u.email || '').toLowerCase();
+        // match full email (user@example.com) or local-part (user)
+        if (email === lower)
+            return true;
+        const local = email.split('@')[0] || '';
+        if (local === lower)
             return true;
         if ((u.name || '').toLowerCase() === lower)
             return true;
@@ -142,3 +147,29 @@ router.post('/logout', (req, res) => {
     return res.json({ ok: true });
 });
 exports.default = router;
+// GET /whois?username=<username|email>
+router.get('/whois', (req, res) => {
+    const username = (req.query.username || '');
+    if (!username || typeof username !== 'string')
+        return res.status(400).json({ ok: false, error: 'username required' });
+    const users = readLocalUsers();
+    const lower = username.toLowerCase();
+    const found = users.find((u) => {
+        if (!u)
+            return false;
+        if ((u.username || '').toLowerCase() === lower)
+            return true;
+        const email = (u.email || '').toLowerCase();
+        if (email === lower)
+            return true;
+        const local = email.split('@')[0] || '';
+        if (local === lower)
+            return true;
+        if ((u.name || '').toLowerCase() === lower)
+            return true;
+        return false;
+    });
+    if (!found)
+        return res.status(404).json({ ok: false, error: 'user not found' });
+    return res.json({ ok: true, user: found });
+});

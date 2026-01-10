@@ -175,11 +175,11 @@ async function hashPassword(password) {
 // Password strength helper component
 function PasswordStrength(t0) {
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(9);
-    if ($[0] !== "32c9fe579eeedee39a65e642be95b9a303e758b8733601909bf888c9ccb1a75a") {
+    if ($[0] !== "5b630e9755d8c5f2d228d2bccd5374c8e12d5e40ccde2b7729be1720b5567d60") {
         for(let $i = 0; $i < 9; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "32c9fe579eeedee39a65e642be95b9a303e758b8733601909bf888c9ccb1a75a";
+        $[0] = "5b630e9755d8c5f2d228d2bccd5374c8e12d5e40ccde2b7729be1720b5567d60";
     }
     const { password } = t0;
     let t1;
@@ -2219,6 +2219,7 @@ const Administrator = (props)=>{
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                 children: [
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                        type: "button",
                                                                         onClick: ()=>{
                                                                             const input_0 = document.createElement('input');
                                                                             input_0.type = 'file';
@@ -2240,6 +2241,7 @@ const Administrator = (props)=>{
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                        type: "button",
                                                                         onClick: ()=>setFormAvatarUrl(undefined),
                                                                         className: "ml-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded",
                                                                         children: "Clear"
@@ -2286,6 +2288,7 @@ const Administrator = (props)=>{
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                        type: "button",
                                                                         onClick: async ()=>{
                                                                             await savePasswordOnly();
                                                                         },
@@ -2367,6 +2370,7 @@ const Administrator = (props)=>{
                                                                                 columnNumber: 29
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                                                type: "button",
                                                                                 onClick: ()=>{
                                                                                     navigator.clipboard?.writeText(lastSavedPlain);
                                                                                     setToastMessage('Copied');

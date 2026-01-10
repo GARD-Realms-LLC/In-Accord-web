@@ -1320,12 +1320,12 @@ const Administrator = (props: Props) => {
                         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'); }}
                       />
                       <div>
-                        <button onClick={() => {
+                        <button type="button" onClick={() => {
                           const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = (ev: any) => {
                             const f = ev.target.files && ev.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => setFormAvatarUrl(String(r.result)); r.readAsDataURL(f);
                           }; input.click();
                         }} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Upload</button>
-                        <button onClick={() => setFormAvatarUrl(undefined)} className="ml-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Clear</button>
+                        <button type="button" onClick={() => setFormAvatarUrl(undefined)} className="ml-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Clear</button>
                       </div>
                     </div>
 
@@ -1333,7 +1333,7 @@ const Administrator = (props: Props) => {
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">New Password</label>
                       <div className="flex items-center gap-2">
                         <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="New password" type={showPassword ? 'text' : 'password'} className="mt-0 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
-                        <button onClick={async () => { await savePasswordOnly(); }} className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Save Password</button>
+                        <button type="button" onClick={async () => { await savePasswordOnly(); }} className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Save Password</button>
                       </div>
                       <div className="mt-2 flex items-center justify-between">
                         <div className="text-xs text-gray-500"><PasswordStrength password={formPassword} /></div>
@@ -1344,7 +1344,7 @@ const Administrator = (props: Props) => {
                           <div className="font-medium text-xs text-gray-600 dark:text-gray-300">Saved Password (temporary)</div>
                           <div className="flex items-center justify-between mt-1">
                             <div className="font-mono text-sm break-all">{lastSavedPlain}</div>
-                            <button onClick={() => { navigator.clipboard?.writeText(lastSavedPlain); setToastMessage('Copied'); setToastVisible(true); setTimeout(() => setToastVisible(false), 2000); }} className="ml-2 px-2 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy</button>
+                            <button type="button" onClick={() => { navigator.clipboard?.writeText(lastSavedPlain); setToastMessage('Copied'); setToastVisible(true); setTimeout(() => setToastVisible(false), 2000); }} className="ml-2 px-2 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy</button>
                           </div>
                         </div>
                       )}
