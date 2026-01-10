@@ -1,6 +1,6 @@
 const Home = (props: Props) => {
     return (
-      <div className="flex flex-col justify-between items-center h-full gap-6 pb-6">
+      <div className="flex flex-col items-center min-h-full gap-6 pb-6">
         <div className="flex flex-col justify-center items-center gap-6 flex-1">
           <h1 className="text-6xl font-bold">In-Accord</h1>
           <h2 className="text-2xl font-bold">The Premier Discord Customization an Management App.</h2>
@@ -17,7 +17,7 @@ const Home = (props: Props) => {
         />
 
         {/* Sidebar Footer */}
-        <div className="w-full mt-auto bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="w-full bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex justify-center items-center gap-3 mb-3">
             <a href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Discord" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-[#5865F2]">
