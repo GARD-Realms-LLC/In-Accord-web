@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": "3b0fd66b-a4d6-4d95-94e4-01940c99aedb",
+      "password": "pbkdf2$100000$c8e7319dfa9add9de26a144fe39e3f20$6a4f9b9d707df50fc38340029c9fde7746985e514a485c91db44bea949cb22cf"
+    },
+    {
+      "id": "u1",
+      "password": "sha256$e71b03240efe911287560ac85c078db77534bdbcded96298ff68ed9430e90cf3"
+    },
+    {
+      "id": "uvnm8ro7",
+      "password": "sha256$e71b03240efe911287560ac85c078db77534bdbcded96298ff68ed9430e90cf3"
+    }
+  ]
+}
