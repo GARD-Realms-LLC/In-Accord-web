@@ -333,6 +333,40 @@ const Administrator = (props: Props) => {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
+      {
+        name: "Doc Cowles - DocRST",
+        jobTitle: "Founder & Manager",
+        description: "Founder and Manager of In-Accord",
+        imageUrl: "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/dic-irish-bear.jpeg",
+        email: "member1@example.com",
+        website: "https://example.com",
+        github: "https://github.com",
+        discord: "https://discord.com"
+      },
+      ...Array.from({ length: 8 }, (_, i) => ({
+        name: `Team Member ${i + 2}`,
+        jobTitle: "Team Member",
+        description: `Information about team member ${i + 2}`,
+        imageUrl: `https://example.com/member${i + 2}`,
+        email: `member${i + 2}@example.com`,
+        website: "https://example.com",
+        github: "https://github.com",
+        discord: "https://discord.com"
+      }))
+    ]);
+
+    const [errors, setErrors] = useState<{ [key: number]: Partial<Record<keyof TeamMember, string>> }>({});
+    const [auditLogEntries, setAuditLogEntries] = useState<AuditLogEntry[]>(initialAuditLogs);
+    const [appStatus, setAppStatus] = useState('Operational');
+    const [responseTime, setResponseTime] = useState(45);
+    const [uptime, setUptime] = useState(99.98);
+    const [requestsPerMin, setRequestsPerMin] = useState(2.4);
+    const [successRate, setSuccessRate] = useState(99.2);
+    const [p95Latency, setP95Latency] = useState(127);
+    const [memoryUsage, setMemoryUsage] = useState(8.2);
+    const [lastUpdated, setLastUpdated] = useState(new Date());
+
     // Check if user has Admin role
     useEffect(() => {
       try {
@@ -359,57 +393,7 @@ const Administrator = (props: Props) => {
       }
     }, [isAuthorized, router]);
 
-    // Show loading while checking authorization
-    if (isAuthorized === null) {
-      return (
-        <div className="p-8">
-          <div className="text-center">Checking authorization...</div>
-        </div>
-      );
-    }
-
-    // Don't render anything if not authorized (will redirect)
-    if (!isAuthorized) {
-      return null;
-    }
-
-    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-      {
-        name: "Doc Cowles - DocRST",
-        jobTitle: "Founder & Manager",
-        description: "Founder and Manager of In-Accord",
-        imageUrl: "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/dic-irish-bear.jpeg",
-        email: "member1@example.com",
-        website: "https://example.com",
-        github: "https://github.com",
-        discord: "https://discord.com"
-      },
-      ...Array.from({ length: 8 }, (_, i) => ({
-        name: `Team Member ${i + 2}`,
-        jobTitle: "Team Member",
-        description: `Information about team member ${i + 2}`,
-        imageUrl: `https://example.com/member${i + 2}`,
-        email: `member${i + 2}@example.com`,
-        website: "https://example.com",
-        github: "https://github.com",
-        discord: "https://discord.com"
-      }))
-    ]);
-
-    // Validation state per member index and field
-    const [errors, setErrors] = useState<{ [key: number]: Partial<Record<keyof TeamMember, string>> }>({});
-
-    const [auditLogEntries, setAuditLogEntries] = useState<AuditLogEntry[]>(initialAuditLogs);
-
-    // System Health state
-    const [appStatus, setAppStatus] = useState('Operational');
-    const [responseTime, setResponseTime] = useState(45);
-    const [uptime, setUptime] = useState(99.98);
-    const [requestsPerMin, setRequestsPerMin] = useState(2.4);
-    const [successRate, setSuccessRate] = useState(99.2);
-    const [p95Latency, setP95Latency] = useState(127);
-    const [memoryUsage, setMemoryUsage] = useState(8.2);
-    const [lastUpdated, setLastUpdated] = useState(new Date());
+    // Note: Do not early-return before hooks; we gate rendering right before the main return
 
 
     const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -1404,6 +1388,18 @@ const Administrator = (props: Props) => {
 
       alert(`Team Member ${index + 1} updated successfully!`);
     };
+
+    // Gate rendering after all hooks are declared to preserve hook call order
+    if (isAuthorized === null) {
+      return (
+        <div className="p-8">
+          <div className="text-center">Checking authorization...</div>
+        </div>
+      );
+    }
+    if (!isAuthorized) {
+      return null;
+    }
 
     return (
       <div className="space-y-8 p-8">

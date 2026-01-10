@@ -233,8 +233,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
                     }
                     await fetch(`${API_BASE}/api/admin/auth/logout`, { method: 'POST' }).catch(() => null);
                   } catch (e) { console.warn('Logout error', e); }
+                  // Clear user immediately and notify listeners
+                  try { localStorage.removeItem('currentUser'); } catch {}
                   setCurrentUser(null);
-                  try { router.push('/'); } catch {}
+                  try { window.dispatchEvent(new Event('userUpdated')); } catch {}
+                  // Prefer a hard navigation to ensure protected pages unload
+                  try { router.replace('/home'); } catch {}
+                  // Fallback in case router navigation is blocked
+                  try { setTimeout(() => { window.location.assign('/home'); }, 50); } catch {}
                 }}
                 className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
               >

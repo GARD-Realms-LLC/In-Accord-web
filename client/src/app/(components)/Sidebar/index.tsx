@@ -84,6 +84,7 @@ const Sidebar = () => {
   const sidebarWidth = useAppSelector((state) => state.global.sidebarWidth);
 
   const [currentUserRole, setCurrentUserRole] = React.useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     try {
@@ -93,8 +94,13 @@ const Sidebar = () => {
         console.log('Sidebar: User loaded from localStorage:', user);
         console.log('Sidebar: User role:', user.role);
         setCurrentUserRole(user.role || null);
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
       }
-    } catch {}
+    } catch {
+      setIsLoggedIn(false);
+    }
 
     const handleUserUpdate = () => {
       try {
@@ -104,10 +110,14 @@ const Sidebar = () => {
           console.log('Sidebar: User updated:', user);
           console.log('Sidebar: Updated role:', user.role);
           setCurrentUserRole(user.role || null);
+          setIsLoggedIn(true);
         } else {
           setCurrentUserRole(null);
+          setIsLoggedIn(false);
         }
-      } catch {}
+      } catch {
+        setIsLoggedIn(false);
+      }
     };
 
     window.addEventListener('userUpdated', handleUserUpdate);
@@ -189,6 +199,11 @@ const Sidebar = () => {
 
   const clampedWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
   const appliedWidth = isSidebarCollapsed ? collapsedWidth : clampedWidth;
+
+  // Hide sidebar if not logged in
+  if (!isLoggedIn) {
+    return null;
+  }
 
   // Keep the sidebar as a full-height column so the footer can sit at the bottom on tall viewports
   // Make sidebar relative so the resize handle is positioned correctly

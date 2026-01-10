@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Navbar from "@/app/(components)/Navbar";
 import Sidebar from "@/app/(components)/Sidebar";
 import StoreProvider, { useAppSelector } from "./redux";
@@ -11,6 +12,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   );
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
   const sidebarWidth = useAppSelector((state) => state.global.sidebarWidth);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -26,6 +29,56 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const maxWidth = 320;
   const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
   const appliedSidebarOffset = isSidebarCollapsed ? 64 : clampedSidebarWidth;
+
+  // Redirect to home when accessing protected routes without a logged-in user
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
+      const user = raw ? JSON.parse(raw) : null;
+      const protectedRoutes = [
+        '/administrator',
+        '/dashboard',
+        '/profile',
+        '/inventory',
+        '/products',
+        '/expenses',
+        '/bots',
+        '/servers',
+        '/hosting',
+        '/users'
+      ];
+      const isProtected = protectedRoutes.some((p) => pathname?.startsWith(p));
+      if (isProtected && !user) {
+        // Use replace to avoid back button returning to protected page
+        router.replace('/home');
+      }
+    } catch (e) {
+      // Fail-safe: if parsing fails, redirect off protected routes
+      const isProtected = ['/administrator', '/dashboard'].some((p) => pathname?.startsWith(p));
+      if (isProtected) router.replace('/home');
+    }
+  }, [pathname, router]);
+
+  // React to auth changes (login/logout) and re-evaluate guards
+  useEffect(() => {
+    const onAuthUpdate = () => {
+      try {
+        const raw = localStorage.getItem('currentUser');
+        const user = raw ? JSON.parse(raw) : null;
+        const protectedRoutes = ['/administrator', '/dashboard'];
+        const isProtected = protectedRoutes.some((p) => pathname?.startsWith(p));
+        if (isProtected && !user) router.replace('/home');
+      } catch {}
+    };
+    window.addEventListener('userUpdated', onAuthUpdate);
+    window.addEventListener('storage', onAuthUpdate);
+    window.addEventListener('sessionCreated', onAuthUpdate);
+    return () => {
+      window.removeEventListener('userUpdated', onAuthUpdate);
+      window.removeEventListener('storage', onAuthUpdate);
+      window.removeEventListener('sessionCreated', onAuthUpdate);
+    };
+  }, [pathname, router]);
 
   return (
     <div

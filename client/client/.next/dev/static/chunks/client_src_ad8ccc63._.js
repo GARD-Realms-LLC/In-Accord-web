@@ -539,6 +539,8 @@ const Navbar = ()=>{
                 name: name,
                 username: name
             };
+            console.log('Login response user:', user);
+            console.log('User role from backend:', user.role);
             try {
                 const sres = await fetch(`${API_BASE}/api/admin/sessions/create`, {
                     method: 'POST',
@@ -558,27 +560,37 @@ const Navbar = ()=>{
             } catch (e_1) {
                 console.warn('Failed to create session', e_1);
             }
-            // notify other parts of the app that a session was created
-            try {
-                window.dispatchEvent(new CustomEvent('sessionCreated', {
-                    detail: {
-                        user,
-                        sessionId: ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('sessionId') : "TURBOPACK unreachable"
-                    }
-                }));
-            } catch  {}
-            setCurrentUser({
+            const fullUser = {
                 id: user.id || user.userId,
                 userId: user.id || user.userId,
                 name: user.name || name,
                 username: user.username || name,
                 email: user.email,
-                role: user.role,
+                role: user.role || 'User',
                 avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}`
-            });
+            };
+            console.log('Setting currentUser:', fullUser);
+            setCurrentUser(fullUser);
+            // Save to localStorage immediately and notify
+            try {
+                localStorage.setItem('currentUser', JSON.stringify(fullUser));
+                console.log('Saved to localStorage:', fullUser);
+            } catch (e_2) {
+                console.error('Failed to save to localStorage', e_2);
+            }
+            // notify other parts of the app that a session was created
+            try {
+                window.dispatchEvent(new CustomEvent('sessionCreated', {
+                    detail: {
+                        user: fullUser,
+                        sessionId: ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('sessionId') : "TURBOPACK unreachable"
+                    }
+                }));
+                window.dispatchEvent(new Event('userUpdated'));
+            } catch  {}
             return {
                 ok: true,
-                user
+                user: fullUser
             };
         } catch (e_0) {
             console.error('Login error', e_0);
@@ -616,7 +628,7 @@ const Navbar = ()=>{
                         className: "hidden md:flex justify-between items-center gap-5"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 177,
+                        lineNumber: 191,
                         columnNumber: 7
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -626,18 +638,18 @@ const Navbar = ()=>{
                             className: "w-4 h-4 dark:text-gray-300"
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                            lineNumber: 180,
+                            lineNumber: 194,
                             columnNumber: 10
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 179,
+                        lineNumber: 193,
                         columnNumber: 7
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                lineNumber: 176,
+                lineNumber: 190,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -649,7 +661,7 @@ const Navbar = ()=>{
                         className: "pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 184,
+                        lineNumber: 198,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -659,18 +671,18 @@ const Navbar = ()=>{
                             size: 20
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                            lineNumber: 186,
+                            lineNumber: 200,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 185,
+                        lineNumber: 199,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                lineNumber: 183,
+                lineNumber: 197,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -680,7 +692,7 @@ const Navbar = ()=>{
                         className: "hidden md:flex justify-between items-center gap-5"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 192,
+                        lineNumber: 206,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -692,19 +704,19 @@ const Navbar = ()=>{
                             size: 24
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                            lineNumber: 195,
+                            lineNumber: 209,
                             columnNumber: 27
                         }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$moon$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Moon$3e$__["Moon"], {
                             className: "cursor-pointer text-gray-500 dark:text-gray-300",
                             size: 24
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                            lineNumber: 195,
+                            lineNumber: 209,
                             columnNumber: 109
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 194,
+                        lineNumber: 208,
                         columnNumber: 12
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -715,7 +727,7 @@ const Navbar = ()=>{
                                 size: 24
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                lineNumber: 198,
+                                lineNumber: 212,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -723,20 +735,20 @@ const Navbar = ()=>{
                                 children: "3"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                lineNumber: 199,
+                                lineNumber: 213,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 197,
+                        lineNumber: 211,
                         columnNumber: 12
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {
                         className: "w-0 h-7 border border-solid border-l border-gray-300 mx-3"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 204,
+                        lineNumber: 218,
                         columnNumber: 12
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -749,7 +761,7 @@ const Navbar = ()=>{
                                 onError: ()=>setAvatarError(true)
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                lineNumber: 206,
+                                lineNumber: 220,
                                 columnNumber: 51
                             }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center",
@@ -758,12 +770,12 @@ const Navbar = ()=>{
                                     size: 18
                                 }, void 0, false, {
                                     fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                    lineNumber: 207,
+                                    lineNumber: 221,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                lineNumber: 206,
+                                lineNumber: 220,
                                 columnNumber: 206
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -771,13 +783,13 @@ const Navbar = ()=>{
                                 children: currentUser?.name ?? 'Not Logged In'
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                lineNumber: 209,
+                                lineNumber: 223,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 205,
+                        lineNumber: 219,
                         columnNumber: 12
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -791,7 +803,7 @@ const Navbar = ()=>{
                                         children: "Login"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                        lineNumber: 213,
+                                        lineNumber: 227,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$LoginModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -800,7 +812,7 @@ const Navbar = ()=>{
                                         onSubmit: handleLogin
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                        lineNumber: 214,
+                                        lineNumber: 228,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
@@ -826,37 +838,51 @@ const Navbar = ()=>{
                                         await fetch(`${API_BASE}/api/admin/auth/logout`, {
                                             method: 'POST'
                                         }).catch(()=>null);
-                                    } catch (e_2) {
-                                        console.warn('Logout error', e_2);
+                                    } catch (e_3) {
+                                        console.warn('Logout error', e_3);
                                     }
+                                    // Clear user immediately and notify listeners
+                                    try {
+                                        localStorage.removeItem('currentUser');
+                                    } catch  {}
                                     setCurrentUser(null);
                                     try {
-                                        router.push('/');
+                                        window.dispatchEvent(new Event('userUpdated'));
+                                    } catch  {}
+                                    // Prefer a hard navigation to ensure protected pages unload
+                                    try {
+                                        router.replace('/home');
+                                    } catch  {}
+                                    // Fallback in case router navigation is blocked
+                                    try {
+                                        setTimeout(()=>{
+                                            window.location.assign('/home');
+                                        }, 50);
                                     } catch  {}
                                 },
                                 className: "px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded",
                                 children: "Logoff"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                                lineNumber: 216,
+                                lineNumber: 230,
                                 columnNumber: 29
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                        lineNumber: 211,
+                        lineNumber: 225,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-                lineNumber: 191,
+                lineNumber: 205,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/client/src/app/(components)/Navbar/index.tsx",
-        lineNumber: 170,
+        lineNumber: 184,
         columnNumber: 10
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -922,11 +948,11 @@ var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.sign
 const SidebarLink = (t0)=>{
     _s();
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(13);
-    if ($[0] !== "fce0fb43f4ded42055f923ef6dbf3ae37713cc7ea8d456162bd3a14847bb964c") {
+    if ($[0] !== "4ad0866ba301ddcd6da0af4bbc7cbf510d6dff7d68ba6a16a3dcdafff3c81f4a") {
         for(let $i = 0; $i < 13; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "fce0fb43f4ded42055f923ef6dbf3ae37713cc7ea8d456162bd3a14847bb964c";
+        $[0] = "4ad0866ba301ddcd6da0af4bbc7cbf510d6dff7d68ba6a16a3dcdafff3c81f4a";
     }
     const { href, icon: Icon, label, isCollapsed } = t0;
     const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
@@ -1029,11 +1055,11 @@ _s(SidebarLink, "xbyQPtUVMO7MNj7WjJlpdWqRcTo=", false, function() {
 _c = SidebarLink;
 const SectionLabel = (t0)=>{
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(4);
-    if ($[0] !== "fce0fb43f4ded42055f923ef6dbf3ae37713cc7ea8d456162bd3a14847bb964c") {
+    if ($[0] !== "4ad0866ba301ddcd6da0af4bbc7cbf510d6dff7d68ba6a16a3dcdafff3c81f4a") {
         for(let $i = 0; $i < 4; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "fce0fb43f4ded42055f923ef6dbf3ae37713cc7ea8d456162bd3a14847bb964c";
+        $[0] = "4ad0866ba301ddcd6da0af4bbc7cbf510d6dff7d68ba6a16a3dcdafff3c81f4a";
     }
     const { text, isCollapsed } = t0;
     const t1 = `${isCollapsed ? "hidden" : "block"} px-4 mt-4 text-xs font-semibold tracking-wide text-gray-500 uppercase`;
@@ -1069,34 +1095,50 @@ const Sidebar = ()=>{
         "Sidebar.useAppSelector[sidebarWidth]": (state_1)=>state_1.global.sidebarWidth
     }["Sidebar.useAppSelector[sidebarWidth]"]);
     const [currentUserRole, setCurrentUserRole] = __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].useState(null);
+    const [isLoggedIn, setIsLoggedIn] = __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].useState(false);
     __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].useEffect({
         "Sidebar.useEffect": ()=>{
             try {
                 const raw = localStorage.getItem('currentUser');
                 if (raw) {
                     const user = JSON.parse(raw);
+                    console.log('Sidebar: User loaded from localStorage:', user);
+                    console.log('Sidebar: User role:', user.role);
                     setCurrentUserRole(user.role || null);
+                    setIsLoggedIn(true);
+                } else {
+                    setIsLoggedIn(false);
                 }
-            } catch  {}
+            } catch  {
+                setIsLoggedIn(false);
+            }
             const handleUserUpdate = {
                 "Sidebar.useEffect.handleUserUpdate": ()=>{
                     try {
                         const raw_0 = localStorage.getItem('currentUser');
                         if (raw_0) {
                             const user_0 = JSON.parse(raw_0);
+                            console.log('Sidebar: User updated:', user_0);
+                            console.log('Sidebar: Updated role:', user_0.role);
                             setCurrentUserRole(user_0.role || null);
+                            setIsLoggedIn(true);
                         } else {
                             setCurrentUserRole(null);
+                            setIsLoggedIn(false);
                         }
-                    } catch  {}
+                    } catch  {
+                        setIsLoggedIn(false);
+                    }
                 }
             }["Sidebar.useEffect.handleUserUpdate"];
             window.addEventListener('userUpdated', handleUserUpdate);
             window.addEventListener('storage', handleUserUpdate);
+            window.addEventListener('sessionCreated', handleUserUpdate);
             return ({
                 "Sidebar.useEffect": ()=>{
                     window.removeEventListener('userUpdated', handleUserUpdate);
                     window.removeEventListener('storage', handleUserUpdate);
+                    window.removeEventListener('sessionCreated', handleUserUpdate);
                 }
             })["Sidebar.useEffect"];
         }
@@ -1177,6 +1219,10 @@ const Sidebar = ()=>{
     ]);
     const clampedWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
     const appliedWidth = isSidebarCollapsed ? collapsedWidth : clampedWidth;
+    // Hide sidebar if not logged in
+    if (!isLoggedIn) {
+        return null;
+    }
     // Keep the sidebar as a full-height column so the footer can sit at the bottom on tall viewports
     // Make sidebar relative so the resize handle is positioned correctly
     const sidebarClassNames = `relative flex flex-col h-screen bg-white dark:bg-gray-800 transition-all duration-300 overflow-hidden shadow-md z-40`;
@@ -1200,22 +1246,22 @@ const Sidebar = ()=>{
                             className: `${isSidebarCollapsed ? 'w-10 h-10' : 'w-full'} object-contain`
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 202,
+                            lineNumber: 223,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                        lineNumber: 201,
+                        lineNumber: 222,
                         columnNumber: 7
                     }, ("TURBOPACK compile-time value", void 0))
                 }, void 0, false, {
                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                    lineNumber: 200,
+                    lineNumber: 221,
                     columnNumber: 5
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {}, void 0, false, {
                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                    lineNumber: 207,
+                    lineNumber: 228,
                     columnNumber: 7
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1228,7 +1274,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 209,
+                            lineNumber: 230,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SectionLabel, {
@@ -1236,7 +1282,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 210,
+                            lineNumber: 231,
                             columnNumber: 7
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1246,7 +1292,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 211,
+                            lineNumber: 232,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1256,7 +1302,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 212,
+                            lineNumber: 233,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1266,7 +1312,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 213,
+                            lineNumber: 234,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SectionLabel, {
@@ -1274,7 +1320,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 214,
+                            lineNumber: 235,
                             columnNumber: 7
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1284,7 +1330,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 215,
+                            lineNumber: 236,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1294,7 +1340,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 216,
+                            lineNumber: 237,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1304,7 +1350,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 217,
+                            lineNumber: 238,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1314,7 +1360,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 218,
+                            lineNumber: 239,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1324,7 +1370,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 219,
+                            lineNumber: 240,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SectionLabel, {
@@ -1332,7 +1378,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 220,
+                            lineNumber: 241,
                             columnNumber: 5
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1342,7 +1388,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 221,
+                            lineNumber: 242,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1352,7 +1398,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 222,
+                            lineNumber: 243,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1362,7 +1408,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 223,
+                            lineNumber: 244,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1372,7 +1418,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 224,
+                            lineNumber: 245,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SectionLabel, {
@@ -1380,7 +1426,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 225,
+                            lineNumber: 246,
                             columnNumber: 7
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1390,7 +1436,7 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 226,
+                            lineNumber: 247,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(SidebarLink, {
@@ -1400,15 +1446,16 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 227,
+                            lineNumber: 248,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0))
                     ]
                 }, void 0, true, {
                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                    lineNumber: 208,
+                    lineNumber: 229,
                     columnNumber: 5
                 }, ("TURBOPACK compile-time value", void 0)),
+                console.log('Sidebar: currentUserRole =', currentUserRole, 'Should show admin?', currentUserRole === 'Admin'),
                 currentUserRole === 'Admin' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "px-2 mb-4",
                     children: [
@@ -1419,20 +1466,20 @@ const Sidebar = ()=>{
                             isCollapsed: isSidebarCollapsed
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 231,
+                            lineNumber: 254,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("hr", {
                             className: "mt-2 border-gray-300 dark:border-gray-600"
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 232,
+                            lineNumber: 255,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     ]
                 }, void 0, true, {
                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                    lineNumber: 230,
+                    lineNumber: 253,
                     columnNumber: 39
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1460,22 +1507,22 @@ const Sidebar = ()=>{
                                                         d: "M20.317 4.369A19.791 19.791 0 0 0 16.558 3c-.19.335-.41.78-.563 1.137a18.27 18.27 0 0 0-4.01 0A8.84 8.84 0 0 0 11.422 3c-1.33.242-2.63.62-3.86 1.137C4.913 6.354 3.924 8.62 4.13 12.02c1.4 1.05 2.75 1.69 4.08 2.1.33-.46.62-.95.87-1.46-.48-.18-.94-.4-1.38-.66.12-.09.24-.18.36-.28 2.64 1.23 5.49 1.23 8.09 0 .12.1.24.19.36.28-.44.26-.9.48-1.38.66.25.51.54 1 .87 1.46 1.33-.41 2.68-1.05 4.08-2.1.33-5.22-.92-7.46-2.74-7.651ZM9.68 11.21c-.79 0-1.43.72-1.43 1.6 0 .88.64 1.6 1.43 1.6.79 0 1.44-.72 1.43-1.6 0-.88-.64-1.6-1.43-1.6Zm4.64 0c-.79 0-1.43.72-1.43 1.6 0 .88.64 1.6 1.43 1.6.79 0 1.43-.72 1.43-1.6 0-.88-.64-1.6-1.43-1.6Z"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                        lineNumber: 242,
+                                                        lineNumber: 265,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                    lineNumber: 241,
+                                                    lineNumber: 264,
                                                     columnNumber: 17
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                lineNumber: 240,
+                                                lineNumber: 263,
                                                 columnNumber: 15
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 239,
+                                            lineNumber: 262,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Content"], {
@@ -1484,13 +1531,13 @@ const Sidebar = ()=>{
                                             children: "Discord"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 246,
+                                            lineNumber: 269,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                    lineNumber: 238,
+                                    lineNumber: 261,
                                     columnNumber: 11
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Root"], {
@@ -1512,22 +1559,22 @@ const Sidebar = ()=>{
                                                         d: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                        lineNumber: 252,
+                                                        lineNumber: 275,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                    lineNumber: 251,
+                                                    lineNumber: 274,
                                                     columnNumber: 17
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                lineNumber: 250,
+                                                lineNumber: 273,
                                                 columnNumber: 15
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 249,
+                                            lineNumber: 272,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Content"], {
@@ -1536,13 +1583,13 @@ const Sidebar = ()=>{
                                             children: "Facebook"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 256,
+                                            lineNumber: 279,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                    lineNumber: 248,
+                                    lineNumber: 271,
                                     columnNumber: 11
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Root"], {
@@ -1564,22 +1611,22 @@ const Sidebar = ()=>{
                                                         d: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                        lineNumber: 262,
+                                                        lineNumber: 285,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                    lineNumber: 261,
+                                                    lineNumber: 284,
                                                     columnNumber: 17
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                lineNumber: 260,
+                                                lineNumber: 283,
                                                 columnNumber: 15
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 259,
+                                            lineNumber: 282,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Content"], {
@@ -1588,13 +1635,13 @@ const Sidebar = ()=>{
                                             children: "LinkedIn"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 266,
+                                            lineNumber: 289,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                    lineNumber: 258,
+                                    lineNumber: 281,
                                     columnNumber: 11
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Root"], {
@@ -1616,22 +1663,22 @@ const Sidebar = ()=>{
                                                         d: "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                        lineNumber: 272,
+                                                        lineNumber: 295,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                    lineNumber: 271,
+                                                    lineNumber: 294,
                                                     columnNumber: 17
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                                lineNumber: 270,
+                                                lineNumber: 293,
                                                 columnNumber: 15
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 269,
+                                            lineNumber: 292,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f40$radix$2d$ui$2f$react$2d$tooltip$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Content"], {
@@ -1640,19 +1687,19 @@ const Sidebar = ()=>{
                                             children: "GitHub"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                            lineNumber: 276,
+                                            lineNumber: 299,
                                             columnNumber: 13
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                                    lineNumber: 268,
+                                    lineNumber: 291,
                                     columnNumber: 11
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 237,
+                            lineNumber: 260,
                             columnNumber: 9
                         }, ("TURBOPACK compile-time value", void 0)),
                         !isSidebarCollapsed && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1660,13 +1707,13 @@ const Sidebar = ()=>{
                             children: "© 2026 In-Accord | GARD Realms LLC"
                         }, void 0, false, {
                             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                            lineNumber: 279,
+                            lineNumber: 302,
                             columnNumber: 33
                         }, ("TURBOPACK compile-time value", void 0))
                     ]
                 }, void 0, true, {
                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                    lineNumber: 236,
+                    lineNumber: 259,
                     columnNumber: 7
                 }, ("TURBOPACK compile-time value", void 0)),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1674,22 +1721,22 @@ const Sidebar = ()=>{
                     onMouseDown: handleMouseDown
                 }, void 0, false, {
                     fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-                    lineNumber: 281,
+                    lineNumber: 304,
                     columnNumber: 7
                 }, ("TURBOPACK compile-time value", void 0))
             ]
         }, void 0, true, {
             fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-            lineNumber: 193,
+            lineNumber: 214,
             columnNumber: 5
         }, ("TURBOPACK compile-time value", void 0))
     }, void 0, false, {
         fileName: "[project]/client/src/app/(components)/Sidebar/index.tsx",
-        lineNumber: 192,
+        lineNumber: 213,
         columnNumber: 10
     }, ("TURBOPACK compile-time value", void 0));
 };
-_s1(Sidebar, "YSw9MDDRmiWJwGyLJoAKDEJFYcw=", false, function() {
+_s1(Sidebar, "xEmWFJzYjiCuA3L9GbX7EuNZZG4=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppDispatch"],
         __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"],
@@ -1717,6 +1764,7 @@ __turbopack_context__.s([
 var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/dist/compiled/react/compiler-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/node_modules/next/navigation.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/src/app/(components)/Navbar/index.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Sidebar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/src/app/(components)/Sidebar/index.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/client/src/app/redux.tsx [app-client] (ecmascript)");
@@ -1728,150 +1776,167 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-const DashboardLayout = (t0)=>{
+;
+const DashboardLayout = ({ children })=>{
     _s();
-    const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(17);
-    if ($[0] !== "d8272eb4f74825df8fca39b235ce7dd584e61b7354b1b98afc24598051b0da66") {
-        for(let $i = 0; $i < 17; $i += 1){
-            $[$i] = Symbol.for("react.memo_cache_sentinel");
-        }
-        $[0] = "d8272eb4f74825df8fca39b235ce7dd584e61b7354b1b98afc24598051b0da66";
-    }
-    const { children } = t0;
-    const isSidebarCollapsed = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])(_temp);
-    const isDarkMode = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])(_temp2);
-    const sidebarWidth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])(_temp3);
-    let t1;
-    let t2;
-    if ($[1] !== isDarkMode) {
-        t1 = ()=>{
+    const isSidebarCollapsed = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])({
+        "DashboardLayout.useAppSelector[isSidebarCollapsed]": (state)=>state.global.isSidebarCollapsed
+    }["DashboardLayout.useAppSelector[isSidebarCollapsed]"]);
+    const isDarkMode = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])({
+        "DashboardLayout.useAppSelector[isDarkMode]": (state_0)=>state_0.global.isDarkMode
+    }["DashboardLayout.useAppSelector[isDarkMode]"]);
+    const sidebarWidth = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"])({
+        "DashboardLayout.useAppSelector[sidebarWidth]": (state_1)=>state_1.global.sidebarWidth
+    }["DashboardLayout.useAppSelector[sidebarWidth]"]);
+    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "DashboardLayout.useEffect": ()=>{
             const html = document.documentElement;
             if (isDarkMode) {
                 html.classList.add("dark");
             } else {
                 html.classList.remove("dark");
             }
-            console.log("Dark mode changed to:", isDarkMode, "HTML classes:", html.classList.value);
-        };
-        t2 = [
-            isDarkMode
-        ];
-        $[1] = isDarkMode;
-        $[2] = t1;
-        $[3] = t2;
-    } else {
-        t1 = $[2];
-        t2 = $[3];
-    }
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])(t1, t2);
-    const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, 120), 320);
-    isSidebarCollapsed ? 64 : clampedSidebarWidth;
-    const t3 = isDarkMode ? "#111827" : "#f9fafb";
-    const t4 = isDarkMode ? "#f3f4f6" : "#111827";
-    let t5;
-    if ($[4] !== t3 || $[5] !== t4) {
-        t5 = {
-            backgroundColor: t3,
-            color: t4
-        };
-        $[4] = t3;
-        $[5] = t4;
-        $[6] = t5;
-    } else {
-        t5 = $[6];
-    }
-    let t6;
-    if ($[7] === Symbol.for("react.memo_cache_sentinel")) {
-        t6 = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Sidebar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-            fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-            lineNumber: 61,
-            columnNumber: 10
-        }, ("TURBOPACK compile-time value", void 0));
-        $[7] = t6;
-    } else {
-        t6 = $[7];
-    }
-    const t7 = isDarkMode ? "#111827" : "#f9fafb";
-    let t8;
-    if ($[8] !== t7) {
-        t8 = {
-            backgroundColor: t7,
-            marginLeft: 0,
-            width: "100%"
-        };
-        $[8] = t7;
-        $[9] = t8;
-    } else {
-        t8 = $[9];
-    }
-    let t9;
-    if ($[10] === Symbol.for("react.memo_cache_sentinel")) {
-        t9 = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
-            fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-            lineNumber: 81,
-            columnNumber: 10
-        }, ("TURBOPACK compile-time value", void 0));
-        $[10] = t9;
-    } else {
-        t9 = $[10];
-    }
-    let t10;
-    if ($[11] !== children || $[12] !== t8) {
-        t10 = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
-            className: "flex flex-col flex-1 h-full py-7 px-6 bg-gray-50 dark:bg-gray-900",
-            style: t8,
-            children: [
-                t9,
-                children
-            ]
-        }, void 0, true, {
-            fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-            lineNumber: 88,
-            columnNumber: 11
-        }, ("TURBOPACK compile-time value", void 0));
-        $[11] = children;
-        $[12] = t8;
-        $[13] = t10;
-    } else {
-        t10 = $[13];
-    }
-    let t11;
-    if ($[14] !== t10 || $[15] !== t5) {
-        t11 = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-            className: "flex bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 w-full min-h-screen",
-            style: t5,
-            children: [
-                t6,
-                t10
-            ]
-        }, void 0, true, {
-            fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-            lineNumber: 97,
-            columnNumber: 11
-        }, ("TURBOPACK compile-time value", void 0));
-        $[14] = t10;
-        $[15] = t5;
-        $[16] = t11;
-    } else {
-        t11 = $[16];
-    }
-    return t11;
+            console.log('Dark mode changed to:', isDarkMode, 'HTML classes:', html.classList.value);
+        }
+    }["DashboardLayout.useEffect"], [
+        isDarkMode
+    ]);
+    const minWidth = 120;
+    const maxWidth = 320;
+    const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
+    const appliedSidebarOffset = isSidebarCollapsed ? 64 : clampedSidebarWidth;
+    // Redirect to home when accessing protected routes without a logged-in user
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "DashboardLayout.useEffect": ()=>{
+            try {
+                const raw = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('currentUser') : "TURBOPACK unreachable";
+                const user = raw ? JSON.parse(raw) : null;
+                const protectedRoutes = [
+                    '/administrator',
+                    '/dashboard',
+                    '/profile',
+                    '/inventory',
+                    '/products',
+                    '/expenses',
+                    '/bots',
+                    '/servers',
+                    '/hosting',
+                    '/users'
+                ];
+                const isProtected_0 = protectedRoutes.some({
+                    "DashboardLayout.useEffect.isProtected_0": (p_0)=>pathname?.startsWith(p_0)
+                }["DashboardLayout.useEffect.isProtected_0"]);
+                if (isProtected_0 && !user) {
+                    // Use replace to avoid back button returning to protected page
+                    router.replace('/home');
+                }
+            } catch (e) {
+                // Fail-safe: if parsing fails, redirect off protected routes
+                const isProtected = [
+                    '/administrator',
+                    '/dashboard'
+                ].some({
+                    "DashboardLayout.useEffect.isProtected": (p)=>pathname?.startsWith(p)
+                }["DashboardLayout.useEffect.isProtected"]);
+                if (isProtected) router.replace('/home');
+            }
+        }
+    }["DashboardLayout.useEffect"], [
+        pathname,
+        router
+    ]);
+    // React to auth changes (login/logout) and re-evaluate guards
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "DashboardLayout.useEffect": ()=>{
+            const onAuthUpdate = {
+                "DashboardLayout.useEffect.onAuthUpdate": ()=>{
+                    try {
+                        const raw_0 = localStorage.getItem('currentUser');
+                        const user_0 = raw_0 ? JSON.parse(raw_0) : null;
+                        const protectedRoutes_0 = [
+                            '/administrator',
+                            '/dashboard'
+                        ];
+                        const isProtected_1 = protectedRoutes_0.some({
+                            "DashboardLayout.useEffect.onAuthUpdate.isProtected_1": (p_1)=>pathname?.startsWith(p_1)
+                        }["DashboardLayout.useEffect.onAuthUpdate.isProtected_1"]);
+                        if (isProtected_1 && !user_0) router.replace('/home');
+                    } catch  {}
+                }
+            }["DashboardLayout.useEffect.onAuthUpdate"];
+            window.addEventListener('userUpdated', onAuthUpdate);
+            window.addEventListener('storage', onAuthUpdate);
+            window.addEventListener('sessionCreated', onAuthUpdate);
+            return ({
+                "DashboardLayout.useEffect": ()=>{
+                    window.removeEventListener('userUpdated', onAuthUpdate);
+                    window.removeEventListener('storage', onAuthUpdate);
+                    window.removeEventListener('sessionCreated', onAuthUpdate);
+                }
+            })["DashboardLayout.useEffect"];
+        }
+    }["DashboardLayout.useEffect"], [
+        pathname,
+        router
+    ]);
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+        className: "flex bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 w-full min-h-screen",
+        style: {
+            backgroundColor: isDarkMode ? '#111827' : '#f9fafb',
+            color: isDarkMode ? '#f3f4f6' : '#111827'
+        },
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Sidebar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                fileName: "[project]/client/src/app/dashboardWrapper.tsx",
+                lineNumber: 75,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0)),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
+                className: `flex flex-col flex-1 h-full py-7 px-6 bg-gray-50 dark:bg-gray-900`,
+                style: {
+                    backgroundColor: isDarkMode ? '#111827' : '#f9fafb',
+                    marginLeft: 0,
+                    width: '100%'
+                },
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
+                        fileName: "[project]/client/src/app/dashboardWrapper.tsx",
+                        lineNumber: 81,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    children
+                ]
+            }, void 0, true, {
+                fileName: "[project]/client/src/app/dashboardWrapper.tsx",
+                lineNumber: 76,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0))
+        ]
+    }, void 0, true, {
+        fileName: "[project]/client/src/app/dashboardWrapper.tsx",
+        lineNumber: 71,
+        columnNumber: 10
+    }, ("TURBOPACK compile-time value", void 0));
 };
-_s(DashboardLayout, "IR38UMIbTXmm0LroKp/bt+QVop8=", false, function() {
+_s(DashboardLayout, "UAop8VHzDXgJs9uW7d3Mx3MaXUQ=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"],
         __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"],
-        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"]
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f$redux$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAppSelector"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"]
     ];
 });
 _c = DashboardLayout;
 const DashboardWrapper = (t0)=>{
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(3);
-    if ($[0] !== "d8272eb4f74825df8fca39b235ce7dd584e61b7354b1b98afc24598051b0da66") {
+    if ($[0] !== "368dc2eaf82fafd3e97383bd03911edbdf04142901103254dbc43c8cf2be5989") {
         for(let $i = 0; $i < 3; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "d8272eb4f74825df8fca39b235ce7dd584e61b7354b1b98afc24598051b0da66";
+        $[0] = "368dc2eaf82fafd3e97383bd03911edbdf04142901103254dbc43c8cf2be5989";
     }
     const { children } = t0;
     let t1;
@@ -1881,12 +1946,12 @@ const DashboardWrapper = (t0)=>{
                 children: children
             }, void 0, false, {
                 fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-                lineNumber: 119,
+                lineNumber: 99,
                 columnNumber: 25
             }, ("TURBOPACK compile-time value", void 0))
         }, void 0, false, {
             fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-            lineNumber: 119,
+            lineNumber: 99,
             columnNumber: 10
         }, ("TURBOPACK compile-time value", void 0));
         $[1] = children;
@@ -1898,15 +1963,6 @@ const DashboardWrapper = (t0)=>{
 };
 _c1 = DashboardWrapper;
 const __TURBOPACK__default__export__ = DashboardWrapper;
-function _temp(state) {
-    return state.global.isSidebarCollapsed;
-}
-function _temp2(state_0) {
-    return state_0.global.isDarkMode;
-}
-function _temp3(state_1) {
-    return state_1.global.sidebarWidth;
-}
 var _c, _c1;
 __turbopack_context__.k.register(_c, "DashboardLayout");
 __turbopack_context__.k.register(_c1, "DashboardWrapper");
