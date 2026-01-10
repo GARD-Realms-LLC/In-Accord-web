@@ -15,47 +15,13 @@ function readLocalUsers() {
             const raw = fs_1.default.readFileSync(dataPath, 'utf8');
             const parsed = JSON.parse(raw);
             const dataUsers = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
-            // Merge with seed users so seed metadata (name/email/username) remains available
-            try {
-                const seed = path_1.default.resolve(__dirname, '..', '..', 'prisma', 'seedData', 'users.json');
-                if (fs_1.default.existsSync(seed)) {
-                    const rawSeed = fs_1.default.readFileSync(seed, 'utf8');
-                    const seedUsers = JSON.parse(rawSeed);
-                    const map = new Map();
-                    const keyOf = (u) => (u.userId || u.id || (u.email || '').toLowerCase() || '');
-                    // put seed users first
-                    for (const s of seedUsers || [])
-                        map.set(keyOf(s), Object.assign({}, s));
-                    // overlay data users (so password and overrides persist)
-                    for (const d of dataUsers || []) {
-                        const k = keyOf(d);
-                        const existing = map.get(k) || {};
-                        map.set(k, Object.assign(Object.assign({}, existing), d));
-                    }
-                    return Array.from(map.values());
-                }
-            }
-            catch (e) {
-                // if seed read fails, just return dataUsers
-                return dataUsers;
-            }
             return dataUsers;
         }
     }
     catch (e) {
         console.warn('[Auth] readLocalUsers error', e);
     }
-    // fallback to seedData
-    try {
-        const seed = path_1.default.resolve(__dirname, '..', '..', 'prisma', 'seedData', 'users.json');
-        if (fs_1.default.existsSync(seed)) {
-            const raw = fs_1.default.readFileSync(seed, 'utf8');
-            return JSON.parse(raw);
-        }
-    }
-    catch (e) {
-        console.warn('[Auth] readSeedUsers error', e);
-    }
+    // Do not fall back to seed data: prefer real users only
     return [];
 }
 // POST /login { username }
@@ -68,6 +34,11 @@ router.post('/login', (req, res) => {
     const found = users.find((u) => {
         if (!u)
             return false;
+        // match by id/userId as a fallback for minimal user records
+        if ((u.id || '').toLowerCase() === lower)
+            return true;
+        if ((u.userId || '').toLowerCase() === lower)
+            return true;
         if ((u.username || '').toLowerCase() === lower)
             return true;
         const email = (u.email || '').toLowerCase();

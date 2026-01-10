@@ -11,13 +11,14 @@ const sessions: SessionRecord[] = [];
 
 function seedSessions() {
   try {
-    const file = path.resolve(__dirname, '..', '..', 'prisma', 'seedData', 'users.json');
+    const file = path.resolve(__dirname, '..', '..', 'data', 'users.json');
     if (!fs.existsSync(file)) return;
     const raw = fs.readFileSync(file, 'utf8');
-    const users = JSON.parse(raw) as any[];
+    const parsed = JSON.parse(raw);
+    const users = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
     // pick up to 6 random users
     const sample = users.slice(0, 10).sort(() => 0.5 - Math.random()).slice(0, 6);
-    sample.forEach((u, idx) => {
+    sample.forEach((u: any, idx: number) => {
       const id = 'sess-' + (u.userId || Math.random().toString(36).slice(2,9));
       sessions.push({ id, userId: u.userId || undefined, ip: `10.0.0.${100 + idx}`, since: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60)).toISOString(), user: { id: u.userId, name: u.name, email: u.email } });
     });

@@ -10,11 +10,12 @@ const router = (0, express_1.Router)();
 const sessions = [];
 function seedSessions() {
     try {
-        const file = path_1.default.resolve(__dirname, '..', '..', 'prisma', 'seedData', 'users.json');
+        const file = path_1.default.resolve(__dirname, '..', '..', 'data', 'users.json');
         if (!fs_1.default.existsSync(file))
             return;
         const raw = fs_1.default.readFileSync(file, 'utf8');
-        const users = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        const users = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
         // pick up to 6 random users
         const sample = users.slice(0, 10).sort(() => 0.5 - Math.random()).slice(0, 6);
         sample.forEach((u, idx) => {

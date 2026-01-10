@@ -8,7 +8,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate:seed-users": "npm --prefix server run migrate:seed-users"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

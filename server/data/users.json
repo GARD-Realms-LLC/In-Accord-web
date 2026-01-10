@@ -7,6 +7,10 @@
     {
       "id": "u1",
       "password": "sha256$e71b03240efe911287560ac85c078db77534bdbcded96298ff68ed9430e90cf3"
+    },
+    {
+      "id": "uvnm8ro7",
+      "password": "sha256$e71b03240efe911287560ac85c078db77534bdbcded96298ff68ed9430e90cf3"
     }
   ]
 }

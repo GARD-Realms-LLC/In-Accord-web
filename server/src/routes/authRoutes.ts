@@ -12,39 +12,10 @@ function readLocalUsers() {
       const raw = fs.readFileSync(dataPath, 'utf8');
       const parsed = JSON.parse(raw);
       const dataUsers = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
-      // Merge with seed users so seed metadata (name/email/username) remains available
-      try {
-        const seed = path.resolve(__dirname, '..', '..', 'prisma', 'seedData', 'users.json');
-        if (fs.existsSync(seed)) {
-          const rawSeed = fs.readFileSync(seed, 'utf8');
-          const seedUsers = JSON.parse(rawSeed) as any[];
-          const map = new Map<string, any>();
-          const keyOf = (u: any) => (u.userId || u.id || (u.email || '').toLowerCase() || '');
-          // put seed users first
-          for (const s of seedUsers || []) map.set(keyOf(s), { ...s });
-          // overlay data users (so password and overrides persist)
-          for (const d of dataUsers || []) {
-            const k = keyOf(d);
-            const existing = map.get(k) || {};
-            map.set(k, { ...existing, ...d });
-          }
-          return Array.from(map.values());
-        }
-      } catch (e) {
-        // if seed read fails, just return dataUsers
-        return dataUsers;
-      }
       return dataUsers;
     }
   } catch (e) { console.warn('[Auth] readLocalUsers error', e); }
-  // fallback to seedData
-  try {
-    const seed = path.resolve(__dirname, '..', '..', 'prisma', 'seedData', 'users.json');
-    if (fs.existsSync(seed)) {
-      const raw = fs.readFileSync(seed, 'utf8');
-      return JSON.parse(raw);
-    }
-  } catch (e) { console.warn('[Auth] readSeedUsers error', e); }
+  // Do not fall back to seed data: prefer real users only
   return [];
 }
 
@@ -56,6 +27,9 @@ router.post('/login', (req: Request, res: Response) => {
   const lower = username.toLowerCase();
   const found = users.find((u: any) => {
     if (!u) return false;
+    // match by id/userId as a fallback for minimal user records
+    if ((u.id || '').toLowerCase() === lower) return true;
+    if ((u.userId || '').toLowerCase() === lower) return true;
     if ((u.username || '').toLowerCase() === lower) return true;
     const email = (u.email || '').toLowerCase();
     // match full email (user@example.com) or local-part (user)
