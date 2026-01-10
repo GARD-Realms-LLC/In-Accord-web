@@ -109,7 +109,7 @@ router.post('/login', (req, res) => {
         // no stored password - deny login
         return res.status(403).json({ ok: false, error: 'user has no password set' });
     }
-    const user = { id: found.userId || found.id || found.id, name: found.name || found.fullName || '', email: found.email || '', username: (found.username || (found.email ? found.email.split('@')[0] : '')) };
+    const user = { id: found.userId || found.id || found.id, userId: found.userId || found.id, name: found.name || found.fullName || '', email: found.email || '', username: (found.username || (found.email ? found.email.split('@')[0] : '')), role: found.role || 'User', avatarUrl: found.avatarUrl || found.avatar };
     return res.json({ ok: true, user });
 });
 // POST /logout { sessionId }

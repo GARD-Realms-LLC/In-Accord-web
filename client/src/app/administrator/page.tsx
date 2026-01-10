@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 // Minimal MD5 for Gravatar (lightweight implementation)
@@ -329,6 +330,49 @@ const initialUsers: User[] = [
 ];
 
 const Administrator = (props: Props) => {
+    const router = useRouter();
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+    // Check if user has Admin role
+    useEffect(() => {
+      try {
+        const raw = localStorage.getItem('currentUser');
+        if (!raw) {
+          setIsAuthorized(false);
+          return;
+        }
+        const user = JSON.parse(raw);
+        if (user.role === 'Admin') {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
+        }
+      } catch {
+        setIsAuthorized(false);
+      }
+    }, []);
+
+    // Redirect non-admin users
+    useEffect(() => {
+      if (isAuthorized === false) {
+        router.push('/home');
+      }
+    }, [isAuthorized, router]);
+
+    // Show loading while checking authorization
+    if (isAuthorized === null) {
+      return (
+        <div className="p-8">
+          <div className="text-center">Checking authorization...</div>
+        </div>
+      );
+    }
+
+    // Don't render anything if not authorized (will redirect)
+    if (!isAuthorized) {
+      return null;
+    }
+
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
       {
         name: "Doc Cowles - DocRST",

@@ -17,7 +17,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
       );
 
   // Simple local auth state for UI (persisted to localStorage)
-  const [currentUser, setCurrentUser] = useState<{ id?: string; userId?: string; name?: string; email?: string; username?: string; avatar?: string } | null>(() => {
+  const [currentUser, setCurrentUser] = useState<{ id?: string; userId?: string; name?: string; email?: string; username?: string; role?: string; avatar?: string } | null>(() => {
     try {
       if (typeof window === 'undefined') return null;
       const raw = localStorage.getItem('currentUser');
@@ -84,6 +84,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
       }
       const j = await res.json();
       const user = j.user || { name: name, username: name };
+      console.log('Login response user:', user);
+      console.log('User role from backend:', user.role);
+      
       try {
         const sres = await fetch(`${API_BASE}/api/admin/sessions/create`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user }) });
         const sjson = await sres.json().catch(() => ({}));
@@ -91,10 +94,35 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
           try { localStorage.setItem('sessionId', sjson.session.id); } catch {}
         }
       } catch (e) { console.warn('Failed to create session', e); }
+      
+      const fullUser = { 
+        id: user.id || user.userId, 
+        userId: user.id || user.userId, 
+        name: user.name || name, 
+        username: user.username || name, 
+        email: user.email, 
+        role: user.role || 'User', 
+        avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` 
+      };
+      
+      console.log('Setting currentUser:', fullUser);
+      setCurrentUser(fullUser);
+      
+      // Save to localStorage immediately and notify
+      try {
+        localStorage.setItem('currentUser', JSON.stringify(fullUser));
+        console.log('Saved to localStorage:', fullUser);
+      } catch (e) {
+        console.error('Failed to save to localStorage', e);
+      }
+      
       // notify other parts of the app that a session was created
-      try { window.dispatchEvent(new CustomEvent('sessionCreated', { detail: { user, sessionId: typeof window !== 'undefined' ? localStorage.getItem('sessionId') : null } })); } catch {}
-      setCurrentUser({ id: user.id || user.userId, userId: user.id || user.userId, name: user.name || name, username: user.username || name, email: user.email, avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` });
-      return { ok: true, user };
+      try { 
+        window.dispatchEvent(new CustomEvent('sessionCreated', { detail: { user: fullUser, sessionId: typeof window !== 'undefined' ? localStorage.getItem('sessionId') : null } })); 
+        window.dispatchEvent(new Event('userUpdated'));
+      } catch {}
+      
+      return { ok: true, user: fullUser };
     } catch (e) {
       console.error('Login error', e);
       // If backend is not reachable, provide a helpful error message

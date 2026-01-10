@@ -268,6 +268,7 @@ const Profile = () => {
           name: formData.name,
           email: formData.email,
           username: formData.username,
+          role: formData.role,
           avatar: avatarToUse,
         };
         window.localStorage.setItem('currentUser', JSON.stringify(updatedUser));

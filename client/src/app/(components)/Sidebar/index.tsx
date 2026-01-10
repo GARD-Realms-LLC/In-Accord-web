@@ -83,6 +83,44 @@ const Sidebar = () => {
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
   const sidebarWidth = useAppSelector((state) => state.global.sidebarWidth);
 
+  const [currentUserRole, setCurrentUserRole] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (raw) {
+        const user = JSON.parse(raw);
+        console.log('Sidebar: User loaded from localStorage:', user);
+        console.log('Sidebar: User role:', user.role);
+        setCurrentUserRole(user.role || null);
+      }
+    } catch {}
+
+    const handleUserUpdate = () => {
+      try {
+        const raw = localStorage.getItem('currentUser');
+        if (raw) {
+          const user = JSON.parse(raw);
+          console.log('Sidebar: User updated:', user);
+          console.log('Sidebar: Updated role:', user.role);
+          setCurrentUserRole(user.role || null);
+        } else {
+          setCurrentUserRole(null);
+        }
+      } catch {}
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+    window.addEventListener('storage', handleUserUpdate);
+    window.addEventListener('sessionCreated', handleUserUpdate);
+
+    return () => {
+      window.removeEventListener('userUpdated', handleUserUpdate);
+      window.removeEventListener('storage', handleUserUpdate);
+      window.removeEventListener('sessionCreated', handleUserUpdate);
+    };
+  }, []);
+
   const discordUrl = process.env.NEXT_PUBLIC_DISCORD_URL || 'https://discord.gg/your-server';
   const facebookUrl = process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://facebook.com/your-page';
   const linkedinUrl = process.env.NEXT_PUBLIC_LINKEDIN_URL || 'https://linkedin.com/company/your-company';
@@ -280,15 +318,19 @@ const Sidebar = () => {
       />
       </div>
 
-      <div className="px-2 mb-4">
-        <SidebarLink 
-          href="/administrator" 
-          icon={StarsIcon}
-          label="Admin" 
-          isCollapsed={isSidebarCollapsed} 
-        />
-        <hr className="mt-2 border-gray-300 dark:border-gray-600" />
-      </div>
+      {/* Debug: Show current role */}
+      {console.log('Sidebar: currentUserRole =', currentUserRole, 'Should show admin?', currentUserRole === 'Admin')}
+      {currentUserRole === 'Admin' && (
+        <div className="px-2 mb-4">
+          <SidebarLink 
+            href="/administrator" 
+            icon={StarsIcon}
+            label="Admin" 
+            isCollapsed={isSidebarCollapsed} 
+          />
+          <hr className="mt-2 border-gray-300 dark:border-gray-600" />
+        </div>
+      )}
 
      {/* Bottom Section: Social icons and footer */}
       <div className="mt-auto mb-4 px-2">
