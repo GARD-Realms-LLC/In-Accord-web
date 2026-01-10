@@ -207,13 +207,36 @@ const Profile = () => {
         return;
       }
 
+      // Upload avatar first when it's a new data URL so the profile save only stores a URL
+      let avatarToUse = avatarUrl;
+      if (avatarUrl && avatarUrl.startsWith('data:')) {
+        const avatarRes = await fetch(`${API_BASE}/api/admin/users/avatar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: userId, dataUrl: avatarUrl }),
+        });
+
+        if (!avatarRes.ok) {
+          const errorData = await avatarRes.json().catch(() => ({}));
+          console.error('Failed to upload avatar:', avatarRes.status, errorData);
+          setMessage(`Failed to upload avatar: ${errorData.error || avatarRes.statusText}`);
+          return;
+        }
+
+        const avatarData = await avatarRes.json();
+        avatarToUse = avatarData.url || avatarUrl;
+        setAvatarUrl(avatarToUse);
+        setFormData(prev => ({ ...prev, avatarUrl: avatarToUse }));
+      }
+
       // Send updated profile to server
       const response = await fetch(`${API_BASE}/api/admin/users/upsert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           user: { 
-            ...formData, 
+            ...formData,
+            avatarUrl: avatarToUse,
             id: userId, 
             userId,
             ...(password && { password })
@@ -234,7 +257,7 @@ const Profile = () => {
           name: formData.name,
           email: formData.email,
           username: formData.username,
-          avatar: avatarUrl,
+          avatar: avatarToUse,
         };
         window.localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       } else {

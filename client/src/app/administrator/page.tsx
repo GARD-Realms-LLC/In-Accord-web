@@ -1376,6 +1376,51 @@ const Administrator = (props: Props) => {
             Manage system users, permissions, and access control. View user activity, reset passwords, and configure role-based access levels.
           </p>
 
+          {/* Online Users panel (top of users list) - always visible, shows empty state when none online */}
+          <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+              <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">Online Users ({onlineUsers.length})</div>
+              <div className="flex gap-2">
+                <button onClick={refreshOnlineUsers} disabled={refreshingOnline} className={refreshingOnline ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
+                  {refreshingOnline ? 'Refreshing...' : 'Refresh'}
+                </button>
+                <button
+                  onClick={bootAllSessions}
+                  disabled={onlineUsers.length === 0}
+                  aria-disabled={onlineUsers.length === 0}
+                  className={onlineUsers.length === 0 ? 'px-3 py-1 bg-gray-300 text-gray-600 text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded'}
+                >
+                  Boot All
+                </button>
+              </div>
+            </div>
+
+            {onlineUsers.length === 0 ? (
+              <div className="text-sm text-gray-600">No users are currently online.</div>
+            ) : (
+              // Render online users in a responsive grid: 4 per row, unlimited rows, fixed height with custom scrollbar
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 h-56 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
+                {onlineUsers.map(s => (
+                  <div key={s.id} className="flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2">
+                    <img
+                      src={s.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name))}
+                      alt=""
+                      className="w-10 h-10 rounded-full object-cover"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name); }}
+                    />
+                    <div className="text-sm flex-1">
+                      <div className="font-medium">{s.name} <span className="text-xs text-gray-500">({s.username})</span></div>
+                      <div className="text-xs text-gray-500">IP: {s.ip} • since {new Date(s.since).toLocaleTimeString()}</div>
+                    </div>
+                    <div>
+                      <button onClick={() => bootSession(s.id)} className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded">Boot</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Users</h3>
@@ -1492,51 +1537,6 @@ const Administrator = (props: Props) => {
                 </div>
               </div>
             )}
-
-            {/* Online Users panel (top of users list) - always visible, shows empty state when none online */}
-            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-                <div className="flex items-center justify-between mb-3">
-                <div className="font-semibold">Online Users ({onlineUsers.length})</div>
-                <div className="flex gap-2">
-                  <button onClick={refreshOnlineUsers} disabled={refreshingOnline} className={refreshingOnline ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
-                    {refreshingOnline ? 'Refreshing...' : 'Refresh'}
-                  </button>
-                  <button
-                    onClick={bootAllSessions}
-                    disabled={onlineUsers.length === 0}
-                    aria-disabled={onlineUsers.length === 0}
-                    className={onlineUsers.length === 0 ? 'px-3 py-1 bg-gray-300 text-gray-600 text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded'}
-                  >
-                    Boot All
-                  </button>
-                </div>
-              </div>
-
-              {onlineUsers.length === 0 ? (
-                <div className="text-sm text-gray-600">No users are currently online.</div>
-              ) : (
-                // Render online users in a responsive grid: 4 per row, unlimited rows, fixed height with custom scrollbar
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 h-56 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
-                  {onlineUsers.map(s => (
-                    <div key={s.id} className="flex items-center gap-3 bg-white dark:bg-gray-800 border rounded px-3 py-2">
-                      <img
-                        src={s.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name))}
-                        alt=""
-                        className="w-10 h-10 rounded-full object-cover"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name); }}
-                      />
-                      <div className="text-sm flex-1">
-                        <div className="font-medium">{s.name} <span className="text-xs text-gray-500">({s.username})</span></div>
-                        <div className="text-xs text-gray-500">IP: {s.ip} • since {new Date(s.since).toLocaleTimeString()}</div>
-                      </div>
-                      <div>
-                        <button onClick={() => bootSession(s.id)} className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded">Boot</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
             <div className="overflow-x-auto">
               <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
