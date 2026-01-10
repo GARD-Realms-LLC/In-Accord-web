@@ -1417,6 +1417,17 @@ const Administrator = (props: Props) => {
 
     const [backupErrorModal, setBackupErrorModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
 
+    const [backupSettings, setBackupSettings] = useState({
+      localBackupPath: 'E:\\In-Accord-web\\backups',
+      r2AccountId: '',
+      r2ApiToken: '',
+      r2Bucket: '',
+      r2Prefix: 'In-Accord Backups',
+    });
+
+    const [backupSettingsEditing, setBackupSettingsEditing] = useState(false);
+    const [backupSettingsTempValues, setBackupSettingsTempValues] = useState(backupSettings);
+
     const [redundancyStatus, setRedundancyStatus] = useState({
       local: 'Active',
       r2: 'Synced',
@@ -1505,6 +1516,19 @@ const Administrator = (props: Props) => {
         backupProgressTimer.current = null;
       }
 
+      const needsCloud = backupStorageLocation === 'cloud' || backupStorageLocation === 'both';
+      if (needsCloud) {
+        const missingFields = [] as string[];
+        if (!backupSettings.r2AccountId.trim()) missingFields.push('R2 Account ID');
+        if (!backupSettings.r2ApiToken.trim()) missingFields.push('R2 API Token');
+        if (!backupSettings.r2Bucket.trim()) missingFields.push('R2 Bucket');
+        if (missingFields.length) {
+          const msg = `Cloud backup requires: ${missingFields.join(', ')}. Update Backup Settings first.`;
+          setBackupErrorModal({ open: true, message: msg });
+          return;
+        }
+      }
+
       const now = new Date();
       const timestamp = now.toLocaleString('en-US', { 
         year: 'numeric', 
@@ -1550,10 +1574,24 @@ const Administrator = (props: Props) => {
       }, 15000);
 
       try {
+        const payload: any = {
+          location: backupStorageLocation,
+          localPath: backupSettings.localBackupPath,
+        };
+
+        if (needsCloud) {
+          payload.r2Config = {
+            accountId: backupSettings.r2AccountId,
+            apiToken: backupSettings.r2ApiToken,
+            bucket: backupSettings.r2Bucket,
+            prefix: backupSettings.r2Prefix,
+          };
+        }
+
         const res = await fetch(`${API_BASE}/api/backup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ location: backupStorageLocation }),
+          body: JSON.stringify(payload),
         });
 
         // Clear the timeout since we got a response
@@ -2955,7 +2993,7 @@ const Administrator = (props: Props) => {
                     <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">Cloudflare R2</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">inaccord/In-Accord Backups</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{backupSettings.r2Bucket ? `${backupSettings.r2Bucket}${backupSettings.r2Prefix ? `/${backupSettings.r2Prefix}` : ''}` : 'Not configured'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -3021,11 +3059,134 @@ const Administrator = (props: Props) => {
                 </div>
                 <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    All critical data is backed up to local storage and <a href="https://dash.cloudflare.com/e6170abf1613b7f0d6f016cda0f7fcf4/r2/default/buckets/inaccord?prefix=In-Accord+Backups%2F" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline">Cloudflare R2</a>. Database schema and migrations are version controlled in the GitHub repository (GARD-Realms-LLC/In-Accord-web).
+                    All critical data is backed up to local storage and Cloudflare R2 (bucket: {backupSettings.r2Bucket || 'not configured'}{backupSettings.r2Prefix ? `/${backupSettings.r2Prefix}` : ''}). Database schema and migrations are version controlled in the GitHub repository (GARD-Realms-LLC/In-Accord-web).
                   </p>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Backup & Recovery Settings */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Backup Settings</h3>
+              <button
+                onClick={() => {
+                  setBackupSettingsEditing(!backupSettingsEditing);
+                  if (!backupSettingsEditing) {
+                    setBackupSettingsTempValues(backupSettings);
+                  }
+                }}
+                className="px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              >
+                {backupSettingsEditing ? 'Done' : 'Edit'}
+              </button>
+            </div>
+
+            {!backupSettingsEditing ? (
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Local Backup Path</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.localBackupPath}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">R2 Account ID</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2AccountId || 'Not set'}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">R2 Bucket / Prefix</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2Bucket ? `${backupSettings.r2Bucket}${backupSettings.r2Prefix ? `/${backupSettings.r2Prefix}` : ''}` : 'Not set'}</p>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">R2 API Token</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? '•••••••• (stored for this session)' : 'Not set'}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Local Backup Path</label>
+                  <input
+                    type="text"
+                    value={backupSettingsTempValues.localBackupPath}
+                    onChange={e => setBackupSettingsTempValues(prev => ({ ...prev, localBackupPath: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="E:\In-Accord-web\backups"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Path where local backups will be stored</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">R2 Account ID</label>
+                  <input
+                    type="text"
+                    value={backupSettingsTempValues.r2AccountId}
+                    onChange={e => setBackupSettingsTempValues(prev => ({ ...prev, r2AccountId: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="e.g., e6170abf1613b7f0d6f016cda0f7fcf4"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Find this in Cloudflare &gt; R2 &gt; Settings.</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">R2 API Token</label>
+                  <input
+                    type="password"
+                    value={backupSettingsTempValues.r2ApiToken}
+                    onChange={e => setBackupSettingsTempValues(prev => ({ ...prev, r2ApiToken: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    placeholder="Paste the Bearer token"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Use a Cloudflare API token with R2 object write access.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">R2 Bucket</label>
+                    <input
+                      type="text"
+                      value={backupSettingsTempValues.r2Bucket}
+                      onChange={e => setBackupSettingsTempValues(prev => ({ ...prev, r2Bucket: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                      placeholder="e.g., inaccord"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Bucket name only (no slashes).</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">R2 Prefix (folder)</label>
+                    <input
+                      type="text"
+                      value={backupSettingsTempValues.r2Prefix}
+                      onChange={e => setBackupSettingsTempValues(prev => ({ ...prev, r2Prefix: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                      placeholder="e.g., In-Accord Backups"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional folder/prefix inside the bucket.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <button
+                    onClick={() => {
+                      setBackupSettings(backupSettingsTempValues);
+                      setBackupSettingsEditing(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm"
+                  >
+                    Save Settings
+                  </button>
+                  <button
+                    onClick={() => {
+                      setBackupSettingsTempValues(backupSettings);
+                      setBackupSettingsEditing(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg font-medium text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

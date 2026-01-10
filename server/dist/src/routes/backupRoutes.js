@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const https_1 = __importDefault(require("https"));
 const router = (0, express_1.Router)();
 // __dirname when this file runs is server/src/routes
 // So: __dirname/../../.. = server/src/routes/../../.. = root/
@@ -22,16 +23,16 @@ const repoRoot = path_1.default.resolve(__dirname, '..', '..', '..');
 const backupDir = path_1.default.join(repoRoot, 'backups');
 console.log('[backup] init: repoRoot =', repoRoot);
 console.log('[backup] init: backupDir =', backupDir);
-function ensureBackupDir() {
+function ensureBackupDir(dir) {
     try {
-        if (!fs_1.default.existsSync(backupDir)) {
-            console.log('[backup] creating backupDir:', backupDir);
-            fs_1.default.mkdirSync(backupDir, { recursive: true });
+        if (!fs_1.default.existsSync(dir)) {
+            console.log('[backup] creating backupDir:', dir);
+            fs_1.default.mkdirSync(dir, { recursive: true });
             console.log('[backup] backupDir created successfully');
         }
     }
     catch (err) {
-        console.error('[backup] failed to create backupDir:', backupDir, err);
+        console.error('[backup] failed to create backupDir:', dir, err);
         throw err;
     }
 }
@@ -48,8 +49,8 @@ function safeReadJson(filePath) {
     }
 }
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    const { location } = req.body;
+    var _a, _b, _c, _d, _e, _f;
+    const { location, localPath, r2Config } = req.body;
     const loc = location || 'local';
     if (!['local', 'cloud', 'both'].includes(loc)) {
         return res.status(400).json({ ok: false, error: 'invalid location' });
@@ -58,11 +59,12 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log('[backup] start request', { loc });
         console.log('[backup] repoRoot resolved to:', repoRoot);
         console.log('[backup] backupDir resolved to:', backupDir);
-        ensureBackupDir();
+        const targetDir = (localPath && localPath.trim()) ? localPath.trim() : backupDir;
+        ensureBackupDir(targetDir);
         const timestamp = new Date();
         const stamp = timestamp.toISOString().replace(/[^0-9]/g, '').slice(0, 14); // YYYYMMDDhhmmss
         const fileName = `backup-${stamp}-${loc}.json`;
-        const filePath = path_1.default.join(backupDir, fileName);
+        const filePath = path_1.default.join(targetDir, fileName);
         console.log('[backup] writing to:', filePath);
         const users = safeReadJson(path_1.default.join(repoRoot, 'server', 'data', 'users.json'));
         const sessions = safeReadJson(path_1.default.join(repoRoot, 'server', 'data', 'sessions.json'));
@@ -92,12 +94,70 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const sizeBytes = Buffer.byteLength(json, 'utf8');
         console.log('[backup] saved', { filePath, sizeBytes, statSize: stat === null || stat === void 0 ? void 0 : stat.size, fileExists: exists });
+        let detail = `Saved backup locally: ${filePath} (${(sizeBytes / (1024 * 1024)).toFixed(2)} MB)`;
+        let r2Uploaded = false;
+        if (loc === 'cloud' || loc === 'both') {
+            const rawAccountId = ((_c = r2Config === null || r2Config === void 0 ? void 0 : r2Config.accountId) === null || _c === void 0 ? void 0 : _c.trim()) || '';
+            const rawBucket = ((_d = r2Config === null || r2Config === void 0 ? void 0 : r2Config.bucket) === null || _d === void 0 ? void 0 : _d.trim()) || '';
+            const apiToken = (_e = r2Config === null || r2Config === void 0 ? void 0 : r2Config.apiToken) === null || _e === void 0 ? void 0 : _e.trim();
+            const userPrefix = (_f = r2Config === null || r2Config === void 0 ? void 0 : r2Config.prefix) === null || _f === void 0 ? void 0 : _f.trim();
+            // Extract bare account ID if user pasted a URL (e.g., dash.cloudflare.com/.../accounts/<id>/...)
+            const accountMatch = rawAccountId.match(/[a-f0-9]{32}/i);
+            const accountId = accountMatch ? accountMatch[0] : rawAccountId;
+            // If bucket contains slashes, treat the first segment as bucket name and the rest as implied prefix
+            const bucketSegments = rawBucket.split(/[\\/]+/).filter(Boolean);
+            const bucket = bucketSegments[0];
+            const bucketPrefix = bucketSegments.slice(1).join('/') || '';
+            // Combine implicit prefix from bucket path with explicit prefix field
+            const combinedPrefix = [bucketPrefix, userPrefix].filter(Boolean).join('/');
+            const normalizedPrefix = combinedPrefix.replace(/^\/+|\/+$/g, '');
+            if (!accountId || !apiToken || !bucket) {
+                throw new Error('Cloud backup requested but R2 configuration is incomplete (need accountId, apiToken, bucket)');
+            }
+            const objectKey = normalizedPrefix ? `${normalizedPrefix}/${fileName}` : fileName;
+            const encodedKey = objectKey.split('/').map(part => encodeURIComponent(part)).join('/');
+            const options = {
+                method: 'PUT',
+                hostname: 'api.cloudflare.com',
+                path: `/client/v4/accounts/${encodeURIComponent(accountId)}/r2/buckets/${encodeURIComponent(bucket)}/objects/${encodedKey}`,
+                headers: {
+                    'Authorization': `Bearer ${apiToken}`,
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(json, 'utf8'),
+                },
+            };
+            console.log('[backup] uploading to R2', { bucket, objectKey, path: options.path });
+            yield new Promise((resolve, reject) => {
+                const uploadReq = https_1.default.request(options, (uploadRes) => {
+                    let body = '';
+                    uploadRes.on('data', (chunk) => { body += chunk; });
+                    uploadRes.on('end', () => {
+                        if (uploadRes.statusCode && uploadRes.statusCode >= 200 && uploadRes.statusCode < 300) {
+                            console.log('[backup] R2 upload success', { statusCode: uploadRes.statusCode });
+                            return resolve();
+                        }
+                        const errMsg = `[backup] R2 upload failed (${uploadRes.statusCode}): ${body || uploadRes.statusMessage}`;
+                        console.error(errMsg);
+                        return reject(new Error(errMsg));
+                    });
+                });
+                uploadReq.on('error', (uploadErr) => {
+                    console.error('[backup] R2 upload network error', uploadErr);
+                    reject(uploadErr);
+                });
+                uploadReq.write(json);
+                uploadReq.end();
+            });
+            r2Uploaded = true;
+            detail = `${detail} + uploaded to R2: ${bucket}/${objectKey}`;
+        }
         return res.json({
             ok: true,
             fileName,
             filePath,
             sizeBytes,
-            detail: `Saved backup to ${loc}: ${filePath} (${(sizeBytes / (1024 * 1024)).toFixed(2)} MB)`,
+            r2Uploaded,
+            detail,
         });
     }
     catch (err) {
