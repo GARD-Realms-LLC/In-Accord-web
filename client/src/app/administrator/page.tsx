@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -1404,8 +1404,107 @@ const Administrator = (props: Props) => {
       }
     ]);
 
+    const [backupStorageLocation, setBackupStorageLocation] = useState<'local' | 'cloud' | 'both'>('local');
+
+    const storageLabel = backupStorageLocation === 'local'
+      ? 'Local storage'
+      : backupStorageLocation === 'cloud'
+        ? 'Cloudflare R2'
+        : 'Local + Cloud';
+
+    const [backupProgress, setBackupProgress] = useState<{ visible: boolean; percent: number; detail: string }>({ visible: false, percent: 0, detail: '' });
+    const backupProgressTimer = useRef<number | null>(null);
+
+    const [backupErrorModal, setBackupErrorModal] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
+
+    const [redundancyStatus, setRedundancyStatus] = useState({
+      local: 'Active',
+      r2: 'Synced',
+      schema: 'Git Tracked',
+      team: 'Protected',
+    });
+
+    const redundancyBadgeClass = (status: string) => {
+      const s = status.toLowerCase();
+      if (['active', 'synced', 'protected', 'git tracked'].some(x => s.includes(x))) return 'text-xs text-green-600 dark:text-green-400 font-medium';
+      if (['degraded', 'warn', 'warning'].some(x => s.includes(x))) return 'text-xs text-yellow-600 dark:text-yellow-400 font-medium';
+      return 'text-xs text-red-600 dark:text-red-400 font-medium';
+    };
+
+    interface StorageItem {
+      key: string;
+      bytes: number;
+      preview: string;
+    }
+
+    const [storageManagerOpen, setStorageManagerOpen] = useState(false);
+    const [storageItems, setStorageItems] = useState<StorageItem[]>([]);
+    const [storageBytes, setStorageBytes] = useState(0);
+    const [storageMessage, setStorageMessage] = useState<string | null>(null);
+
+    const formatBytesToMB = (bytes: number) => Math.round((bytes / (1024 * 1024)) * 10) / 10;
+
+    const refreshLocalStorageSnapshot = () => {
+      if (typeof window === 'undefined') {
+        setStorageMessage('Storage is available only in the browser.');
+        return;
+      }
+      try {
+        const encoder = new TextEncoder();
+        const items: StorageItem[] = [];
+        let total = 0;
+
+        for (let i = 0; i < window.localStorage.length; i += 1) {
+          const key = window.localStorage.key(i);
+          if (!key) continue;
+          const value = window.localStorage.getItem(key) ?? '';
+          const bytes = encoder.encode(value).length + encoder.encode(key).length;
+          total += bytes;
+          items.push({
+            key,
+            bytes,
+            preview: value.length > 160 ? `${value.slice(0, 160)}...` : value || '""',
+          });
+        }
+
+        items.sort((a, b) => b.bytes - a.bytes);
+        setStorageItems(items);
+        setStorageBytes(total);
+        setStorageMessage(items.length === 0 ? 'No localStorage entries found.' : null);
+      } catch (err) {
+        console.warn('Failed to read localStorage', err);
+        setStorageMessage('Unable to read localStorage. Browser may be blocking access.');
+      }
+    };
+
+    const openStorageManager = () => {
+      setStorageManagerOpen(true);
+      refreshLocalStorageSnapshot();
+    };
+
+    const closeStorageManager = () => setStorageManagerOpen(false);
+
+    const removeStorageKey = (key: string) => {
+      if (typeof window === 'undefined') return;
+      if (!confirm(`Delete "${key}" from localStorage?`)) return;
+      window.localStorage.removeItem(key);
+      refreshLocalStorageSnapshot();
+    };
+
+    const clearLocalStorage = () => {
+      if (typeof window === 'undefined') return;
+      if (!confirm('Clear all localStorage items for this site?')) return;
+      window.localStorage.clear();
+      refreshLocalStorageSnapshot();
+    };
+
     // Run backup immediately
-    const runBackup = () => {
+    const runBackup = async () => {
+      if (backupProgressTimer.current) {
+        clearInterval(backupProgressTimer.current);
+        backupProgressTimer.current = null;
+      }
+
       const now = new Date();
       const timestamp = now.toLocaleString('en-US', { 
         year: 'numeric', 
@@ -1423,14 +1522,41 @@ const Administrator = (props: Props) => {
         user: 'System',
         page: 'Backup & Recovery',
         action: 'Backup Started',
-        details: 'Starting full backup (DB + Files) to Local + Cloud storage',
+        details: `Starting full backup (DB + Files) to ${storageLabel}`,
         status: 'In Progress'
       };
 
-      setBackupLogs([inProgressLog, ...backupLogs]);
+      setBackupLogs(prev => [inProgressLog, ...prev]);
 
-      // Simulate backup completion after 3 seconds
-      setTimeout(() => {
+      setBackupProgress({ visible: true, percent: 15, detail: `Preparing backup to ${storageLabel}...` });
+
+      const startedAt = Date.now();
+      const durationMs = 3000;
+      backupProgressTimer.current = window.setInterval(() => {
+        const elapsed = Date.now() - startedAt;
+        const pct = Math.min(95, Math.round((elapsed / durationMs) * 100));
+        setBackupProgress(prev => ({ ...prev, percent: pct }));
+        if (elapsed >= durationMs) {
+          if (backupProgressTimer.current) {
+            clearInterval(backupProgressTimer.current);
+            backupProgressTimer.current = null;
+          }
+        }
+      }, 150);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/backup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ location: backupStorageLocation }),
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`Backup failed (${res.status}) ${text}`);
+        }
+        const data = await res.json();
+
         const completionTime = new Date();
         const completionTimestamp = completionTime.toLocaleString('en-US', { 
           year: 'numeric', 
@@ -1447,19 +1573,50 @@ const Administrator = (props: Props) => {
           user: 'System',
           page: 'Backup & Recovery',
           action: 'Backup Completed',
-          details: 'Full backup (DB + Files) 492 MB to Local + Cloud',
+          details: data?.detail || `Full backup written to ${storageLabel}`,
           status: 'Success'
         };
 
         setBackupLogs(prevLogs => {
           const updatedLogs = [...prevLogs];
-          // Remove the "In Progress" entry and add the completed one
-          updatedLogs.shift();
+          const idx = updatedLogs.findIndex(l => l.action === 'Backup Started');
+          if (idx >= 0) updatedLogs.splice(idx, 1);
           return [completedLog, ...updatedLogs];
         });
 
-        alert('Backup completed successfully! 492 MB backed up to local storage and Cloudflare R2.');
-      }, 3000);
+        if (backupProgressTimer.current) {
+          clearInterval(backupProgressTimer.current);
+          backupProgressTimer.current = null;
+        }
+        setBackupProgress({ visible: true, percent: 100, detail: data?.detail || `Backup completed successfully to ${storageLabel}.` });
+        setTimeout(() => setBackupProgress(prev => ({ ...prev, visible: false })), 3200);
+        alert(data?.detail ? `Backup completed: ${data.detail}` : `Backup completed successfully!`);
+      } catch (err: any) {
+        console.warn('Backup failed', err);
+        if (backupProgressTimer.current) {
+          clearInterval(backupProgressTimer.current);
+          backupProgressTimer.current = null;
+        }
+        const msg = err?.message || 'Backup failed. Check server logs.';
+        setBackupProgress({ visible: true, percent: 0, detail: msg });
+        setTimeout(() => setBackupProgress(prev => ({ ...prev, visible: false })), 2500);
+        setBackupErrorModal({ open: true, message: msg });
+        setBackupLogs(prevLogs => {
+          const updatedLogs = [...prevLogs];
+          const idx = updatedLogs.findIndex(l => l.action === 'Backup Started');
+          if (idx >= 0) updatedLogs.splice(idx, 1);
+          const failureLog: BackupLog = {
+            timestamp,
+            user: 'System',
+            page: 'Backup & Recovery',
+            action: 'Backup Failed',
+            details: msg,
+            status: 'Failed'
+          };
+          return [failureLog, ...updatedLogs];
+        });
+        alert(msg);
+      }
     };
 
 /* Backup Code */
@@ -1583,6 +1740,36 @@ const Administrator = (props: Props) => {
         {toastVisible && (
           <div className="fixed right-4 bottom-4 z-50">
             <div className="px-4 py-2 bg-gray-900 text-white rounded shadow">{toastMessage}</div>
+          </div>
+        )}
+
+        {backupProgress.visible && (
+          <div className="fixed right-4 bottom-20 z-50 w-80 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+            <div className="flex items-center justify-between mb-1">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">Backup in progress</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">{backupProgress.percent}%</div>
+            </div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">{backupProgress.detail}</div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div className="bg-green-600 h-2 rounded-full transition-all" style={{ width: `${backupProgress.percent}%` }}></div>
+            </div>
+          </div>
+        )}
+
+        {backupErrorModal.open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Backup Failed</h3>
+                <button onClick={() => setBackupErrorModal({ open: false, message: '' })} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded">Close</button>
+              </div>
+              <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/40 rounded p-3 mb-4">
+                {backupErrorModal.message || 'No error details returned.'}
+              </div>
+              <div className="flex justify-end">
+                <button onClick={() => setBackupErrorModal({ open: false, message: '' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">OK</button>
+              </div>
+            </div>
           </div>
         )}
         {/* Section 1 */}
@@ -2039,125 +2226,121 @@ const Administrator = (props: Props) => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Application Name</label>
                 <input value={systemConfig.appName} onChange={e => setSystemConfig(prev => ({ ...prev, appName: e.target.value }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" />
-
-                <div className="mt-4 flex items-center gap-3">
-                  <label className="flex items-center gap-2">
+                <div className="mt-4 space-y-4">
+                  <label className="flex items-center gap-3">
                     <input type="checkbox" checked={systemConfig.maintenanceMode} onChange={e => setSystemConfig(prev => ({ ...prev, maintenanceMode: e.target.checked }))} />
-                    <span className="text-sm text-gray-700 dark:text-gray-200">Maintenance Mode</span>
+                    <div>
+                      <div className="font-medium text-sm">Maintenance Mode</div>
+                      <div className="text-xs text-gray-500">Serve a maintenance banner and limit access to admins.</div>
+                    </div>
                   </label>
-                  <span className="text-xs text-gray-500">When enabled, non-admin access is limited.</span>
-                </div>
 
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Logging Level</label>
-                  <select value={systemConfig.loggingLevel} onChange={e => setSystemConfig(prev => ({ ...prev, loggingLevel: e.target.value }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
-                    <option value="debug">Debug</option>
-                    <option value="info">Info</option>
-                    <option value="warn">Warn</option>
-                    <option value="error">Error</option>
-                  </select>
-                </div>
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Allowed Origins (one per line)</label>
-                  <textarea value={systemConfig.allowedOrigins.join('\n')} onChange={e => setSystemConfig(prev => ({ ...prev, allowedOrigins: e.target.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean) }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 h-24 text-sm" />
-                </div>
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Backup Schedule</label>
-                  <select value={systemConfig.backupSchedule} onChange={e => setSystemConfig(prev => ({ ...prev, backupSchedule: e.target.value }))} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                </div>
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Sidebar Top Logo (Image URL or upload)</label>
-                  <input value={(systemConfig as any).sidebarLogo || ''} onChange={e => setSystemConfig(prev => ({ ...prev, sidebarLogo: e.target.value }))} placeholder="https://example.com/logo.png or data:image/..." className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-3">Sidebar Top Link (URL)</label>
-                  <input value={(systemConfig as any).sidebarUrl || ''} onChange={e => setSystemConfig(prev => ({ ...prev, sidebarUrl: e.target.value }))} placeholder="https://example.com" className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-
-                  <div className="mt-3 flex items-center gap-3">
-                    <div className="w-24 h-12 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded border overflow-hidden">
-                      {(systemConfig as any).sidebarLogo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={(systemConfig as any).sidebarLogo} alt="Sidebar Logo" className="max-h-12 object-contain" />
-                      ) : (
-                        <div className="text-xs text-gray-500">No logo set</div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <input id="sidebarLogoFile" type="file" accept="image/*" onChange={e => handleSidebarLogoUpload(e.target.files?.[0] ?? null)} className="hidden" />
-                      <button onClick={() => (document.getElementById('sidebarLogoFile') as HTMLInputElement)?.click()} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Upload</button>
-                      <button onClick={() => { setSystemConfig(prev => ({ ...prev, sidebarLogo: '', sidebarUrl: '' })); }} className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm">Clear</button>
-                      <button onClick={() => { navigator.clipboard && (systemConfig as any).sidebarLogo && navigator.clipboard.writeText((systemConfig as any).sidebarLogo); alert('Logo URL copied'); }} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm">Copy Logo URL</button>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Logging Level</label>
+                    <select value={systemConfig.loggingLevel} onChange={e => setSystemConfig(prev => ({ ...prev, loggingLevel: e.target.value }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm">
+                      <option value="debug">debug</option>
+                      <option value="info">info</option>
+                      <option value="warn">warn</option>
+                      <option value="error">error</option>
+                    </select>
                   </div>
-                </div>
 
-                <div className="mt-6 flex items-center gap-2">
-                  <button onClick={saveSystemConfig} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save Configuration</button>
-                  <button onClick={resetSystemDefaults} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset Defaults</button>
-                  <div className="ml-3">
-                    {integrationSaveStatus === 'saving' && <span className="text-sm text-gray-600">{integrationSaveMessage || 'Saving...'}</span>}
-                    {integrationSaveStatus === 'saved' && <span className="text-sm text-green-600">{integrationSaveMessage || 'Saved'}</span>}
-                    {integrationSaveStatus === 'error' && <span className="text-sm text-red-600">{integrationSaveMessage || 'Save failed'}</span>}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Allowed Origins (comma or newline)</label>
+                    <textarea
+                      value={systemConfig.allowedOrigins.join('\n')}
+                      onChange={e => setSystemConfig(prev => ({ ...prev, allowedOrigins: e.target.value.split(/[,\n]/).map(s => s.trim()).filter(Boolean) }))}
+                      className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm h-24"
+                    />
+                    <div className="text-xs text-gray-500 mt-1">These values sync to CORS/helmet and client usage.</div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Sidebar Logo (data URL)</label>
+                      <input value={systemConfig.sidebarLogo} onChange={e => setSystemConfig(prev => ({ ...prev, sidebarLogo: e.target.value }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                      <div className="text-xs text-gray-500 mt-1">Paste a data URL or upload via Settings (kept for quick edits).</div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Sidebar Link</label>
+                      <input value={systemConfig.sidebarUrl} onChange={e => setSystemConfig(prev => ({ ...prev, sidebarUrl: e.target.value }))} className="mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white">Integration Management</h4>
-                <div className="mt-3 space-y-4">
-                  {/* Generic toggles for lightweight integrations (kept for backward compatibility) */}
-                  <div className="grid grid-cols-1 gap-2">
-                    <label className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <div className="font-medium text-sm">Issue/Telemetry Integrations</div>
-                        <div className="text-xs text-gray-500">Enable basic integrations like GitHub issue sync, Sentry, and analytics.</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={systemConfig.integrations.github} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, github: e.target.checked } }))} />
-                        <input type="checkbox" checked={systemConfig.integrations.sentry} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, sentry: e.target.checked } }))} />
-                        <input type="checkbox" checked={systemConfig.integrations.analytics} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, analytics: e.target.checked } }))} />
-                      </div>
-                    </label>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="font-medium text-sm">Issue/Telemetry Integrations</div>
+                    <div className="text-xs text-gray-500">Enable basic integrations like GitHub issue sync, Sentry, and analytics.</div>
+                  </div>
+                  <label className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="text-sm text-gray-700 dark:text-gray-200">GitHub / Sentry / Analytics</div>
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" checked={systemConfig.integrations.github} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, github: e.target.checked } }))} />
+                      <input type="checkbox" checked={systemConfig.integrations.sentry} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, sentry: e.target.checked } }))} />
+                      <input type="checkbox" checked={systemConfig.integrations.analytics} onChange={e => setSystemConfig(prev => ({ ...prev, integrations: { ...prev.integrations, analytics: e.target.checked } }))} />
+                    </div>
+                  </label>
+                </div>
+
+                <h4 className="text-md font-semibold text-gray-900 dark:text-white">API Keys</h4>
+                <div className="mt-2">
+                  <div className="mb-2 flex gap-2">
+                    <input id="newKeyName" placeholder="Key name" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                    <button onClick={() => {
+                      const el: any = document.getElementById('newKeyName');
+                      if (!el || !el.value.trim()) { alert('Enter a key name'); return; }
+                      const newKey = addApiKey(el.value.trim());
+                      alert(`New API Key created: ${newKey.key}`);
+                      el.value = '';
+                    }} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Create</button>
                   </div>
 
-                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mt-6">API Keys</h4>
-                  <div className="mt-2">
-                    <div className="mb-2 flex gap-2">
-                      <input id="newKeyName" placeholder="Key name" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                      <button onClick={() => {
-                        const el: any = document.getElementById('newKeyName');
-                        if (!el || !el.value.trim()) { alert('Enter a key name'); return; }
-                        const newKey = addApiKey(el.value.trim());
-                        alert(`New API Key created: ${newKey.key}`);
-                        el.value = '';
-                      }} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Create</button>
-                    </div>
-
-                    <div className="space-y-2">
-                      {systemConfig.apiKeys.map(k => (
-                        <div key={k.id} className="flex items-center justify-between p-2 border rounded-lg">
-                          <div>
-                            <div className="font-medium text-sm">{k.name}</div>
-                            <div className="text-xs text-gray-500">Created: {new Date(k.createdAt).toLocaleString()}</div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => { navigator.clipboard.writeText(k.key); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
-                            <button onClick={() => deleteApiKey(k.id)} className="text-sm px-2 py-1 border rounded text-red-600">Delete</button>
-                          </div>
+                  <div className="space-y-2">
+                    {systemConfig.apiKeys.map(k => (
+                      <div key={k.id} className="flex items-center justify-between p-2 border rounded-lg">
+                        <div>
+                          <div className="font-medium text-sm">{k.name}</div>
+                          <div className="text-xs text-gray-500">Created: {new Date(k.createdAt).toLocaleString()}</div>
                         </div>
-                      ))}
-                      {systemConfig.apiKeys.length === 0 && <div className="text-sm text-gray-500">No API keys configured.</div>}
-                    </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => { navigator.clipboard.writeText(k.key); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
+                          <button onClick={() => deleteApiKey(k.id)} className="text-sm px-2 py-1 border rounded text-red-600">Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                    {systemConfig.apiKeys.length === 0 && <div className="text-sm text-gray-500">No API keys configured.</div>}
                   </div>
                 </div>
+
+                <div className="p-4 border rounded-lg flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-sm">Sidebar Logo Preview</div>
+                      <div className="text-xs text-gray-500">Live preview of the sidebar image and link.</div>
+                    </div>
+                    {systemConfig.sidebarUrl && (
+                      <a href={systemConfig.sidebarUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 text-xs font-medium">Open Link</a>
+                    )}
+                  </div>
+                  <div className="w-full h-32 border rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                    {systemConfig.sidebarLogo ? (
+                      <img src={systemConfig.sidebarLogo} alt="Sidebar logo preview" className="max-h-full max-w-full object-contain" />
+                    ) : (
+                      <span className="text-xs text-gray-500">No logo set. Paste a data URL in the Sidebar Logo field.</span>
+                    )}
+                  </div>
+                  {systemConfig.sidebarUrl && (
+                    <div className="text-xs text-gray-600 dark:text-gray-400 break-all">Link: {systemConfig.sidebarUrl}</div>
+                  )}
+                </div>
               </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button onClick={saveSystemConfig} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save Configuration</button>
+              <button onClick={resetSystemDefaults} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset Defaults</button>
             </div>
           </div>
         </section>
@@ -2505,10 +2688,14 @@ const Administrator = (props: Props) => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Storage Location</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option>Local - E:/In-Accord-web/backups</option>
-                    <option>Cloudflare R2 - inaccord/In-Accord Backups</option>
-                    <option>Both (Local + Cloud)</option>
+                  <select
+                    value={backupStorageLocation}
+                    onChange={e => setBackupStorageLocation(e.target.value as 'local' | 'cloud' | 'both')}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    <option value="local">Local - E:/In-Accord-web/backups</option>
+                    <option value="cloud">Cloudflare R2 - inaccord/In-Accord Backups</option>
+                    <option value="both">Both (Local + Cloud)</option>
                   </select>
                 </div>
                 <div>
@@ -2586,7 +2773,7 @@ const Administrator = (props: Props) => {
                     <span className="font-medium text-gray-900 dark:text-white">Jan 2, 2026</span>
                   </div>
                 </div>
-                <button className="w-full mt-3 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors">
+                <button onClick={openStorageManager} className="w-full mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
                   Manage Storage Locations
                 </button>
               </div>
@@ -2723,7 +2910,20 @@ const Administrator = (props: Props) => {
                       <p className="text-xs text-gray-500 dark:text-gray-400">E:/In-Accord-web/backups</p>
                     </div>
                   </div>
-                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">Active</span>
+                  <div className="flex items-center gap-2">
+                    <span className={redundancyBadgeClass(redundancyStatus.local)}>{redundancyStatus.local}</span>
+                    <select
+                      value={redundancyStatus.local}
+                      onChange={e => setRedundancyStatus(prev => ({ ...prev, local: e.target.value }))}
+                      className="text-xs px-2 py-1 border rounded bg-white dark:bg-gray-800"
+                    >
+                      <option>Active</option>
+                      <option>Synced</option>
+                      <option>Protected</option>
+                      <option>Degraded</option>
+                      <option>Offline</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div className="flex items-center">
@@ -2733,7 +2933,20 @@ const Administrator = (props: Props) => {
                       <p className="text-xs text-gray-500 dark:text-gray-400">inaccord/In-Accord Backups</p>
                     </div>
                   </div>
-                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">Synced</span>
+                  <div className="flex items-center gap-2">
+                    <span className={redundancyBadgeClass(redundancyStatus.r2)}>{redundancyStatus.r2}</span>
+                    <select
+                      value={redundancyStatus.r2}
+                      onChange={e => setRedundancyStatus(prev => ({ ...prev, r2: e.target.value }))}
+                      className="text-xs px-2 py-1 border rounded bg-white dark:bg-gray-800"
+                    >
+                      <option>Synced</option>
+                      <option>Active</option>
+                      <option>Protected</option>
+                      <option>Degraded</option>
+                      <option>Offline</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div className="flex items-center">
@@ -2743,7 +2956,20 @@ const Administrator = (props: Props) => {
                       <p className="text-xs text-gray-500 dark:text-gray-400">server/prisma/schema.prisma</p>
                     </div>
                   </div>
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Git Tracked</span>
+                  <div className="flex items-center gap-2">
+                    <span className={redundancyBadgeClass(redundancyStatus.schema)}>{redundancyStatus.schema}</span>
+                    <select
+                      value={redundancyStatus.schema}
+                      onChange={e => setRedundancyStatus(prev => ({ ...prev, schema: e.target.value }))}
+                      className="text-xs px-2 py-1 border rounded bg-white dark:bg-gray-800"
+                    >
+                      <option>Git Tracked</option>
+                      <option>Synced</option>
+                      <option>Protected</option>
+                      <option>Degraded</option>
+                      <option>Offline</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div className="flex items-center">
@@ -2753,7 +2979,20 @@ const Administrator = (props: Props) => {
                       <p className="text-xs text-gray-500 dark:text-gray-400">localStorage + backups</p>
                     </div>
                   </div>
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Protected</span>
+                  <div className="flex items-center gap-2">
+                    <span className={redundancyBadgeClass(redundancyStatus.team)}>{redundancyStatus.team}</span>
+                    <select
+                      value={redundancyStatus.team}
+                      onChange={e => setRedundancyStatus(prev => ({ ...prev, team: e.target.value }))}
+                      className="text-xs px-2 py-1 border rounded bg-white dark:bg-gray-800"
+                    >
+                      <option>Protected</option>
+                      <option>Active</option>
+                      <option>Synced</option>
+                      <option>Degraded</option>
+                      <option>Offline</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -2764,6 +3003,90 @@ const Administrator = (props: Props) => {
             </div>
           </div>
         </section>
+
+        {storageManagerOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
+            <div
+              className="bg-white dark:bg-gray-800 w-full max-w-4xl rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6 resize overflow-hidden flex flex-col"
+              style={{ maxWidth: '90vw', maxHeight: '90vh', minWidth: '320px', minHeight: '240px' }}
+            >
+              <div className="flex items-center justify-between mb-4 shrink-0">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Manage Local Storage</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Inspect and clear browser-stored data used by the admin app. Drag the corner to resize.</p>
+                </div>
+                <button onClick={closeStorageManager} className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md">
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 shrink-0">
+                <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Entries</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{storageItems.length}</div>
+                </div>
+                <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Total Size</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{formatBytesToMB(storageBytes)} MB</div>
+                </div>
+                <div className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Scope</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">This browser</div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mb-3 shrink-0">
+                <p className="text-sm text-gray-600 dark:text-gray-400">{storageMessage ?? 'Select a key to remove it. Clearing only affects this browser.'}</p>
+                <div className="flex gap-2">
+                  <button onClick={refreshLocalStorageSnapshot} className="px-3 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg">
+                    Refresh
+                  </button>
+                  <button
+                    onClick={clearLocalStorage}
+                    disabled={!storageItems.length}
+                    className={!storageItems.length ? 'px-3 py-2 text-sm bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed' : 'px-3 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg'}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 min-h-0 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900/40">
+                {storageItems.length === 0 ? (
+                  <div className="p-4 text-sm text-gray-600 dark:text-gray-300">{storageMessage ?? 'No localStorage entries found.'}</div>
+                ) : (
+                  <div className="h-full overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                        <tr>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Key</th>
+                          <th className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Size</th>
+                          <th className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {storageItems.map((item) => (
+                          <tr key={item.key} className="hover:bg-gray-100 dark:hover:bg-gray-800/60">
+                            <td className="px-4 py-3">
+                              <div className="font-medium text-gray-900 dark:text-white break-words">{item.key}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 break-words">{item.preview}</div>
+                            </td>
+                            <td className="px-4 py-3 text-right align-top text-gray-700 dark:text-gray-300">{formatBytesToMB(item.bytes)} MB</td>
+                            <td className="px-4 py-3 text-right align-top">
+                              <button onClick={() => removeStorageKey(item.key)} className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-800 text-red-700 dark:text-red-200 rounded-lg">
+                                Remove
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Section 7 */}
         <section className="border-b pb-8">

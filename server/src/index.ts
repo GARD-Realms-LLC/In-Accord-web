@@ -48,6 +48,8 @@ import sessionsRoutes from './routes/sessionsRoutes';
 app.use('/api/admin/sessions', sessionsRoutes);
 import authRoutes from './routes/authRoutes';
 app.use('/api/admin/auth', authRoutes);
+import backupRoutes from './routes/backupRoutes';
+app.use('/api/backup', backupRoutes);
 import path from 'path';
 app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
 
