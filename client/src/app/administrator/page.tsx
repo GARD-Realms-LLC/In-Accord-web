@@ -1528,21 +1528,26 @@ const Administrator = (props: Props) => {
 
       setBackupLogs(prev => [inProgressLog, ...prev]);
 
-      setBackupProgress({ visible: true, percent: 15, detail: `Preparing backup to ${storageLabel}...` });
+      setBackupProgress({ visible: true, percent: 20, detail: `Preparing backup to ${storageLabel}...` });
 
-      const startedAt = Date.now();
-      const durationMs = 3000;
+      // Smoothly advance progress while the request is running
       backupProgressTimer.current = window.setInterval(() => {
-        const elapsed = Date.now() - startedAt;
-        const pct = Math.min(95, Math.round((elapsed / durationMs) * 100));
-        setBackupProgress(prev => ({ ...prev, percent: pct }));
-        if (elapsed >= durationMs) {
-          if (backupProgressTimer.current) {
-            clearInterval(backupProgressTimer.current);
-            backupProgressTimer.current = null;
-          }
+        setBackupProgress(prev => {
+          const next = Math.min(prev.percent + 12, 90);
+          return { ...prev, percent: next };
+        });
+      }, 180);
+
+      // Safety timeout: if no response in 15 seconds, assume failure
+      const timeoutId = setTimeout(() => {
+        if (backupProgressTimer.current) {
+          clearInterval(backupProgressTimer.current);
+          backupProgressTimer.current = null;
         }
-      }, 150);
+        setBackupProgress({ visible: true, percent: 0, detail: 'Backup request timed out (no response from server)' });
+        setTimeout(() => setBackupProgress(prev => ({ ...prev, visible: false })), 2500);
+        setBackupErrorModal({ open: true, message: 'Backup request timed out. Check server logs and network connectivity.' });
+      }, 15000);
 
       try {
         const res = await fetch(`${API_BASE}/api/backup`, {
@@ -1551,11 +1556,29 @@ const Administrator = (props: Props) => {
           body: JSON.stringify({ location: backupStorageLocation }),
         });
 
+        // Clear the timeout since we got a response
+        clearTimeout(timeoutId);
+
         if (!res.ok) {
           const text = await res.text().catch(() => '');
           throw new Error(`Backup failed (${res.status}) ${text}`);
         }
         const data = await res.json();
+
+        // Wait for progress bar to reach or exceed 95% before showing success
+        // This ensures a smooth visual experience
+        await new Promise<void>(resolve => {
+          const checkProgress = setInterval(() => {
+            setBackupProgress(prev => {
+              if (prev.percent >= 95) {
+                clearInterval(checkProgress);
+                resolve();
+                return prev;
+              }
+              return prev;
+            });
+          }, 50);
+        });
 
         const completionTime = new Date();
         const completionTimestamp = completionTime.toLocaleString('en-US', { 
@@ -1592,6 +1615,8 @@ const Administrator = (props: Props) => {
         setTimeout(() => setBackupProgress(prev => ({ ...prev, visible: false })), 3200);
         alert(data?.detail ? `Backup completed: ${data.detail}` : `Backup completed successfully!`);
       } catch (err: any) {
+        // Clear the timeout on error too
+        clearTimeout(timeoutId);
         console.warn('Backup failed', err);
         if (backupProgressTimer.current) {
           clearInterval(backupProgressTimer.current);

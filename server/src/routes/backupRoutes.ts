@@ -3,12 +3,25 @@ import fs from 'fs';
 import path from 'path';
 
 const router = Router();
-// Anchor backups under the server folder (works in dev or dist)
-const serverRoot = path.resolve(__dirname, '..', '..');
-const backupDir = path.join(serverRoot, 'backups');
+// __dirname when this file runs is server/src/routes
+// So: __dirname/../../.. = server/src/routes/../../.. = root/
+const repoRoot = path.resolve(__dirname, '..', '..', '..');
+const backupDir = path.join(repoRoot, 'backups');
+
+console.log('[backup] init: repoRoot =', repoRoot);
+console.log('[backup] init: backupDir =', backupDir);
 
 function ensureBackupDir() {
-  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+  try {
+    if (!fs.existsSync(backupDir)) {
+      console.log('[backup] creating backupDir:', backupDir);
+      fs.mkdirSync(backupDir, { recursive: true });
+      console.log('[backup] backupDir created successfully');
+    }
+  } catch (err) {
+    console.error('[backup] failed to create backupDir:', backupDir, err);
+    throw err;
+  }
 }
 
 function safeReadJson(filePath: string) {
@@ -31,6 +44,8 @@ router.post('/', async (req: Request, res: Response) => {
 
   try {
     console.log('[backup] start request', { loc });
+    console.log('[backup] repoRoot resolved to:', repoRoot);
+    console.log('[backup] backupDir resolved to:', backupDir);
     ensureBackupDir();
 
     const timestamp = new Date();
@@ -38,8 +53,10 @@ router.post('/', async (req: Request, res: Response) => {
     const fileName = `backup-${stamp}-${loc}.json`;
     const filePath = path.join(backupDir, fileName);
 
-    const users = safeReadJson(path.join(serverRoot, 'data', 'users.json'));
-    const sessions = safeReadJson(path.join(serverRoot, 'data', 'sessions.json'));
+    console.log('[backup] writing to:', filePath);
+
+    const users = safeReadJson(path.join(repoRoot, 'server', 'data', 'users.json'));
+    const sessions = safeReadJson(path.join(repoRoot, 'server', 'data', 'sessions.json'));
 
     const payload = {
       createdAt: timestamp.toISOString(),
@@ -56,10 +73,21 @@ router.post('/', async (req: Request, res: Response) => {
     };
 
     const json = JSON.stringify(payload, null, 2);
+    console.log('[backup] about to write', Buffer.byteLength(json, 'utf8'), 'bytes to:', filePath);
     fs.writeFileSync(filePath, json, 'utf8');
+    console.log('[backup] writeFileSync completed');
+
+    // Verify the file was actually written before claiming success
+    const exists = fs.existsSync(filePath);
+    const stat = exists ? fs.statSync(filePath) : null;
+    console.log('[backup] file existence check:', { exists, filePath, statSize: stat?.size });
+    
+    if (!exists) {
+      throw new Error(`File was not written or not found after write: ${filePath}`);
+    }
 
     const sizeBytes = Buffer.byteLength(json, 'utf8');
-    console.log('[backup] saved', { filePath, sizeBytes });
+    console.log('[backup] saved', { filePath, sizeBytes, statSize: stat?.size, fileExists: exists });
 
     return res.json({
       ok: true,
