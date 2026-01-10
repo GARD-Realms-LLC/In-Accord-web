@@ -51,26 +51,6 @@ const SidebarLink = ({
     return null;
   }
 
-  const [sidebarLogoSrc, setSidebarLogoSrc] = React.useState<string | null>(null);
-  const [sidebarLink, setSidebarLink] = React.useState<string>('/home');
-
-  useEffect(() => {
-    try {
-      const raw = typeof window !== 'undefined' ? localStorage.getItem('system_config') : null;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const logo = parsed?.sidebarLogo as string | undefined;
-        const link = parsed?.sidebarUrl as string | undefined;
-        if (logo && typeof logo === 'string' && logo.length > 0) setSidebarLogoSrc(logo);
-        if (link && typeof link === 'string' && link.length > 0) setSidebarLink(link);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  const fallbackLogo = "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg";
-
   return (
     <Link href={href}>
       <div className={`cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md ${
@@ -105,6 +85,9 @@ const SectionLabel = ({ text, isCollapsed }: { text: string; isCollapsed: boolea
 );
 
 const Sidebar = () => {
+  // Restore original static logo/link
+  const sidebarLogoSrc = "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg";
+  const sidebarLink = "/home";
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed

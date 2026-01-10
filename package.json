@@ -9,7 +9,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate:seed-users": "npm --prefix server run migrate:seed-users"
+    "migrate:seed-users": "npm --prefix server run migrate:seed-users",
+    "dev:client": "npm --prefix client run dev",
+    "dev:client:unlock": "npm --prefix client run dev:unlock",
+    "dev:server": "npm --prefix server run dev",
+    "dev:server:freeport": "npm --prefix server run dev:freeport",
+    "dev:all": "npx concurrently \"npm --prefix client run dev\" \"npm --prefix server run dev\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
