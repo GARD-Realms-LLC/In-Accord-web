@@ -46,7 +46,8 @@ const SidebarLink = ({
 
   // Hide uploads, products, and expenses for user/viewer roles
   const restrictedLinks = ['/uploads', '/products', '/expenses'];
-  if ((currentUserRole === 'user' || currentUserRole === 'viewer') && restrictedLinks.includes(href)) {
+  const role = currentUserRole?.toLowerCase();
+  if ((role === 'user' || role === 'viewer') && restrictedLinks.includes(href)) {
     return null;
   }
 
