@@ -2151,94 +2151,6 @@ const Administrator = (props: Props) => {
                     </div>
                   </div>
 
-                  <div>
-                    <div className="text-sm font-medium mb-2">Custom Tables ({customTables.length})</div>
-
-                    <div className="p-3 bg-white dark:bg-gray-800 border rounded mb-3">
-                      <div className="flex gap-2 items-start">
-                        <input value={newTableName} onChange={e => setNewTableName(e.target.value)} placeholder="New table name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
-                        <button onClick={addFieldToNewTable} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">+ Field</button>
-                        <button onClick={addCustomTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create</button>
-                      </div>
-
-                      {newTableFields.length > 0 && (
-                        <div className="mt-2 space-y-2">
-                          {newTableFields.map(f => (
-                            <div key={f.id} className="flex gap-2 items-center">
-                              <input value={f.name} onChange={e => updateNewField(f.id, { name: e.target.value })} placeholder="field name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
-                              <select value={f.type} onChange={e => updateNewField(f.id, { type: e.target.value })} className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm">
-                                <option value="string">string</option>
-                                <option value="number">number</option>
-                                <option value="date">date</option>
-                                <option value="boolean">boolean</option>
-                                <option value="enum">enum</option>
-                              </select>
-                              <button onClick={() => removeNewField(f.id)} className="px-2 py-1 text-red-600">Remove</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {customTables.length === 0 ? (
-                      <div className="text-sm text-gray-500">No custom tables defined.</div>
-                    ) : (
-                      <div className="space-y-2">
-                        {customTables.map(t => {
-                          const isEditing = editingTableId === t.id;
-                          return (
-                            <div key={t.id} className="p-2 bg-white dark:bg-gray-800 border rounded">
-                              <div className="flex items-center justify-between">
-                                <div className="font-medium">{t.name}</div>
-                                <div className="flex items-center gap-2">
-                                  <div className="text-xs text-gray-500">{t.fields.length} fields</div>
-                                </div>
-                              </div>
-
-                              {isEditing ? (
-                                <div className="mt-2 space-y-2">
-                                  <input value={editingTableDraft?.name ?? ''} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, name: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" />
-
-                                  <div className="space-y-2">
-                                    {editingTableDraft?.fields.map(f => (
-                                      <div key={f.id} className="flex gap-2 items-center">
-                                        <input value={f.name} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.map(ff => ff.id === f.id ? { ...ff, name: e.target.value } : ff) } : prev)} placeholder="field name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
-                                        <select value={f.type} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.map(ff => ff.id === f.id ? { ...ff, type: e.target.value } : ff) } : prev)} className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm">
-                                          <option value="string">string</option>
-                                          <option value="number">number</option>
-                                          <option value="date">date</option>
-                                          <option value="boolean">boolean</option>
-                                          <option value="enum">enum</option>
-                                        </select>
-                                        <button onClick={() => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.filter(ff => ff.id !== f.id) } : prev)} className="px-2 py-1 text-red-600">Remove</button>
-                                      </div>
-                                    ))}
-                                  </div>
-
-                                  <div className="flex gap-2 mt-2">
-                                    <button onClick={() => setEditingTableDraft(prev => prev ? { ...prev, fields: [...prev.fields, { id: 'f' + Math.random().toString(36).slice(2,9), name: '', type: 'string' }] } : prev)} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Add Field</button>
-                                    <button onClick={saveEditedTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Save</button>
-                                    <button onClick={cancelEditTable} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Cancel</button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="mt-2 flex flex-wrap gap-2">
-                                    {t.fields.map(f => <span key={f.id} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 border rounded text-xs text-gray-700 dark:text-gray-200">{f.name} ({f.type})</span>)}
-                                  </div>
-
-                                  <div className="mt-2 flex gap-2">
-                                    <button onClick={() => startEditTable(t.id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Edit</button>
-                                    <button onClick={() => deleteCustomTableById(t.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Delete</button>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -2710,6 +2622,98 @@ const Administrator = (props: Props) => {
             </div>
           </div>
 
+          {/* Custom Tables */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Custom Tables ({customTables.length})</h3>
+            </div>
+
+            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border rounded mb-4">
+              <div className="flex gap-2 items-start">
+                <input value={newTableName} onChange={e => setNewTableName(e.target.value)} placeholder="New table name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                <button onClick={addFieldToNewTable} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">+ Field</button>
+                <button onClick={addCustomTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create</button>
+              </div>
+
+              {newTableFields.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {newTableFields.map(f => (
+                    <div key={f.id} className="flex gap-2 items-center">
+                      <input value={f.name} onChange={e => updateNewField(f.id, { name: e.target.value })} placeholder="field name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                      <select value={f.type} onChange={e => updateNewField(f.id, { type: e.target.value })} className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm">
+                        <option value="string">string</option>
+                        <option value="number">number</option>
+                        <option value="date">date</option>
+                        <option value="boolean">boolean</option>
+                        <option value="enum">enum</option>
+                      </select>
+                      <button onClick={() => removeNewField(f.id)} className="px-2 py-1 text-red-600">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {customTables.length === 0 ? (
+              <div className="text-sm text-gray-500">No custom tables defined.</div>
+            ) : (
+              <div className="space-y-2">
+                {customTables.map(t => {
+                  const isEditing = editingTableId === t.id;
+                  return (
+                    <div key={t.id} className="p-2 bg-gray-50 dark:bg-gray-700/50 border rounded">
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium">{t.name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-xs text-gray-500">{t.fields.length} fields</div>
+                        </div>
+                      </div>
+
+                      {isEditing ? (
+                        <div className="mt-2 space-y-2">
+                          <input value={editingTableDraft?.name ?? ''} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, name: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" />
+
+                          <div className="space-y-2">
+                            {editingTableDraft?.fields.map(f => (
+                              <div key={f.id} className="flex gap-2 items-center">
+                                <input value={f.name} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.map(ff => ff.id === f.id ? { ...ff, name: e.target.value } : ff) } : prev)} placeholder="field name" className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1" />
+                                <select value={f.type} onChange={e => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.map(ff => ff.id === f.id ? { ...ff, type: e.target.value } : ff) } : prev)} className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm">
+                                  <option value="string">string</option>
+                                  <option value="number">number</option>
+                                  <option value="date">date</option>
+                                  <option value="boolean">boolean</option>
+                                  <option value="enum">enum</option>
+                                </select>
+                                <button onClick={() => setEditingTableDraft(prev => prev ? { ...prev, fields: prev.fields.filter(ff => ff.id !== f.id) } : prev)} className="px-2 py-1 text-red-600">Remove</button>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex gap-2 mt-2">
+                            <button onClick={() => setEditingTableDraft(prev => prev ? { ...prev, fields: [...prev.fields, { id: 'f' + Math.random().toString(36).slice(2,9), name: '', type: 'string' }] } : prev)} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Add Field</button>
+                            <button onClick={saveEditedTable} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Save</button>
+                            <button onClick={cancelEditTable} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {t.fields.map(f => <span key={f.id} className="px-2 py-1 bg-white dark:bg-gray-800 border rounded text-xs text-gray-700 dark:text-gray-200">{f.name} ({f.type})</span>)}
+                          </div>
+
+                          <div className="mt-2 flex gap-2">
+                            <button onClick={() => startEditTable(t.id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Edit</button>
+                            <button onClick={() => deleteCustomTableById(t.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Delete</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Maintenance Tasks */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Database Optimization */}
@@ -2906,69 +2910,28 @@ const Administrator = (props: Props) => {
                 <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Date & Time</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Backup Type</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Location</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Size</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Action</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Details</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Status</th>
-                    <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-08 02:00</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local + Cloud</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">487 MB</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
-                    <td className="px-4 py-3">
-                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-07 02:00</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local + Cloud</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">465 MB</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
-                    <td className="px-4 py-3">
-                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-06 02:00</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local + Cloud</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">458 MB</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
-                    <td className="px-4 py-3">
-                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-05 02:00</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local Only</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">442 MB</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded">Verified</span></td>
-                    <td className="px-4 py-3">
-                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-white">2026-01-04 02:00</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Full (DB + Files)</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">Local Only</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">438 MB</td>
-                    <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium rounded">Complete</span></td>
-                    <td className="px-4 py-3">
-                      <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium mr-3">Restore</button>
-                      <button className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 text-sm font-medium">Download</button>
-                    </td>
-                  </tr>
+                  {backupLogs.slice(0, 10).map((log, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white">{log.timestamp}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{log.action}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{log.details}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 text-xs font-medium rounded ${
+                          log.status === 'Success' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
+                          log.status === 'In Progress' ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200' :
+                          'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                        }`}>
+                          {log.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -3149,7 +3112,7 @@ const Administrator = (props: Props) => {
                 </div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">R2 API Token</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? 'ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó (stored for this session)' : 'Not set'}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? '••••••••••••••••• (stored for this session)' : 'Not set'}</p>
                 </div>
               </div>
             ) : (
