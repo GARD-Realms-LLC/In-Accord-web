@@ -61,6 +61,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   
   // Construct avatar URL, ensuring relative paths are converted to absolute backend URLs
   let rawAvatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=Not+Logged+In';
@@ -180,16 +181,18 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
             )}
           </div>
           
-          <div className='relative'>
-            <input 
-              type="search" 
-              placeholder="Start typing  to search" 
-              className="pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
-            />
-            <div className='absolute inset-y-0 left-0 pl- flex items-center pointer-events-none'>
-              <Bell className="text-gray-500 dark:text-gray-400" size={20} />
-            </div>
-          </div> 
+          {currentUser && (
+            <div className='relative'>
+              <input 
+                type="search" 
+                placeholder="Start typing  to search" 
+                className="pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
+              />
+              <div className='absolute inset-y-0 left-0 pl- flex items-center pointer-events-none'>
+                <Bell className="text-gray-500 dark:text-gray-400" size={20} />
+              </div>
+            </div> 
+          )}
 
           {/*Right Side */}
           <div className="flex justify-between items-center gap-5">
@@ -206,13 +209,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
                 <Moon className="cursor-pointer text-gray-500 dark:text-gray-300" size={24} />
               )}
             </button>
-            <div className="relative">
-              <Bell className="cursor-pointer text-gray-500" size={24} />
-              <span className="absolute -top-2 -right-2 inline-flex items-center justify-center 
-              px-[0.4rem] py-1 text-xs leading-none text-red-100 bg-red-600 rounded-full">
-                3
-              </span>
-            </div>
+            {currentUser && notificationCount > 0 && (
+              <div className="relative">
+                <Bell className="cursor-pointer text-gray-500" size={24} />
+                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center 
+                px-[0.4rem] py-1 text-xs leading-none text-red-100 bg-red-600 rounded-full">
+                  {notificationCount}
+                </span>
+              </div>
+            )}
             <hr className="w-0 h-7 border border-solid border-l border-gray-300 mx-3" />
             <div className="flex items-center gap-3">
               {!avatarError && !isGeneratedAvatar ? (
@@ -232,7 +237,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
             <div className="flex items-center gap-2">
               {!currentUser && (
                 <>
-                  <button onClick={() => setShowLoginModal(true)} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Login</button>
+                  <button onClick={() => setShowLoginModal(true)} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Login/Register</button>
                   <LoginModal show={showLoginModal} onClose={() => setShowLoginModal(false)} onSubmit={handleLogin} />
                 </>
               )}
