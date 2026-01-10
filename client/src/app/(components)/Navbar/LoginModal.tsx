@@ -47,7 +47,16 @@ export default function LoginModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black opacity-40" onClick={onClose} />
       <div className="relative bg-white dark:bg-gray-800 rounded-lg p-6 w-80 shadow-lg">
-        <h3 className="text-lg font-semibold mb-3">Login</h3>
+        {/* Logo at the top */}
+        <div className="flex justify-center mb-4">
+          <img 
+            src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg" 
+            alt="In-Accord" 
+            className="w-40 h-40 object-contain"
+          />
+        </div>
+        
+        <h3 className="text-lg font-semibold mb-3 text-center">Login</h3>
         <label className="text-sm block mb-1">Username</label>
         <input
           autoFocus

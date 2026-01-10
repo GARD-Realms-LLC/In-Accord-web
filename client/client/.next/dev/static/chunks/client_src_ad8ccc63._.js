@@ -268,12 +268,28 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "relative bg-white dark:bg-gray-800 rounded-lg p-6 w-80 shadow-lg",
                 children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex justify-center mb-4",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                            src: "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg",
+                            alt: "In-Accord",
+                            className: "w-40 h-40 object-contain"
+                        }, void 0, false, {
+                            fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
+                            lineNumber: 51,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
+                        lineNumber: 50,
+                        columnNumber: 9
+                    }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                        className: "text-lg font-semibold mb-3",
+                        className: "text-lg font-semibold mb-3 text-center",
                         children: "Login"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 49,
+                        lineNumber: 54,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -281,7 +297,7 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                         children: "Username"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 50,
+                        lineNumber: 55,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -294,7 +310,7 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                         className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 text-sm mb-2"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 51,
+                        lineNumber: 56,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -302,7 +318,7 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                         children: "Password"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 54,
+                        lineNumber: 59,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -315,7 +331,7 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                         className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 text-sm mb-2"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 55,
+                        lineNumber: 60,
                         columnNumber: 9
                     }, this),
                     error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -323,7 +339,7 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                         children: error
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 58,
+                        lineNumber: 63,
                         columnNumber: 19
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -335,7 +351,7 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                                 children: "Cancel"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                                lineNumber: 60,
+                                lineNumber: 65,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -345,13 +361,13 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                                 children: loading ? 'Signing in...' : 'Sign in'
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                                lineNumber: 61,
+                                lineNumber: 66,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 59,
+                        lineNumber: 64,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -365,13 +381,13 @@ function LoginModal({ show, onClose, onSubmit, initialUsername }) {
                                 children: "Create one"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                                lineNumber: 65,
+                                lineNumber: 70,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/(components)/Navbar/LoginModal.tsx",
-                        lineNumber: 63,
+                        lineNumber: 68,
                         columnNumber: 9
                     }, this)
                 ]
