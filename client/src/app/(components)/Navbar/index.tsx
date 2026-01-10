@@ -6,16 +6,18 @@ import { setIsDarkMode, setIsSidebarCollapsed} from '@/state';
 import { Bell, Menu, Moon, Settings, Sun, User } from 'lucide-react';
 import Link from 'next/link';
 import LoginModal from './LoginModal';
+import { useRouter } from 'next/navigation';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   const Navbar = () => {
     const dispatch = useAppDispatch();
+    const router = useRouter();
       const isSidebarCollapsed = useAppSelector(
         (state) => state.global.isSidebarCollapsed
       );
 
   // Simple local auth state for UI (persisted to localStorage)
-  const [currentUser, setCurrentUser] = useState<{ name?: string; email?: string; username?: string; avatar?: string } | null>(() => {
+  const [currentUser, setCurrentUser] = useState<{ id?: string; userId?: string; name?: string; email?: string; username?: string; avatar?: string } | null>(() => {
     try {
       if (typeof window === 'undefined') return null;
       const raw = localStorage.getItem('currentUser');
@@ -71,11 +73,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
       } catch (e) { console.warn('Failed to create session', e); }
       // notify other parts of the app that a session was created
       try { window.dispatchEvent(new CustomEvent('sessionCreated', { detail: { user, sessionId: typeof window !== 'undefined' ? localStorage.getItem('sessionId') : null } })); } catch {}
-      setCurrentUser({ name: user.name || name, username: user.username || name, email: user.email, avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` });
+      setCurrentUser({ id: user.id || user.userId, userId: user.id || user.userId, name: user.name || name, username: user.username || name, email: user.email, avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` });
       return { ok: true, user };
     } catch (e) {
       console.error('Login error', e);
-      return { ok: false, error: 'Network error' };
+      // If backend is not reachable, provide a helpful error message
+      const errorMsg = e instanceof TypeError && e.message.includes('fetch') 
+        ? 'Backend server not reachable. Please make sure the server is running on ' + API_BASE 
+        : 'Network error';
+      return { ok: false, error: errorMsg };
     }
   }
 
@@ -180,6 +186,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
                     await fetch(`${API_BASE}/api/admin/auth/logout`, { method: 'POST' }).catch(() => null);
                   } catch (e) { console.warn('Logout error', e); }
                   setCurrentUser(null);
+                  try { router.push('/'); } catch {}
                 }}
                 className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded"
               >

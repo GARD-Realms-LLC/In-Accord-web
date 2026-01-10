@@ -14,9 +14,14 @@ datasource db {
 }
 
 model Users {
-  userId String @id
-  name   String
-  email  String
+  userId        String    @id
+  name          String
+  email         String
+  website       String?
+  githubLogin   String?
+  discordLogin  String?
+  description   String?
+  lastLogin     DateTime?
 }
 
 model Products {

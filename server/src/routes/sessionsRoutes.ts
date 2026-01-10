@@ -7,31 +7,44 @@ const router = Router();
 interface SessionUser { id?: string; name?: string; email?: string; username?: string }
 interface SessionRecord { id: string; userId?: string; ip: string; since: string; user?: SessionUser; avatar?: string }
 
-const sessions: SessionRecord[] = [];
+const sessionsFile = path.resolve(__dirname, '..', '..', 'data', 'sessions.json');
 
-function seedSessions() {
+function ensureSessionsFile() {
   try {
-    const file = path.resolve(__dirname, '..', '..', 'data', 'users.json');
-    if (!fs.existsSync(file)) return;
-    const raw = fs.readFileSync(file, 'utf8');
-    const parsed = JSON.parse(raw);
-    const users = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
-    // pick up to 6 random users
-    const sample = users.slice(0, 10).sort(() => 0.5 - Math.random()).slice(0, 6);
-    sample.forEach((u: any, idx: number) => {
-      const id = 'sess-' + (u.userId || Math.random().toString(36).slice(2,9));
-      sessions.push({ id, userId: u.userId || undefined, ip: `10.0.0.${100 + idx}`, since: new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60)).toISOString(), user: { id: u.userId, name: u.name, email: u.email } });
-    });
+    const dir = path.dirname(sessionsFile);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(sessionsFile)) fs.writeFileSync(sessionsFile, JSON.stringify({ sessions: [] }, null, 2));
   } catch (e) {
-    console.warn('[Sessions] seed failed', e);
+    console.warn('[Sessions] ensure file error', e);
   }
 }
 
-// Do not auto-seed sessions on startup — show only real sessions created at runtime
-// seedSessions();
+function readSessions(): SessionRecord[] {
+  try {
+    ensureSessionsFile();
+    const raw = fs.readFileSync(sessionsFile, 'utf8');
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed.sessions) ? parsed.sessions : Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.warn('[Sessions] read error', e);
+    return [];
+  }
+}
+
+function writeSessions(list: SessionRecord[]) {
+  try {
+    ensureSessionsFile();
+    fs.writeFileSync(sessionsFile, JSON.stringify({ sessions: list }, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[Sessions] write error', e);
+  }
+}
+
+let sessions: SessionRecord[] = readSessions();
 
 // GET / - list sessions
 router.get('/', (req: Request, res: Response) => {
+  sessions = readSessions();
   return res.json({ ok: true, sessions });
 });
 
@@ -42,6 +55,7 @@ router.post('/terminate', (req: Request, res: Response) => {
   const idx = sessions.findIndex(s => s.id === sessionId);
   if (idx === -1) return res.status(404).json({ ok: false, error: 'not found' });
   const removed = sessions.splice(idx, 1)[0];
+  writeSessions(sessions);
   return res.json({ ok: true, removed });
 });
 
@@ -52,6 +66,7 @@ router.post('/create', (req: Request, res: Response) => {
   const id = 'sess-' + (user.userId || user.id || Math.random().toString(36).slice(2,9));
   const rec: SessionRecord = { id, userId: user.userId || user.id || undefined, ip: req.ip || '0.0.0.0', since: new Date().toISOString(), user: { id: user.userId || user.id, name: user.name, email: user.email, username: user.username } };
   sessions.push(rec);
+  writeSessions(sessions);
   return res.json({ ok: true, session: rec });
 });
 
@@ -59,6 +74,7 @@ router.post('/create', (req: Request, res: Response) => {
 router.post('/terminate-all', (_req: Request, res: Response) => {
   const count = sessions.length;
   sessions.splice(0, sessions.length);
+  writeSessions(sessions);
   return res.json({ ok: true, terminated: count });
 });
 

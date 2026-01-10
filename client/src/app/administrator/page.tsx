@@ -296,6 +296,10 @@ interface User {
   status: 'Active' | 'Suspended';
   createdAt: string;
   passwordExpiresAt?: string;
+  website?: string;
+  githubLogin?: string;
+  discordLogin?: string;
+  description?: string;
 }
 
 interface Group {
@@ -624,11 +628,16 @@ const Administrator = (props: Props) => {
     const [formName, setFormName] = useState('');
     const [formEmail, setFormEmail] = useState('');
     const [formRole, setFormRole] = useState<User['role']>('User');
+    const [formStatus, setFormStatus] = useState<User['status']>('Active');
     const [formUsername, setFormUsername] = useState('');
     const [formPassword, setFormPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [formAvatarUrl, setFormAvatarUrl] = useState<string | undefined>(undefined);
     const [formPasswordExpiresAt, setFormPasswordExpiresAt] = useState<string | undefined>(undefined);
+    const [formWebsite, setFormWebsite] = useState('');
+    const [formGithubLogin, setFormGithubLogin] = useState('');
+    const [formDiscordLogin, setFormDiscordLogin] = useState('');
+    const [formDescription, setFormDescription] = useState('');
     // UI for save-toast and temporary reveal of saved password
     const [toastVisible, setToastVisible] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
@@ -721,10 +730,15 @@ const Administrator = (props: Props) => {
       setFormName('');
       setFormEmail('');
       setFormRole('User');
+      setFormStatus('Active');
       setFormUsername('');
       setFormPassword('');
       setFormPasswordExpiresAt(undefined);
       setFormAvatarUrl(undefined);
+      setFormWebsite('');
+      setFormGithubLogin('');
+      setFormDiscordLogin('');
+      setFormDescription('');
       setShowUserForm(true);
     };
 
@@ -733,10 +747,15 @@ const Administrator = (props: Props) => {
       setFormName(u.name);
       setFormEmail(u.email);
       setFormRole(u.role);
+      setFormStatus(u.status || 'Active');
       setFormUsername(u.username ?? '');
       setFormPassword(u.password ?? '');
       setFormPasswordExpiresAt(u.passwordExpiresAt);
       setFormAvatarUrl(u.avatarUrl ?? undefined);
+      setFormWebsite((u as any).website ?? '');
+      setFormGithubLogin((u as any).githubLogin ?? '');
+      setFormDiscordLogin((u as any).discordLogin ?? '');
+      setFormDescription((u as any).description ?? '');
       setShowUserForm(true);
     };
 
@@ -746,10 +765,15 @@ const Administrator = (props: Props) => {
       setFormName('');
       setFormEmail('');
       setFormRole('User');
+      setFormStatus('Active');
       setFormUsername('');
       setFormPassword('');
       setFormPasswordExpiresAt(undefined);
       setFormAvatarUrl(undefined);
+      setFormWebsite('');
+      setFormGithubLogin('');
+      setFormDiscordLogin('');
+      setFormDescription('');
     };
 
     const saveUser = async () => {
@@ -761,7 +785,7 @@ const Administrator = (props: Props) => {
       if (editingUser) {
         if (formPassword && formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = formPassword ? await hashPassword(formPassword) : undefined;
-        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt, avatarUrl: formAvatarUrl ?? x.avatarUrl } : x);
+        const updated = users.map(x => x.id === editingUser.id ? { ...x, name: formName, email: formEmail, role: formRole, status: formStatus, username: formUsername, password: hashed ?? x.password, passwordExpiresAt: formPasswordExpiresAt ?? x.passwordExpiresAt, avatarUrl: formAvatarUrl ?? x.avatarUrl, website: formWebsite || undefined, githubLogin: formGithubLogin || undefined, discordLogin: formDiscordLogin || undefined, description: formDescription || undefined } : x);
         setUsers(updated as User[]);
         if (hashed) {
           try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
@@ -774,7 +798,7 @@ const Administrator = (props: Props) => {
         if (!formPassword) { alert('Password is required for new user'); return; }
         if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = await hashPassword(formPassword);
-        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, status: formStatus, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt, website: formWebsite || undefined, githubLogin: formGithubLogin || undefined, discordLogin: formDiscordLogin || undefined, description: formDescription || undefined };
         setUsers([newUser, ...users] as User[]);
         try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
         // also send full user metadata to server so login by username/email works
@@ -787,11 +811,27 @@ const Administrator = (props: Props) => {
       try { window.dispatchEvent(new CustomEvent('teamMembersUpdated', { detail: { type: 'users' } })); } catch {}
     };
 
-    const deleteUser = (id: string) => {
+    const deleteUser = async (id: string) => {
       if (!confirm('Delete this user?')) return;
       const toDelete = users.find(u => u.id === id);
-      setUsers(users.filter(u => u.id !== id) as User[]);
-      setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted User', details: `${toDelete?.name} deleted`, status: 'Success' }, ...prev]);
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/users/${id}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          setUsers(users.filter(u => u.id !== id) as User[]);
+          setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted User', details: `${toDelete?.name} deleted`, status: 'Success' }, ...prev]);
+        } else {
+          alert('Failed to delete user. Please try again.');
+          setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Delete User Failed', details: `${toDelete?.name} deletion failed`, status: 'Error' }, ...prev]);
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Error deleting user. Please try again.');
+        setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Delete User Error', details: `${toDelete?.name} deletion error`, status: 'Error' }, ...prev]);
+      }
     };
 
     const savePasswordOnly = async () => {
@@ -891,6 +931,10 @@ const Administrator = (props: Props) => {
         { table: 'users', name: 'role', type: 'string' },
         { table: 'users', name: 'status', type: 'string' },
         { table: 'users', name: 'createdAt', type: 'date' },
+        { table: 'users', name: 'website', type: 'string' },
+        { table: 'users', name: 'githubLogin', type: 'string' },
+        { table: 'users', name: 'discordLogin', type: 'string' },
+        { table: 'users', name: 'description', type: 'string' },
       ];
       const custom = customTables.flatMap(t => t.fields.map(f => ({ table: t.name, name: f.name, type: f.type })));
       return [...defaultFields, ...custom];
@@ -898,6 +942,16 @@ const Administrator = (props: Props) => {
 
     const refreshTablesFromServer = async () => {
       try {
+        // Refresh users from server
+        const userRes = await fetch(`${API_BASE}/api/admin/users`);
+        if (userRes.ok) {
+          const userdata = await userRes.json();
+          if (userdata && Array.isArray(userdata.users)) {
+            setUsers(userdata.users as User[]);
+            try { if (typeof window !== 'undefined') window.localStorage.setItem('users', JSON.stringify(userdata.users)); } catch {}
+          }
+        }
+        // Also try to refresh schema from server
         const res = await fetch('/api/schemas');
         if (!res.ok) return;
         const data = await res.json();
@@ -913,7 +967,11 @@ const Administrator = (props: Props) => {
       { name: 'email', type: 'string', description: 'Email address used for login and notifications', example: 'alice@example.com' },
       { name: 'role', type: 'enum', description: 'Assigned role determining permissions', example: 'Admin | Manager | User | Viewer' },
       { name: 'status', type: 'enum', description: 'Account status', example: 'Active | Suspended' },
-      { name: 'createdAt', type: 'date', description: 'Account creation date', example: '2024-01-10' }
+      { name: 'createdAt', type: 'date', description: 'Account creation date', example: '2024-01-10' },
+      { name: 'website', type: 'string', description: 'User website URL', example: 'https://example.com' },
+      { name: 'githubLogin', type: 'string', description: 'GitHub username', example: 'alice-dev' },
+      { name: 'discordLogin', type: 'string', description: 'Discord username', example: 'Alice#1234' },
+      { name: 'description', type: 'string', description: 'User bio or description', example: 'Full-stack developer' }
     ];
 
     // UI state & handlers for adding/editing custom user tables/fields
@@ -1323,7 +1381,6 @@ const Administrator = (props: Props) => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Users</h3>
               <div className="flex items-center gap-2">
                 <button onClick={openCreateUser} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Create User</button>
-                <button onClick={() => { setUsers(initialUsers); alert('Reset users to seed data.'); }} className="px-3 py-2 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg">Reset</button>
               </div>
             </div>
 
@@ -1354,6 +1411,14 @@ const Administrator = (props: Props) => {
                       <option>Manager</option>
                       <option>User</option>
                       <option>Viewer</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Status</label>
+                    <select value={formStatus} onChange={e => setFormStatus(e.target.value as User['status'])} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full">
+                      <option>Active</option>
+                      <option>Suspended</option>
                     </select>
                   </div>
                 </div>
@@ -1402,6 +1467,24 @@ const Administrator = (props: Props) => {
                 <div className="mb-3">
                   <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Password Expires</label>
                   <input type="date" value={formPasswordExpiresAt ?? ''} onChange={e => setFormPasswordExpiresAt(e.target.value || undefined)} className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Website</label>
+                  <input value={formWebsite} onChange={e => setFormWebsite(e.target.value)} placeholder="https://example.com" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">GitHub Login</label>
+                    <input value={formGithubLogin} onChange={e => setFormGithubLogin(e.target.value)} placeholder="github-username" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Discord Login</label>
+                    <input value={formDiscordLogin} onChange={e => setFormDiscordLogin(e.target.value)} placeholder="Discord#1234" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Description</label>
+                  <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} placeholder="User bio or description" className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" rows={3} />
                 </div>
                 <div className="flex gap-2">
                   <button onClick={saveUser} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">Save</button>

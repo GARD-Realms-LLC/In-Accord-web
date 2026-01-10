@@ -99,7 +99,22 @@ router.post('/upsert', (req, res) => {
         const users = Array.isArray(data.users) ? data.users : [];
         const id = user.id || user.userId || (user.email ? (user.email.split('@')[0]) : undefined) || ('u' + Math.random().toString(36).slice(2, 9));
         const idx = users.findIndex((u) => (u.id === id) || (u.userId === id));
-        const toStore = Object.assign(Object.assign({}, user), { id, userId: user.userId || user.id || id });
+        const existing = idx !== -1 ? users[idx] : undefined;
+        // start with existing user (if any) so we don't drop fields like password
+        let toStore = Object.assign(Object.assign(Object.assign({}, existing), user), { id, userId: user.userId || user.id || id });
+        // If password not provided, keep existing password
+        if ((!user.password || user.password === '') && (existing === null || existing === void 0 ? void 0 : existing.password)) {
+            toStore.password = existing.password;
+        }
+        // Hash password if provided as plain text
+        if (user.password && typeof user.password === 'string' && !user.password.startsWith('pbkdf2$') && !user.password.startsWith('sha256$')) {
+            const salt = crypto_1.default.randomBytes(16).toString('hex');
+            const iterations = 100000;
+            const keyLen = 32;
+            const digest = 'sha256';
+            const derived = crypto_1.default.pbkdf2Sync(user.password, salt, iterations, keyLen, digest).toString('hex');
+            toStore.password = `pbkdf2$${iterations}$${salt}$${derived}`;
+        }
         if (idx === -1) {
             users.push(toStore);
         }
@@ -141,6 +156,30 @@ router.post('/avatar', (req, res) => {
     catch (e) {
         console.error('[UsersRoute] avatar upload error', e);
         return res.status(500).json({ ok: false, error: 'failed to write avatar' });
+    }
+});
+// DELETE user account
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    if (!id || typeof id !== 'string')
+        return res.status(400).json({ ok: false, error: 'id required' });
+    try {
+        const data = readUsersFile();
+        const users = Array.isArray(data.users) ? data.users : [];
+        const idx = users.findIndex((u) => (u.id === id) || (u.userId === id));
+        if (idx === -1) {
+            return res.status(404).json({ ok: false, error: 'user not found' });
+        }
+        // Remove user from array
+        users.splice(idx, 1);
+        const ok = writeUsersFile({ users });
+        if (!ok)
+            return res.status(500).json({ ok: false, error: 'failed to delete' });
+        return res.json({ ok: true, message: 'account deleted' });
+    }
+    catch (e) {
+        console.error('[UsersRoute] delete error', e);
+        return res.status(500).json({ ok: false, error: 'internal' });
     }
 });
 exports.default = router;

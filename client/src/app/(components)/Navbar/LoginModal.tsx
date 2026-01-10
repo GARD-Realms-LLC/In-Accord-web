@@ -68,10 +68,16 @@ export default function LoginModal({
           type="password"
           className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 text-sm mb-2"
         />
-        {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
+        {error && <div className="text-sm text-red-600 dark:text-red-400 mb-2 p-2 bg-red-50 dark:bg-red-900/20 rounded">{error}</div>}
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Cancel</button>
           <button onClick={() => void submit()} disabled={loading} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">{loading ? 'Signing in...' : 'Sign in'}</button>
+        </div>
+        <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+          Don't have an account?{' '}
+          <a href="/signup" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">
+            Create one
+          </a>
         </div>
       </div>
     </div>

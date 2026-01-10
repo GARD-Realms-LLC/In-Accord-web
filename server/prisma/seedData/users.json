@@ -2,146 +2,291 @@
   {
     "userId": "3b0fd66b-a4d6-4d95-94e4-01940c99aedb",
     "name": "Carly",
-    "email": "cvansalzberger0@cisco.com"
+    "email": "cvansalzberger0@cisco.com",
+    "website": "https://carly.dev",
+    "githubLogin": "carly-dev",
+    "discordLogin": "Carly#1234",
+    "description": "Full-stack developer passionate about web technologies",
+    "lastLogin": "2026-01-09T14:30:00Z"
   },
   {
     "userId": "d9d323fa-5c98-4222-a352-120e1f5e2798",
     "name": "Inesita",
-    "email": "imcconnachie1@oaic.gov.au"
+    "email": "imcconnachie1@oaic.gov.au",
+    "website": "https://inesita-portfolio.com",
+    "githubLogin": "inesita-code",
+    "discordLogin": "Inesita#5678",
+    "description": "Data scientist and ML engineer",
+    "lastLogin": "2026-01-08T09:15:00Z"
   },
   {
     "userId": "9e2895ae-4afe-4ff2-b3b3-be15cf1c82d6",
     "name": "Tulley",
-    "email": "tbridywater2@wikimedia.org"
+    "email": "tbridywater2@wikimedia.org",
+    "website": "https://tulley.dev",
+    "githubLogin": "tulley-dev",
+    "discordLogin": "Tulley#9012",
+    "description": "Open source contributor and tech enthusiast",
+    "lastLogin": "2026-01-07T11:45:00Z"
   },
   {
     "userId": "c7072fb5-cd2b-4703-8a58-328e5b7ed95a",
     "name": "Amelia",
-    "email": "atondeur3@posterous.com"
+    "email": "atondeur3@posterous.com",
+    "website": "https://amelia-designs.com",
+    "githubLogin": "amelia-design",
+    "discordLogin": "Amelia#3456",
+    "description": "UI/UX designer and front-end developer",
+    "lastLogin": "2026-01-06T16:20:00Z"
   },
   {
     "userId": "22c29051-d301-4cc2-86dd-c19695408adb",
     "name": "Bucky",
-    "email": "btompkin4@moonfruit.com"
+    "email": "btompkin4@moonfruit.com",
+    "website": "https://bucky-codes.com",
+    "githubLogin": "bucky-mango",
+    "discordLogin": "Bucky#7890",
+    "description": "Backend engineer specializing in microservices",
+    "lastLogin": "2026-01-09T10:00:00Z"
   },
   {
     "userId": "6ac28937-bc05-4c0a-be7e-1a332e2de312",
     "name": "Sherline",
-    "email": "sinston5@issuu.com"
+    "email": "sinston5@issuu.com",
+    "website": "https://sherline.tech",
+    "githubLogin": "sherline-tech",
+    "discordLogin": "Sherline#2345",
+    "description": "DevOps engineer and cloud architect",
+    "lastLogin": "2026-01-05T13:30:00Z"
   },
   {
     "userId": "552c1c73-e324-47ee-bf7f-b0dfbeb59788",
     "name": "Leontine",
-    "email": "lchartres6@edublogs.org"
+    "email": "lchartres6@edublogs.org",
+    "website": "https://leontine-writes.com",
+    "githubLogin": "leontine-blog",
+    "discordLogin": "Leontine#6789",
+    "description": "Technical writer and educator",
+    "lastLogin": "2026-01-04T08:45:00Z"
   },
   {
     "userId": "962c8a6b-c914-4aa4-93bc-2b91188a1a58",
     "name": "Cloris",
-    "email": "cmorrall7@un.org"
+    "email": "cmorrall7@un.org",
+    "website": "https://cloris-studio.com",
+    "githubLogin": "cloris-art",
+    "discordLogin": "Cloris#0123",
+    "description": "Creative developer with a focus on animations",
+    "lastLogin": "2026-01-09T15:00:00Z"
   },
   {
     "userId": "35393a7a-f41b-4fe9-8901-fc39a8f803d6",
     "name": "Tobiah",
-    "email": "trubinchik8@time.com"
+    "email": "trubinchik8@time.com",
+    "website": "https://tobiah-ventures.io",
+    "githubLogin": "tobiah-startup",
+    "discordLogin": "Tobiah#4567",
+    "description": "Startup founder and product builder",
+    "lastLogin": "2026-01-03T12:00:00Z"
   },
   {
     "userId": "9cf146a9-3da9-47fe-bcc3-3abdeb3a375d",
     "name": "Colet",
-    "email": "cmincini9@dell.com"
+    "email": "cmincini9@dell.com",
+    "website": "https://colet-consulting.com",
+    "githubLogin": "colet-consult",
+    "discordLogin": "Colet#8901",
+    "description": "Enterprise solutions architect",
+    "lastLogin": "2026-01-02T14:15:00Z"
   },
   {
     "userId": "4a6efba9-61a2-4829-abe6-dfed18484737",
     "name": "Van",
-    "email": "vswaitea@imdb.com"
+    "email": "vswaitea@imdb.com",
+    "website": "https://van-streaming.io",
+    "githubLogin": "van-media",
+    "discordLogin": "Van#2345",
+    "description": "Video streaming and media tech specialist",
+    "lastLogin": "2026-01-09T17:30:00Z"
   },
   {
     "userId": "6718765e-123c-42d4-b2b3-efc029ff854e",
     "name": "Mella",
-    "email": "mheartyb@sphinn.com"
+    "email": "mheartyb@sphinn.com",
+    "website": "https://mella-music.dev",
+    "githubLogin": "mella-audio",
+    "discordLogin": "Mella#6789",
+    "description": "Audio engineering and music tech developer",
+    "lastLogin": "2025-12-28T10:30:00Z"
   },
   {
     "userId": "0880eb85-2a08-4898-8aae-3cf90c48b08b",
     "name": "Karyl",
-    "email": "kmatteic@live.com"
+    "email": "kmatteic@live.com",
+    "website": "https://karyl-games.com",
+    "githubLogin": "karyl-gaming",
+    "discordLogin": "Karyl#0123",
+    "description": "Game developer and graphics programmer",
+    "lastLogin": "2026-01-01T09:00:00Z"
   },
   {
     "userId": "2977c5fe-22be-454a-80e1-5b93db92a371",
     "name": "Berrie",
-    "email": "bnortcliffed@linkedin.com"
+    "email": "bnortcliffed@linkedin.com",
+    "website": "https://berrie-analytics.io",
+    "githubLogin": "berrie-data",
+    "discordLogin": "Berrie#4567",
+    "description": "Analytics and business intelligence specialist",
+    "lastLogin": "2026-01-08T11:20:00Z"
   },
   {
     "userId": "bd909a0b-f665-451a-a052-8e8111e796e3",
     "name": "Giselle",
-    "email": "gsollitte@weibo.com"
+    "email": "gsollitte@weibo.com",
+    "website": "https://giselle-fashion.com",
+    "githubLogin": "giselle-style",
+    "discordLogin": "Giselle#8901",
+    "description": "E-commerce and fashion tech developer",
+    "lastLogin": "2025-12-25T15:45:00Z"
   },
   {
     "userId": "26409ed7-15ac-4695-9813-be2afb6dad26",
     "name": "Niall",
-    "email": "nrebeirof@netvibes.com"
+    "email": "nrebeirof@netvibes.com",
+    "website": "https://niall-security.io",
+    "githubLogin": "niall-sec",
+    "discordLogin": "Niall#2345",
+    "description": "Cybersecurity expert and penetration tester",
+    "lastLogin": "2026-01-07T14:00:00Z"
   },
   {
     "userId": "80697f6f-69bc-4b03-82c0-40f48884f716",
     "name": "Afton",
-    "email": "ajozaitisg@craigslist.org"
+    "email": "ajozaitisg@craigslist.org",
+    "website": "https://afton-testing.com",
+    "githubLogin": "afton-qa",
+    "discordLogin": "Afton#6789",
+    "description": "QA automation engineer",
+    "lastLogin": "2026-01-09T13:00:00Z"
   },
   {
     "userId": "15d25fd9-32da-4ac7-b1b6-589a90a41dbf",
     "name": "Letisha",
-    "email": "lgrimsdykeh@blogger.com"
+    "email": "lgrimsdykeh@blogger.com",
+    "website": "https://letisha-learning.io",
+    "githubLogin": "letisha-edu",
+    "discordLogin": "Letisha#0123",
+    "description": "Education tech developer and trainer",
+    "lastLogin": "2025-12-20T10:15:00Z"
   },
   {
     "userId": "0bd8b2b2-d67f-47dc-9acc-d2311006852b",
     "name": "Julio",
-    "email": "jcuniami@weibo.com"
+    "email": "jcuniami@weibo.com",
+    "website": "https://julio-mobile.dev",
+    "githubLogin": "julio-app",
+    "discordLogin": "Julio#4567",
+    "description": "Mobile app developer for iOS and Android",
+    "lastLogin": "2026-01-06T12:30:00Z"
   },
   {
     "userId": "e83bae68-8104-4847-9f08-98206f35d100",
     "name": "Dana",
-    "email": "dstrugnellj@51.la"
+    "email": "dstrugnellj@51.la",
+    "website": "https://dana-healthcare.io",
+    "githubLogin": "dana-health",
+    "discordLogin": "Dana#8901",
+    "description": "Healthcare tech and telemedicine specialist",
+    "lastLogin": "2026-01-05T16:45:00Z"
   },
   {
     "userId": "a4cf8f1f-8c61-404d-834d-220202358f91",
     "name": "Gertie",
-    "email": "gmacrok@networkadvertising.org"
+    "email": "gmacrok@networkadvertising.org",
+    "website": "https://gertie-marketing.com",
+    "githubLogin": "gertie-ads",
+    "discordLogin": "Gertie#2345",
+    "description": "Marketing automation and ad tech developer",
+    "lastLogin": "2025-12-31T11:00:00Z"
   },
   {
     "userId": "e091dbc4-0fc5-4823-9fc4-1cdded1fc5f4",
     "name": "Vidovik",
-    "email": "vriddettl@usgs.gov"
+    "email": "vriddettl@usgs.gov",
+    "website": "https://vidovik-geo.io",
+    "githubLogin": "vidovik-map",
+    "discordLogin": "Vidovik#6789",
+    "description": "GIS and geospatial data specialist",
+    "lastLogin": "2026-01-04T09:30:00Z"
   },
   {
     "userId": "e9ceef74-fb81-41e0-b52e-0089b978b2f3",
     "name": "Yancey",
-    "email": "yfentemm@51.la"
+    "email": "yfentemm@51.la",
+    "website": "https://yancey-fintech.io",
+    "githubLogin": "yancey-crypto",
+    "discordLogin": "Yancey#0123",
+    "description": "Fintech and blockchain developer",
+    "lastLogin": "2026-01-08T14:20:00Z"
   },
   {
     "userId": "9d82ca0e-cb41-4fba-a73f-acb7388e9d12",
     "name": "Lyndell",
-    "email": "ldurninn@sciencedirect.com"
+    "email": "ldurninn@sciencedirect.com",
+    "website": "https://lyndell-research.com",
+    "githubLogin": "lyndell-science",
+    "discordLogin": "Lyndell#4567",
+    "description": "Research and academic software developer",
+    "lastLogin": "2025-12-15T13:45:00Z"
   },
   {
     "userId": "ecea4d11-d41e-468a-85d3-e80a193a5620",
     "name": "Heidie",
-    "email": "hrackhamo@craigslist.org"
+    "email": "hrackhamo@craigslist.org",
+    "website": "https://heidie-marketplace.io",
+    "githubLogin": "heidie-buy",
+    "discordLogin": "Heidie#8901",
+    "description": "Marketplace and e-commerce platform developer",
+    "lastLogin": "2026-01-09T11:30:00Z"
   },
   {
     "userId": "29232f0d-2423-406f-956b-00ddf9540ac8",
     "name": "Clem",
-    "email": "cthorbonp@smugmug.com"
+    "email": "cthorbonp@smugmug.com",
+    "website": "https://clem-photography.com",
+    "githubLogin": "clem-photo",
+    "discordLogin": "Clem#2345",
+    "description": "Photography and image processing tech expert",
+    "lastLogin": "2026-01-02T10:00:00Z"
   },
   {
     "userId": "afd4a67e-83ba-4a62-9cdc-2fdc0c553b29",
     "name": "Paten",
-    "email": "pblasdaleq@quantcast.com"
+    "email": "pblasdaleq@quantcast.com",
+    "website": "https://paten-analytics.io",
+    "githubLogin": "paten-metrics",
+    "discordLogin": "Paten#6789",
+    "description": "Real-time analytics and metrics platform builder",
+    "lastLogin": "2026-01-07T15:15:00Z"
   },
   {
     "userId": "2a26982f-498f-4599-ab54-bc7469e2fbfd",
     "name": "Daisi",
-    "email": "dsedgwickr@addthis.com"
+    "email": "dsedgwickr@addthis.com",
+    "website": "https://daisi-social.io",
+    "githubLogin": "daisi-net",
+    "discordLogin": "Daisi#0123",
+    "description": "Social networking and community platform developer",
+    "lastLogin": "2025-12-10T08:30:00Z"
   },
   {
     "userId": "c876a2cc-7528-4b61-837b-b7f7efc62cca",
     "name": "Sara-ann",
-    "email": "sblundels@csmonitor.com"
+    "email": "sblundels@csmonitor.com",
+    "website": "https://sara-ann-consulting.com",
+    "githubLogin": "sara-ann-tech",
+    "discordLogin": "Sara-ann#4567",
+    "description": "Tech consultant and system architect",
+    "lastLogin": "2026-01-09T12:45:00Z"
   }
 ]
