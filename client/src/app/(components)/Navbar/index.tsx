@@ -35,6 +35,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const avatarUrl = currentUser?.avatar || 'https://ui-avatars.com/api/?name=DocRST';
+  const isGeneratedAvatar = typeof avatarUrl === 'string' && avatarUrl.includes('ui-avatars.com');
 
   async function handleLogin(username: string, password: string) {
     const name = (username || '').trim();
@@ -132,9 +134,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
           </div>
            <hr className="w-0 h-7 border border-solid border-l border-gray-300 mx-3" />
            <div className="flex items-center gap-3">
-            {!avatarError ? (
+            {!avatarError && !isGeneratedAvatar ? (
               <img
-                src={currentUser?.avatar || 'https://ui-avatars.com/api/?name=DocRST'}
+                src={avatarUrl}
                 alt={currentUser?.name ?? 'user'}
                 className="w-9 h-9 rounded-full object-cover bg-gray-200"
                 onError={() => setAvatarError(true)}
