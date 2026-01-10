@@ -780,10 +780,10 @@ const Administrator = (props: Props) => {
       setFormPassword(u.password ?? '');
       setFormPasswordExpiresAt(u.passwordExpiresAt);
       setFormAvatarUrl(u.avatarUrl ?? undefined);
-      setFormWebsite((u as any).website ?? '');
-      setFormGithubLogin((u as any).githubLogin ?? '');
-      setFormDiscordLogin((u as any).discordLogin ?? '');
-      setFormDescription((u as any).description ?? '');
+      setFormWebsite(u.website ?? '');
+      setFormGithubLogin(u.githubLogin ?? '');
+      setFormDiscordLogin(u.discordLogin ?? '');
+      setFormDescription(u.description ?? '');
       setShowUserForm(true);
     };
 
@@ -817,9 +817,9 @@ const Administrator = (props: Props) => {
         setUsers(updated as User[]);
         if (hashed) {
           try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
-        // also upsert full user metadata to server
-        try { await fetch(`${API_BASE}/api/admin/users/upsert`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: updated.find(u => u.id === editingUser.id) }) }); } catch (e) { console.warn('Failed to upsert user to server', e); }
         }
+        // Always upsert full user metadata to server (not just when password changes)
+        try { await fetch(`${API_BASE}/api/admin/users/upsert`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: updated.find(u => u.id === editingUser.id) }) }); } catch (e) { console.warn('Failed to upsert user to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
       } else {
@@ -1512,7 +1512,13 @@ const Administrator = (props: Props) => {
                   <div className="flex items-start gap-4">
                     <div className="flex items-center gap-2">
                       <img
-                        src={formAvatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'))}
+                        src={(() => {
+                          let url = formAvatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'));
+                          if (url && url.startsWith('/data/')) {
+                            url = `${API_BASE}${url}`;
+                          }
+                          return url;
+                        })()}
                         alt="avatar"
                         className="w-12 h-12 rounded-full object-cover"
                         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'); }}

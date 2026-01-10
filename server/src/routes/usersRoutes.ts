@@ -147,7 +147,9 @@ router.post('/avatar', (req: Request, res: Response) => {
     const filename = `${id.replace(/[^a-z0-9_-]/gi, '')}-${Date.now()}.${ext}`;
     const filePath = path.join(dir, filename);
     fs.writeFileSync(filePath, buf);
-    const urlPath = `/data/avatars/${filename}`;
+    // Return full URL with backend server origin
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+    const urlPath = `${backendUrl}/data/avatars/${filename}`;
     return res.json({ ok: true, url: urlPath });
   } catch (e) {
     console.error('[UsersRoute] avatar upload error', e);

@@ -137,7 +137,12 @@ const Profile = () => {
           // Never hydrate password into form state
           const { password: _ignoredPassword, ...rest } = user as any;
           setFormData(rest);
-          setAvatarUrl(user.avatarUrl || currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`);
+          // Ensure avatar URL is absolute
+          let avatarToShow = user.avatarUrl || currentUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`;
+          if (avatarToShow && avatarToShow.startsWith('/data/')) {
+            avatarToShow = `${API_BASE}${avatarToShow}`;
+          }
+          setAvatarUrl(avatarToShow);
         } else {
           console.error('No matching user found');
           setMessage('User profile not found');

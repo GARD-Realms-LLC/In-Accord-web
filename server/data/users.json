@@ -10,7 +10,11 @@
       "status": "Active",
       "createdAt": "2026-01-10",
       "userId": "uo0dcod2",
-      "avatarUrl": "/data/avatars/uo0dcod2-1768024665535.jpeg"
+      "avatarUrl": "http://localhost:8000/data/avatars/uo0dcod2-1768025004485.png",
+      "website": "ppeasrt.com",
+      "githubLogin": "https://github.com/GARD-Realms-LLC/In-Accord-web",
+      "discordLogin": "1139705465232699443",
+      "description": "just the facts ma'am!"
     },
     {
       "id": "uxkgeoua",

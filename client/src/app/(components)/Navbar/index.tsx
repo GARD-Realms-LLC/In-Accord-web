@@ -61,7 +61,13 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
-  const avatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=Not+Logged+In';
+  
+  // Construct avatar URL, ensuring relative paths are converted to absolute backend URLs
+  let rawAvatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=Not+Logged+In';
+  if (rawAvatarUrl && rawAvatarUrl.startsWith('/data/')) {
+    rawAvatarUrl = `${API_BASE}${rawAvatarUrl}`;
+  }
+  const avatarUrl = rawAvatarUrl;
   const isGeneratedAvatar = typeof avatarUrl === 'string' && avatarUrl.includes('ui-avatars.com');
 
   useEffect(() => {
