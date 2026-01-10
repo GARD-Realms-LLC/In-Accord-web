@@ -1811,24 +1811,25 @@ const DashboardLayout = ({ children })=>{
     const maxWidth = 320;
     const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
     const appliedSidebarOffset = isSidebarCollapsed ? 64 : clampedSidebarWidth;
+    // Centralized list of routes that require authentication
+    const protectedRoutes = [
+        '/administrator',
+        '/dashboard',
+        '/profile',
+        '/inventory',
+        '/products',
+        '/expenses',
+        '/bots',
+        '/servers',
+        '/hosting',
+        '/users'
+    ];
     // Redirect to home when accessing protected routes without a logged-in user
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "DashboardLayout.useEffect": ()=>{
             try {
                 const raw = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('currentUser') : "TURBOPACK unreachable";
                 const user = raw ? JSON.parse(raw) : null;
-                const protectedRoutes = [
-                    '/administrator',
-                    '/dashboard',
-                    '/profile',
-                    '/inventory',
-                    '/products',
-                    '/expenses',
-                    '/bots',
-                    '/servers',
-                    '/hosting',
-                    '/users'
-                ];
                 const isProtected_0 = protectedRoutes.some({
                     "DashboardLayout.useEffect.isProtected_0": (p_0)=>pathname?.startsWith(p_0)
                 }["DashboardLayout.useEffect.isProtected_0"]);
@@ -1836,12 +1837,13 @@ const DashboardLayout = ({ children })=>{
                     // Use replace to avoid back button returning to protected page
                     router.replace('/home');
                 }
+                // Enforce Admin-only access for administrator route
+                if (pathname?.startsWith('/administrator') && user && user.role !== 'Admin') {
+                    router.replace('/home');
+                }
             } catch (e) {
                 // Fail-safe: if parsing fails, redirect off protected routes
-                const isProtected = [
-                    '/administrator',
-                    '/dashboard'
-                ].some({
+                const isProtected = protectedRoutes.some({
                     "DashboardLayout.useEffect.isProtected": (p)=>pathname?.startsWith(p)
                 }["DashboardLayout.useEffect.isProtected"]);
                 if (isProtected) router.replace('/home');
@@ -1859,14 +1861,14 @@ const DashboardLayout = ({ children })=>{
                     try {
                         const raw_0 = localStorage.getItem('currentUser');
                         const user_0 = raw_0 ? JSON.parse(raw_0) : null;
-                        const protectedRoutes_0 = [
-                            '/administrator',
-                            '/dashboard'
-                        ];
-                        const isProtected_1 = protectedRoutes_0.some({
+                        const isProtected_1 = protectedRoutes.some({
                             "DashboardLayout.useEffect.onAuthUpdate.isProtected_1": (p_1)=>pathname?.startsWith(p_1)
                         }["DashboardLayout.useEffect.onAuthUpdate.isProtected_1"]);
                         if (isProtected_1 && !user_0) router.replace('/home');
+                        // Enforce Admin-only access for administrator route
+                        if (pathname?.startsWith('/administrator') && user_0 && user_0.role !== 'Admin') {
+                            router.replace('/home');
+                        }
                     } catch  {}
                 }
             }["DashboardLayout.useEffect.onAuthUpdate"];
@@ -1896,7 +1898,7 @@ const DashboardLayout = ({ children })=>{
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Sidebar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                 fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-                lineNumber: 77,
+                lineNumber: 86,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -1909,20 +1911,20 @@ const DashboardLayout = ({ children })=>{
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$app$2f28$components$292f$Navbar$2f$index$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                         fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-                        lineNumber: 83,
+                        lineNumber: 92,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     children
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-                lineNumber: 78,
+                lineNumber: 87,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-        lineNumber: 73,
+        lineNumber: 82,
         columnNumber: 10
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -1938,11 +1940,11 @@ _s(DashboardLayout, "UAop8VHzDXgJs9uW7d3Mx3MaXUQ=", false, function() {
 _c = DashboardLayout;
 const DashboardWrapper = (t0)=>{
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(3);
-    if ($[0] !== "9328b3be450bb0c60738484c8bd12f7c71998870ca946e727ebd9c4d99e5ad8f") {
+    if ($[0] !== "0ab361128b9480666876c44db41fb2596155f2cd2b76c9015c662badec620c63") {
         for(let $i = 0; $i < 3; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "9328b3be450bb0c60738484c8bd12f7c71998870ca946e727ebd9c4d99e5ad8f";
+        $[0] = "0ab361128b9480666876c44db41fb2596155f2cd2b76c9015c662badec620c63";
     }
     const { children } = t0;
     let t1;
@@ -1952,12 +1954,12 @@ const DashboardWrapper = (t0)=>{
                 children: children
             }, void 0, false, {
                 fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-                lineNumber: 101,
+                lineNumber: 110,
                 columnNumber: 25
             }, ("TURBOPACK compile-time value", void 0))
         }, void 0, false, {
             fileName: "[project]/client/src/app/dashboardWrapper.tsx",
-            lineNumber: 101,
+            lineNumber: 110,
             columnNumber: 10
         }, ("TURBOPACK compile-time value", void 0));
         $[1] = children;
