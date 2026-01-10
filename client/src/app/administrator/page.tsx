@@ -113,6 +113,23 @@ function gravatarUrlForEmail(email: string, size = 64) {
   try { return `https://www.gravatar.com/avatar/${md5(email.trim().toLowerCase())}?s=${size}&d=identicon`; } catch { return ''; }
 }
 
+// Hash password helper - uses SHA-256 and returns a simple prefixed form the server accepts (legacy sha256)
+async function hashPassword(password: string) {
+  try {
+    const enc = new TextEncoder();
+    const data = enc.encode(password);
+    const hashBuf = await (crypto.subtle || (window as any).crypto.subtle).digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuf));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return `sha256$${hashHex}`;
+  } catch (e) {
+    // fallback: simple JS hash (not cryptographically secure)
+    let h = 0;
+    for (let i = 0; i < password.length; i++) h = ((h << 5) - h) + password.charCodeAt(i);
+    return `sha256$${(h >>> 0).toString(16)}`;
+  }
+}
+
 
 // Password strength helper component
 function PasswordStrength({ password }: { password: string }) {
@@ -568,6 +585,11 @@ const Administrator = (props: Props) => {
     const [showPassword, setShowPassword] = useState(false);
     const [formAvatarUrl, setFormAvatarUrl] = useState<string | undefined>(undefined);
     const [formPasswordExpiresAt, setFormPasswordExpiresAt] = useState<string | undefined>(undefined);
+    // UI for save-toast and temporary reveal of saved password
+    const [toastVisible, setToastVisible] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [lastSavedPlain, setLastSavedPlain] = useState<string | null>(null);
+    const [showSavedReveal, setShowSavedReveal] = useState(false);
     // Bulk password migration state
     const [showBulkPasswords, setShowBulkPasswords] = useState(false);
     const [bulkPasswords, setBulkPasswords] = useState<Record<string,string>>({});
@@ -722,6 +744,32 @@ const Administrator = (props: Props) => {
       const toDelete = users.find(u => u.id === id);
       setUsers(users.filter(u => u.id !== id) as User[]);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted User', details: `${toDelete?.name} deleted`, status: 'Success' }, ...prev]);
+    };
+
+    const savePasswordOnly = async () => {
+      const minPasswordLen = 8;
+      if (!editingUser) { alert('No user selected. Open Edit for a user first.'); return; }
+      if (!formPassword) { alert('Enter a new password first.'); return; }
+      if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
+      try {
+        const plain = formPassword;
+        const hashed = await hashPassword(plain);
+        setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, password: hashed } : u));
+        try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
+        setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated Password', details: `${editingUser.name} password updated`, status: 'Success' }, ...prev]);
+        // show transient reveal and toast
+        setLastSavedPlain(plain);
+        setShowSavedReveal(true);
+        setToastMessage('Password saved');
+        setToastVisible(true);
+        setFormPassword('');
+        // hide reveal after 8s and toast after 3s
+        setTimeout(() => setShowSavedReveal(false), 8000);
+        setTimeout(() => setToastVisible(false), 3000);
+      } catch (e) {
+        console.error('savePasswordOnly failed', e);
+        alert('Failed to save password.');
+      }
     };
 
     const toggleUserStatus = (id: string) => {
@@ -1209,6 +1257,12 @@ const Administrator = (props: Props) => {
 
     return (
       <div className="space-y-8 p-8">
+        {/* Toast */}
+        {toastVisible && (
+          <div className="fixed right-4 bottom-4 z-50">
+            <div className="px-4 py-2 bg-gray-900 text-white rounded shadow">{toastMessage}</div>
+          </div>
+        )}
         {/* Section 1 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">User Management</h2>
@@ -1238,18 +1292,7 @@ const Administrator = (props: Props) => {
                     <input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="username" className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
                   </div>
 
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Password</label>
-                      <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="password" type={showPassword ? 'text' : 'password'} className="mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
-                      <div className="mt-1">
-                        <PasswordStrength password={formPassword} />
-                      </div>
-                    </div>
-                    <div className="flex items-center mt-6">
-                      <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
-                    </div>
-                  </div>
+                  {/* password moved below next to avatar */}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email</label>
@@ -1266,9 +1309,9 @@ const Administrator = (props: Props) => {
                     </select>
                   </div>
                 </div>
-                <div className="mb-3 flex items-center gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Avatar</label>
+                <div className="mb-3">
+                  <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Avatar & Password</label>
+                  <div className="flex items-start gap-4">
                     <div className="flex items-center gap-2">
                       <img
                         src={formAvatarUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'))}
@@ -1284,6 +1327,27 @@ const Administrator = (props: Props) => {
                         }} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Upload</button>
                         <button onClick={() => setFormAvatarUrl(undefined)} className="ml-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Clear</button>
                       </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">New Password</label>
+                      <div className="flex items-center gap-2">
+                        <input value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="New password" type={showPassword ? 'text' : 'password'} className="mt-0 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full" />
+                        <button onClick={async () => { await savePasswordOnly(); }} className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Save Password</button>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="text-xs text-gray-500"><PasswordStrength password={formPassword} /></div>
+                        <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
+                      </div>
+                      {showSavedReveal && lastSavedPlain && (
+                        <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
+                          <div className="font-medium text-xs text-gray-600 dark:text-gray-300">Saved Password (temporary)</div>
+                          <div className="flex items-center justify-between mt-1">
+                            <div className="font-mono text-sm break-all">{lastSavedPlain}</div>
+                            <button onClick={() => { navigator.clipboard?.writeText(lastSavedPlain); setToastMessage('Copied'); setToastVisible(true); setTimeout(() => setToastVisible(false), 2000); }} className="ml-2 px-2 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
