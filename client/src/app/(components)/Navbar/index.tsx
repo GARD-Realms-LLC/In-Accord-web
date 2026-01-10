@@ -27,6 +27,26 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
     }
   });
 
+  // Listen for localStorage changes (e.g., when profile is updated)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const raw = localStorage.getItem('currentUser');
+        const updated = raw ? JSON.parse(raw) : null;
+        setCurrentUser(updated);
+      } catch {}
+    };
+
+    // Listen for storage events (from other tabs) and custom events (from same tab)
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('userUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userUpdated', handleStorageChange);
+    };
+  }, []);
+
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
@@ -37,7 +57,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-  const avatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=DocRST';
+  const avatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=Not+Logged+In';
   const isGeneratedAvatar = typeof avatarUrl === 'string' && avatarUrl.includes('ui-avatars.com');
 
   useEffect(() => {
@@ -165,7 +185,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
                 <User className="text-gray-600" size={18} />
               </div>
             )}
-            <span className="font-semibold">{currentUser?.name ?? 'DocRST'}</span>
+            <span className="font-semibold">{currentUser?.name ?? 'Not Logged In'}</span>
           </div>
           <div className="flex items-center gap-2">
             {!currentUser && (

@@ -77,4 +77,19 @@ router.post('/terminate-all', (_req, res) => {
     writeSessions(sessions);
     return res.json({ ok: true, terminated: count });
 });
+// POST /update-avatar { sessionId, avatar }
+router.post('/update-avatar', (req, res) => {
+    const { sessionId, avatar } = req.body;
+    if (!sessionId || typeof sessionId !== 'string')
+        return res.status(400).json({ ok: false, error: 'sessionId required' });
+    if (!avatar || typeof avatar !== 'string')
+        return res.status(400).json({ ok: false, error: 'avatar required' });
+    sessions = readSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session)
+        return res.status(404).json({ ok: false, error: 'session not found' });
+    session.avatar = avatar;
+    writeSessions(sessions);
+    return res.json({ ok: true, session });
+});
 exports.default = router;

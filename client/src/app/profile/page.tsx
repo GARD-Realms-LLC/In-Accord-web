@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+// Use API base URL from env, or fallback to localhost:8000 for development
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 interface UserProfile {
   id?: string;
@@ -204,12 +205,14 @@ const Profile = () => {
       const userId = profile?.id || profile?.userId;
       if (!userId) {
         setMessage('User ID not found');
+        setSaving(false);
         return;
       }
 
       // Upload avatar first when it's a new data URL so the profile save only stores a URL
       let avatarToUse = avatarUrl;
       if (avatarUrl && avatarUrl.startsWith('data:')) {
+        console.log('Uploading avatar to server...');
         const avatarRes = await fetch(`${API_BASE}/api/admin/users/avatar`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -220,16 +223,19 @@ const Profile = () => {
           const errorData = await avatarRes.json().catch(() => ({}));
           console.error('Failed to upload avatar:', avatarRes.status, errorData);
           setMessage(`Failed to upload avatar: ${errorData.error || avatarRes.statusText}`);
+          setSaving(false);
           return;
         }
 
         const avatarData = await avatarRes.json();
+        console.log('Avatar uploaded successfully:', avatarData);
         avatarToUse = avatarData.url || avatarUrl;
         setAvatarUrl(avatarToUse);
         setFormData(prev => ({ ...prev, avatarUrl: avatarToUse }));
       }
 
       // Send updated profile to server
+      console.log('Saving profile with avatar:', avatarToUse);
       const response = await fetch(`${API_BASE}/api/admin/users/upsert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -245,7 +251,10 @@ const Profile = () => {
       });
 
       if (response.ok) {
-        setProfile(formData);
+        console.log('Profile saved successfully');
+        const updatedProfile = { ...formData, avatarUrl: avatarToUse };
+        setProfile(updatedProfile);
+        setAvatarUrl(avatarToUse);
         setEditMode(false);
         setPassword('');
         setPasswordConfirm('');
@@ -254,12 +263,31 @@ const Profile = () => {
 
         // Update localStorage
         const updatedUser = {
+          id: userId,
+          userId: userId,
           name: formData.name,
           email: formData.email,
           username: formData.username,
           avatar: avatarToUse,
         };
         window.localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        
+        // Update session avatar on server
+        const sessionId = window.localStorage.getItem('sessionId');
+        if (sessionId) {
+          try {
+            await fetch(`${API_BASE}/api/admin/sessions/update-avatar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId, avatar: avatarToUse }),
+            });
+          } catch (e) {
+            console.warn('Failed to update session avatar', e);
+          }
+        }
+        
+        // Notify other components (like Navbar) that the user was updated
+        window.dispatchEvent(new Event('userUpdated'));
       } else {
           const errorData = await response.json().catch(() => ({}));
           console.error('Failed to save profile:', response.status, errorData);
@@ -267,7 +295,7 @@ const Profile = () => {
       }
     } catch (e) {
       console.error('Error saving profile', e);
-      setMessage('Error saving profile');
+      setMessage(`Error saving profile: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }

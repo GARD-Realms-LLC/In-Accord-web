@@ -97,6 +97,11 @@ router.post('/upsert', (req: Request, res: Response) => {
     // start with existing user (if any) so we don't drop fields like password
     let toStore = { ...existing, ...user, id, userId: user.userId || user.id || id };
 
+    // Set createdAt for new users
+    if (idx === -1 && !toStore.createdAt) {
+      toStore.createdAt = new Date().toISOString().split('T')[0];
+    }
+
     // If password not provided, keep existing password
     if ((!user.password || user.password === '') && existing?.password) {
       toStore.password = existing.password;

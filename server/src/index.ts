@@ -11,7 +11,8 @@ import dashboardRoutes from "./routes/dashboardRoutes"; // http://localhost:8000
 /* CONFIGURATION */
 dotenv.config();
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 // Allow images from data: and https so inline/base64 avatars and external images can load in the frontend
@@ -29,8 +30,6 @@ app.use(
     })
 );
 app.use(morgan("common"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 /* ROUTES */
