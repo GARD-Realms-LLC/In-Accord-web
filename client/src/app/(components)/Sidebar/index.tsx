@@ -28,6 +28,7 @@ const SidebarLink = ({
     "/home",
     "/plugins",
     "/themes",
+    "/ide",
     "/uploads",
     "/dashboard",
     "/inventory",
@@ -306,6 +307,13 @@ const Sidebar = () => {
         href="/themes" 
         icon={FileQuestionIcon}
         label="Themes" 
+        isCollapsed={isSidebarCollapsed}
+        currentUserRole={currentUserRole} 
+      />
+              <SidebarLink 
+        href="/ide" 
+        icon={FileQuestionIcon}
+        label="CSS IDE"
         isCollapsed={isSidebarCollapsed}
         currentUserRole={currentUserRole} 
       />
