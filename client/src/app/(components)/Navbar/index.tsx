@@ -35,8 +35,12 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-  const avatarUrl = currentUser?.avatar || 'https://ui-avatars.com/api/?name=DocRST';
+  const avatarUrl = currentUser?.avatar || (currentUser as any)?.avatarUrl || 'https://ui-avatars.com/api/?name=DocRST';
   const isGeneratedAvatar = typeof avatarUrl === 'string' && avatarUrl.includes('ui-avatars.com');
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [avatarUrl]);
 
   async function handleLogin(username: string, password: string) {
     const name = (username || '').trim();
@@ -58,7 +62,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
       } catch (e) { console.warn('Failed to create session', e); }
       // notify other parts of the app that a session was created
       try { window.dispatchEvent(new CustomEvent('sessionCreated', { detail: { user, sessionId: typeof window !== 'undefined' ? localStorage.getItem('sessionId') : null } })); } catch {}
-      setCurrentUser({ name: user.name || name, username: user.username || name, email: user.email, avatar: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` });
+      setCurrentUser({ name: user.name || name, username: user.username || name, email: user.email, avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` });
       return { ok: true, user };
     } catch (e) {
       console.error('Login error', e);

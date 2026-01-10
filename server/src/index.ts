@@ -14,6 +14,20 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+// Allow images from data: and https so inline/base64 avatars and external images can load in the frontend
+app.use(
+    // @ts-ignore - use helmet.contentSecurityPolicy middleware
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            connectSrc: ["'self'"],
+            frameAncestors: ["'none'"],
+        },
+    })
+);
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
