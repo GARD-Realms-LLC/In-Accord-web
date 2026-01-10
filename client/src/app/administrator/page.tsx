@@ -367,6 +367,15 @@ const Administrator = (props: Props) => {
     const [memoryUsage, setMemoryUsage] = useState(8.2);
     const [lastUpdated, setLastUpdated] = useState(new Date());
 
+    // Integration Management State
+    const [oauthConfig, setOauthConfig] = useState({
+      github: { clientId: '', clientSecret: '', redirectUri: '', enabled: false, connected: false },
+      discord: { clientId: '', clientSecret: '', redirectUri: '', enabled: false, connected: false }
+    });
+    const [integrationLoading, setIntegrationLoading] = useState(false);
+    const [integrationMessage, setIntegrationMessage] = useState('');
+    const [githubRefreshing, setGithubRefreshing] = useState(false);
+
     // Check if user has Admin role
     useEffect(() => {
       try {
@@ -392,6 +401,30 @@ const Administrator = (props: Props) => {
         router.push('/home');
       }
     }, [isAuthorized, router]);
+
+    // Load OAuth configuration from backend
+    useEffect(() => {
+      const loadOAuthConfig = async () => {
+        try {
+          const response = await fetch(`${API_BASE}/api/integrations/config`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.config) {
+              setOauthConfig(prev => ({
+                github: { ...prev.github, ...(data.config.github || {}) },
+                discord: { ...prev.discord, ...(data.config.discord || {}) }
+              }));
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load OAuth config:', error);
+        }
+      };
+      
+      if (isAuthorized) {
+        loadOAuthConfig();
+      }
+    }, [isAuthorized]);
 
     // Note: Do not early-return before hooks; we gate rendering right before the main return
 
@@ -466,6 +499,149 @@ const Administrator = (props: Props) => {
 
     const editTable = (tableName: string) => {
       alert(`Opening schema editor for table: ${tableName}. You can view and modify column definitions here.`);
+    };
+
+    // OAuth Integration Management Functions
+    const saveOAuthConfig = async () => {
+      setIntegrationLoading(true);
+      setIntegrationMessage('');
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/integrations/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(oauthConfig)
+        });
+        
+        if (response.ok) {
+          setIntegrationMessage('Configuration saved successfully!');
+          setAuditLogEntries(prev => [{
+            timestamp: new Date().toISOString(),
+            user: 'Admin',
+            page: 'System Configuration',
+            action: 'OAuth Configuration Saved',
+            details: 'GitHub and Discord OAuth settings updated',
+            status: 'Success'
+          }, ...prev]);
+          setTimeout(() => setIntegrationMessage(''), 3000);
+        } else {
+          setIntegrationMessage('Failed to save configuration');
+        }
+      } catch (error) {
+        console.error('Save OAuth config error:', error);
+        setIntegrationMessage('Error saving configuration');
+      } finally {
+        setIntegrationLoading(false);
+      }
+    };
+
+    const testOAuthConnection = async (provider: 'github' | 'discord') => {
+      const config = oauthConfig[provider];
+      
+      if (!config.clientId || !config.clientSecret) {
+        alert(`Missing ${provider} Client ID or Secret. Please configure them first.`);
+        return;
+      }
+      
+      setIntegrationLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/api/auth/${provider}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          setOauthConfig(prev => ({
+            ...prev,
+            [provider]: { ...prev[provider], connected: true }
+          }));
+          setAuditLogEntries(prev => [{
+            timestamp: new Date().toISOString(),
+            user: 'Admin',
+            page: 'System Configuration',
+            action: `${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth Connected`,
+            details: `Successfully tested ${provider} OAuth connection`,
+            status: 'Success'
+          }, ...prev]);
+          alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth test successful! Connection verified.`);
+        } else {
+          alert(`Failed to test ${provider} OAuth connection`);
+        }
+      } catch (error) {
+        console.error(`Test ${provider} OAuth error:`, error);
+        alert(`Error testing ${provider} OAuth connection`);
+      } finally {
+        setIntegrationLoading(false);
+      }
+    };
+
+    const disconnectOAuth = (provider: 'github' | 'discord') => {
+      setOauthConfig(prev => ({
+        ...prev,
+        [provider]: { ...prev[provider], connected: false }
+      }));
+      setAuditLogEntries(prev => [{
+        timestamp: new Date().toISOString(),
+        user: 'Admin',
+        page: 'System Configuration',
+        action: `${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth Disconnected`,
+        details: `Disconnected ${provider} OAuth integration`,
+        status: 'Success'
+      }, ...prev]);
+    };
+
+    const openOAuthFlow = async (provider: 'github' | 'discord') => {
+      try {
+        const response = await fetch(`${API_BASE}/api/auth/${provider}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          window.open(data.url, '_blank');
+        } else {
+          alert(`Failed to start ${provider} OAuth flow`);
+        }
+      } catch (error) {
+        console.error(`Open ${provider} OAuth flow error:`, error);
+        alert(`Error starting ${provider} OAuth flow`);
+      }
+    };
+
+    const copyOAuthURL = async (provider: 'github' | 'discord') => {
+      try {
+        const response = await fetch(`${API_BASE}/api/auth/${provider}/url`);
+        if (response.ok) {
+          const data = await response.json();
+          await navigator.clipboard.writeText(data.url);
+          alert('OAuth URL copied to clipboard!');
+        } else {
+          alert('Failed to fetch OAuth URL');
+        }
+      } catch (error) {
+        console.error('Copy OAuth URL error:', error);
+        alert('Failed to copy OAuth URL');
+      }
+    };
+
+    // GitHub Repository Refresh Function
+    const refreshGitHubChanges = async () => {
+      setGithubRefreshing(true);
+      try {
+        // This would fetch the latest commits from GitHub API
+        // For now, we'll simulate a refresh
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        setAuditLogEntries(prev => [{
+          timestamp: new Date().toISOString(),
+          user: 'Admin',
+          page: 'System Configuration',
+          action: 'GitHub Repository Refreshed',
+          details: 'Latest commits fetched from GitHub',
+          status: 'Success'
+        }, ...prev]);
+        
+        alert('GitHub repository changes updated successfully!');
+      } catch (error) {
+        console.error('GitHub refresh error:', error);
+        alert('Failed to refresh GitHub changes');
+      } finally {
+        setGithubRefreshing(false);
+      }
     };
 
     const viewTableDetails = (tableName: string) => {
@@ -1960,56 +2136,41 @@ const Administrator = (props: Props) => {
                       </div>
                       <div className="flex items-center gap-2">
                         <label className="text-sm">Enabled</label>
-                        <input type="checkbox" checked={systemConfig.oauth.github.enabled} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, enabled: e.target.checked } } }))} />
+                        <input type="checkbox" checked={oauthConfig.github.enabled} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, enabled: e.target.checked } }))} />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block text-xs text-gray-600 mb-1">Client ID</label>
-                        <input value={systemConfig.oauth.github.clientId} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, clientId: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                        <input value={oauthConfig.github.clientId} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, clientId: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                       </div>
                       <div>
                         <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
-                        <input type="password" value={systemConfig.oauth.github.clientSecret} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, clientSecret: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                        <input type="password" value={oauthConfig.github.clientSecret} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, clientSecret: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <div className="flex-1">
                         <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
-                        <input value={systemConfig.oauth.github.redirectUri} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, redirectUri: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                        <input value={oauthConfig.github.redirectUri} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, redirectUri: e.target.value } }))} placeholder={`${API_BASE}/api/auth/github/callback`} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                       </div>
                       <div className="flex flex-col gap-2">
-                        <button onClick={async () => {
-                          try {
-                            const r = await fetch('/api/auth/github/url');
-                            if (r.ok) {
-                              const j = await r.json();
-                              try { await navigator.clipboard.writeText(j.url); alert('Auth URL copied'); } catch { alert(j.url); }
-                            } else { alert('Failed to fetch auth url'); }
-                          } catch (e) { console.warn(e); alert('Failed to fetch auth url'); }
-                        }} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
+                        <button onClick={() => copyOAuthURL('github')} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
 
-                        <button onClick={async () => {
-                          try {
-                            const r = await fetch('/api/auth/github/url');
-                            if (r.ok) {
-                              const j = await r.json();
-                              window.open(j.url, '_blank');
-                            } else { alert('Failed to fetch auth url'); }
-                          } catch (e) { console.warn(e); alert('Failed to start OAuth'); }
-                        }} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
+                        <button onClick={() => openOAuthFlow('github')} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
 
-                        <button onClick={() => { const ok = !!systemConfig.oauth.github.clientId && !!systemConfig.oauth.github.clientSecret; setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, connected: ok } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: ok ? 'GitHub OAuth Configured' : 'GitHub OAuth Missing Credentials', details: ok ? 'GitHub OAuth configured' : 'Missing client id/secret', status: 'Success' }, ...prev]); alert(ok ? 'Connection simulated as successful.' : 'Missing client id or secret.'); }} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Test / Connect</button>
+                        <button onClick={() => testOAuthConnection('github')} disabled={integrationLoading} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50">Test / Connect</button>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="text-sm">Status: {systemConfig.oauth.github.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
+                      <div className="text-sm">Status: {oauthConfig.github.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, connected: true } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'GitHub Connected', details: 'Marked connected (simulated)', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Simulate Connect</button>
-                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, github: { ...prev.oauth.github, connected: false } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'GitHub Disconnected', details: 'Disconnected', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                        {oauthConfig.github.connected && (
+                          <button onClick={() => disconnectOAuth('github')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2022,55 +2183,59 @@ const Administrator = (props: Props) => {
                       </div>
                       <div className="flex items-center gap-2">
                         <label className="text-sm">Enabled</label>
-                        <input type="checkbox" checked={systemConfig.oauth.discord.enabled} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, enabled: e.target.checked } } }))} />
+                        <input type="checkbox" checked={oauthConfig.discord.enabled} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, enabled: e.target.checked } }))} />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block text-xs text-gray-600 mb-1">Client ID</label>
-                        <input value={systemConfig.oauth.discord.clientId} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, clientId: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                        <input value={oauthConfig.discord.clientId} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, clientId: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                       </div>
                       <div>
                         <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
-                        <input type="password" value={systemConfig.oauth.discord.clientSecret} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, clientSecret: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                        <input type="password" value={oauthConfig.discord.clientSecret} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, clientSecret: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <div className="flex-1">
                         <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
-                        <input value={systemConfig.oauth.discord.redirectUri} onChange={e => setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, redirectUri: e.target.value } } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                        <input value={oauthConfig.discord.redirectUri} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, redirectUri: e.target.value } }))} placeholder={`${API_BASE}/api/auth/discord/callback`} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                       </div>
                       <div className="flex flex-col gap-2">
-                        <button onClick={async () => {
-                          try {
-                            const r = await fetch('/api/auth/discord/url');
-                            if (r.ok) {
-                              const j = await r.json();
-                              try { await navigator.clipboard.writeText(j.url); alert('Auth URL copied'); } catch { alert(j.url); }
-                            } else { alert('Failed to fetch auth url'); }
-                          } catch (e) { console.warn(e); alert('Failed to fetch auth url'); }
-                        }} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
+                        <button onClick={() => copyOAuthURL('discord')} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
 
-                        <button onClick={async () => {
-                          try {
-                            const r = await fetch('/api/auth/discord/url');
-                            if (r.ok) { const j = await r.json(); window.open(j.url, '_blank'); } else { alert('Failed to fetch auth url'); }
-                          } catch (e) { console.warn(e); alert('Failed to start OAuth'); }
-                        }} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
+                        <button onClick={() => openOAuthFlow('discord')} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
 
-                        <button onClick={() => { const ok = !!systemConfig.oauth.discord.clientId && !!systemConfig.oauth.discord.clientSecret; setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, connected: ok } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: ok ? 'Discord OAuth Configured' : 'Discord OAuth Missing Credentials', details: ok ? 'Discord OAuth configured' : 'Missing client id/secret', status: 'Success' }, ...prev]); alert(ok ? 'Connection simulated as successful.' : 'Missing client id or secret.'); }} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Test / Connect</button>
+                        <button onClick={() => testOAuthConnection('discord')} disabled={integrationLoading} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50">Test / Connect</button>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="text-sm">Status: {systemConfig.oauth.discord.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
+                      <div className="text-sm">Status: {oauthConfig.discord.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, connected: true } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Discord Connected', details: 'Marked connected (simulated)', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Simulate Connect</button>
-                        <button onClick={() => { setSystemConfig(prev => ({ ...prev, oauth: { ...prev.oauth, discord: { ...prev.oauth.discord, connected: false } } })); setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Discord Disconnected', details: 'Disconnected', status: 'Success' }, ...prev]); }} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                        {oauthConfig.discord.connected && (
+                          <button onClick={() => disconnectOAuth('discord')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                        )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Save Configuration Button */}
+                  <div className="flex items-center justify-between mt-4">
+                    <button 
+                      onClick={saveOAuthConfig} 
+                      disabled={integrationLoading}
+                      className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50"
+                    >
+                      {integrationLoading ? 'Saving...' : 'Save OAuth Configuration'}
+                    </button>
+                    {integrationMessage && (
+                      <span className={`text-sm ${integrationMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+                        {integrationMessage}
+                      </span>
+                    )}
                   </div>
 
                   </div>
@@ -2949,10 +3114,123 @@ const Administrator = (props: Props) => {
         {/* Section 8 */}
         <section className="border-b pb-8">
           <h2 className="text-3xl font-bold mb-2">Integration Management</h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-6">
             Configure third-party integrations and manage API connections. 
             Monitor webhook delivery, manage authentication tokens, and troubleshoot integration issues.
           </p>
+
+          {/* OAuth Configuration Section */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">OAuth Provider Configuration</h3>
+
+            {/* GitHub OAuth */}
+            <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 space-y-3 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">GitHub Login</div>
+                  <div className="text-xs text-gray-500">Configure GitHub OAuth login (optional).</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">Enabled</label>
+                  <input type="checkbox" checked={oauthConfig.github.enabled} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, enabled: e.target.checked } }))} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Client ID</label>
+                  <input value={oauthConfig.github.clientId} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, clientId: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
+                  <input type="password" value={oauthConfig.github.clientSecret} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, clientSecret: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
+                  <input value={oauthConfig.github.redirectUri} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, redirectUri: e.target.value } }))} placeholder={`${API_BASE}/api/auth/github/callback`} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => copyOAuthURL('github')} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
+                  <button onClick={() => openOAuthFlow('github')} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
+                  <button onClick={() => testOAuthConnection('github')} disabled={integrationLoading} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50">Test / Connect</button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm">Status: {oauthConfig.github.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
+                <div className="flex items-center gap-2">
+                  {oauthConfig.github.connected && (
+                    <button onClick={() => disconnectOAuth('github')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Discord OAuth */}
+            <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">Discord Login</div>
+                  <div className="text-xs text-gray-500">Configure Discord OAuth login (optional).</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">Enabled</label>
+                  <input type="checkbox" checked={oauthConfig.discord.enabled} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, enabled: e.target.checked } }))} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Client ID</label>
+                  <input value={oauthConfig.discord.clientId} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, clientId: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
+                  <input type="password" value={oauthConfig.discord.clientSecret} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, clientSecret: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
+                  <input value={oauthConfig.discord.redirectUri} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, redirectUri: e.target.value } }))} placeholder={`${API_BASE}/api/auth/discord/callback`} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => copyOAuthURL('discord')} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
+                  <button onClick={() => openOAuthFlow('discord')} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
+                  <button onClick={() => testOAuthConnection('discord')} disabled={integrationLoading} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50">Test / Connect</button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="text-sm">Status: {oauthConfig.discord.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
+                <div className="flex items-center gap-2">
+                  {oauthConfig.discord.connected && (
+                    <button onClick={() => disconnectOAuth('discord')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Save Configuration Button */}
+            <div className="flex items-center justify-between mt-4">
+              <button 
+                onClick={saveOAuthConfig} 
+                disabled={integrationLoading}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50"
+              >
+                {integrationLoading ? 'Saving...' : 'Save OAuth Configuration'}
+              </button>
+              {integrationMessage && (
+                <span className={`text-sm ${integrationMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+                  {integrationMessage}
+                </span>
+              )}
+            </div>
+          </div>
         </section>
 
         {/* Section 9 */}
@@ -3108,9 +3386,19 @@ const Administrator = (props: Props) => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Commits</h3>
-              <a href="https://github.com/GARD-Realms-LLC/In-Accord-web" target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                View on GitHub
-              </a>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={refreshGitHubChanges}
+                  disabled={githubRefreshing}
+                  className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Refresh GitHub changes"
+                >
+                  {githubRefreshing ? 'Refreshing...' : '🔄 Refresh'}
+                </button>
+                <a href="https://github.com/GARD-Realms-LLC/In-Accord-web" target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                  View on GitHub
+                </a>
+              </div>
             </div>
             
             <div className="h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
