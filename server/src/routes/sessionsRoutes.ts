@@ -27,7 +27,8 @@ function seedSessions() {
   }
 }
 
-seedSessions();
+// Do not auto-seed sessions on startup — show only real sessions created at runtime
+// seedSessions();
 
 // GET / - list sessions
 router.get('/', (req: Request, res: Response) => {

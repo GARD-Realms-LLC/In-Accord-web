@@ -27,7 +27,8 @@ function seedSessions() {
         console.warn('[Sessions] seed failed', e);
     }
 }
-seedSessions();
+// Do not auto-seed sessions on startup — show only real sessions created at runtime
+// seedSessions();
 // GET / - list sessions
 router.get('/', (req, res) => {
     return res.json({ ok: true, sessions });

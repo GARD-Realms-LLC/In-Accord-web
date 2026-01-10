@@ -5,7 +5,8 @@
       "userId": "3b0fd66b-a4d6-4d95-94e4-01940c99aedb",
       "name": "Carly",
       "email": "cvansalzberger0@cisco.com",
-      "username": "cvansalzberger0"
+      "username": "cvansalzberger0",
+      "password": "pbkdf2$100000$3dffdb0f10a917c677870363804618d2$58b8df278c74afd6f22e4da53d8d5355ce9cad24e9864f28b29934f6b3de8251"
     },
     {
       "id": "d9d323fa-5c98-4222-a352-120e1f5e2798",
@@ -202,6 +203,17 @@
       "name": "Sara-ann",
       "email": "sblundels@csmonitor.com",
       "username": "sblundels"
+    },
+    {
+      "id": "uo0dcod2",
+      "password": "sha256$c775a1a8c2a629e57d0e8818ba8fe699f3fce1a20d8eb12118d24fb9c0f85be1",
+      "name": "Worlds Of Wogwarts",
+      "email": "dacowles@gmail.com",
+      "role": "Admin",
+      "username": "WorldsOfWogwarts",
+      "status": "Active",
+      "createdAt": "2026-01-10",
+      "userId": "uo0dcod2"
     }
   ]
 }

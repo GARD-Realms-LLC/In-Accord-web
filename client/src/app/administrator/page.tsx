@@ -481,14 +481,8 @@ const Administrator = (props: Props) => {
       avatar?: string;
     }
 
-    const [onlineUsers, setOnlineUsers] = useState<OnlineSession[]>(() => {
-      try {
-        // Try to seed from users list; pick active users
-        return (initialUsers.filter(u => u.status === 'Active').slice(0, 3).map((u, i) => ({ id: 'sess-' + u.id, userId: u.id, name: u.name, username: u.username, ip: `192.168.1.${100 + i}`, since: new Date().toISOString(), avatar: u.avatarUrl || gravatarUrlForEmail(u.email, 40) })));
-      } catch {
-        return [];
-      }
-    });
+    // start empty; load real sessions from server
+    const [onlineUsers, setOnlineUsers] = useState<OnlineSession[]>([]);
 
     // Try to load real session data from server; fall back to simulated local sessions
     useEffect(() => {
@@ -508,12 +502,39 @@ const Administrator = (props: Props) => {
             since: s.since || s.createdAt || new Date().toISOString(),
             avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
           }));
-          if (mounted && mapped.length > 0) setOnlineUsers(mapped);
+          if (mounted) setOnlineUsers(mapped);
         } catch (e) {
           // ignore; keep simulated
         }
       })();
       return () => { mounted = false; };
+    }, []);
+
+    // listen for session creation events (dispatched by Navbar on login)
+    useEffect(() => {
+      function handler() {
+        // best-effort refresh
+        (async () => {
+          try {
+            const res = await fetch(`${API_BASE}/api/admin/sessions`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!Array.isArray(data.sessions)) return;
+            const mapped: OnlineSession[] = data.sessions.map((s: any) => ({
+              id: s.id || s.sessionId || ('sess-' + (s.userId || Math.random().toString(36).slice(2,8))),
+              userId: s.userId || s.user?.id || s.userId,
+              name: s.user?.name || s.name || s.username || 'Unknown',
+              username: s.user?.username || s.username || s.user?.email || '',
+              ip: s.ip || s.remoteAddr || '0.0.0.0',
+              since: s.since || s.createdAt || new Date().toISOString(),
+              avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
+            }));
+            setOnlineUsers(mapped);
+          } catch (e) {}
+        })();
+      }
+      window.addEventListener('sessionCreated', handler);
+      return () => window.removeEventListener('sessionCreated', handler);
     }, []);
 
     // Boot a single session (simulate terminating a session)
@@ -721,6 +742,8 @@ const Administrator = (props: Props) => {
         setUsers(updated as User[]);
         if (hashed) {
           try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
+        // also upsert full user metadata to server
+        try { await fetch(`${API_BASE}/api/admin/users/upsert`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: updated.find(u => u.id === editingUser.id) }) }); } catch (e) { console.warn('Failed to upsert user to server', e); }
         }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
         alert('User updated.');
@@ -731,6 +754,8 @@ const Administrator = (props: Props) => {
         const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, status: 'Active', createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt };
         setUsers([newUser, ...users] as User[]);
         try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
+        // also send full user metadata to server so login by username/email works
+        try { await fetch(`${API_BASE}/api/admin/users/upsert`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: newUser }) }); } catch (e) { console.warn('Failed to upsert new user to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
         alert('User created.');
       }

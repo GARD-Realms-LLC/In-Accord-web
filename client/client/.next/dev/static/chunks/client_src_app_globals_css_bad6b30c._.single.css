@@ -774,10 +774,6 @@
     max-height: calc(var(--spacing) * 40);
   }
 
-  .max-h-56 {
-    max-height: calc(var(--spacing) * 56);
-  }
-
   .min-h-screen {
     min-height: 100vh;
   }
@@ -864,10 +860,6 @@
 
   .max-w-\[80\%\] {
     max-width: 80%;
-  }
-
-  .min-w-\[240px\] {
-    min-width: 240px;
   }
 
   .flex-1 {

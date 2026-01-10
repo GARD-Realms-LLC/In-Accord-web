@@ -89,6 +89,33 @@ router.post('/password', (req, res) => {
         return res.status(500).json({ ok: false, error: 'failed to write' });
     return res.json({ ok: true, id });
 });
+// POST upsert full user record: { user }
+router.post('/upsert', (req, res) => {
+    const { user } = req.body;
+    if (!user || typeof user !== 'object')
+        return res.status(400).json({ ok: false, error: 'user required' });
+    try {
+        const data = readUsersFile();
+        const users = Array.isArray(data.users) ? data.users : [];
+        const id = user.id || user.userId || (user.email ? (user.email.split('@')[0]) : undefined) || ('u' + Math.random().toString(36).slice(2, 9));
+        const idx = users.findIndex((u) => (u.id === id) || (u.userId === id));
+        const toStore = Object.assign(Object.assign({}, user), { id, userId: user.userId || user.id || id });
+        if (idx === -1) {
+            users.push(toStore);
+        }
+        else {
+            users[idx] = Object.assign(Object.assign({}, users[idx]), toStore);
+        }
+        const ok = writeUsersFile({ users });
+        if (!ok)
+            return res.status(500).json({ ok: false, error: 'failed to write' });
+        return res.json({ ok: true, user: toStore });
+    }
+    catch (e) {
+        console.error('[UsersRoute] upsert error', e);
+        return res.status(500).json({ ok: false, error: 'internal' });
+    }
+});
 // POST upload avatar: { id, dataUrl }
 router.post('/avatar', (req, res) => {
     const { id, dataUrl } = req.body;
