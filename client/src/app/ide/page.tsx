@@ -2,14 +2,17 @@
 import React, { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { css } from "@codemirror/lang-css";
+import { javascript } from "@codemirror/lang-javascript";
+import { json as jsonLang } from "@codemirror/lang-json";
 import { dracula } from "@uiw/codemirror-theme-dracula";
 
 const IDE = (props: any) => {
+	const [mode, setMode] = useState<'css' | 'javascript' | 'json'>('css');
 	const [code, setCode] = useState<string>(`body {\n  background: #f9fafb;\n  color: #222;\n}`);
 	// File input ref for import
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-	// Import CSS file handler
+	// Import file handler (CSS, JS, or JSON)
 	const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
@@ -20,13 +23,17 @@ const IDE = (props: any) => {
 		reader.readAsText(file);
 	};
 
-	// Export CSS file handler
+	// Export file handler (CSS, JS, or JSON)
 	const handleExport = () => {
-		const blob = new Blob([code], { type: 'text/css' });
+		let type = 'text/plain', filename = 'file.txt';
+		if (mode === 'css') { type = 'text/css'; filename = 'style.css'; }
+		else if (mode === 'javascript') { type = 'application/javascript'; filename = 'script.js'; }
+		else if (mode === 'json') { type = 'application/json'; filename = 'data.json'; }
+		const blob = new Blob([code], { type });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = 'style.css';
+		a.download = filename;
 		document.body.appendChild(a);
 		a.click();
 		setTimeout(() => {
@@ -37,17 +44,38 @@ const IDE = (props: any) => {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold mb-4">CSS IDE</h1>
+			<h1 className="text-2xl font-bold mb-4">CSS & JavaScript IDE</h1>
+			<h2 className="text-lg font-semibold mb-2 text-gray-300">
+				Edit your CSS, JSON and JavaScript files here, you can load, edit, and save them from here.
+			</h2>
+			<div className="flex gap-4 mb-4 items-center">
+				<label htmlFor="mode-select" className="font-semibold">Mode:</label>
+				<select
+					id="mode-select"
+					className="border rounded px-2 py-1 text-sm bg-gray-800 text-white"
+					value={mode}
+					onChange={e => setMode(e.target.value as 'css' | 'javascript' | 'json')}
+				>
+					<option value="css">CSS</option>
+					<option value="javascript">JavaScript</option>
+					<option value="json">JSON</option>
+				</select>
+				<span className="text-xs text-gray-400">(Import/Export will use selected mode)</span>
+			</div>
 			<div className="flex gap-4 mb-4">
 				<button
 					className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
 					onClick={() => fileInputRef.current?.click()}
 				>
-					Import CSS
+					Import File
 				</button>
 				<input
 					type="file"
-					accept=".css,text/css"
+					accept={
+						mode === 'css' ? '.css,text/css' :
+						mode === 'javascript' ? '.js,application/javascript' :
+						'.json,application/json'
+					}
 					ref={fileInputRef}
 					style={{ display: 'none' }}
 					onChange={handleImport}
@@ -56,7 +84,7 @@ const IDE = (props: any) => {
 					className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
 					onClick={handleExport}
 				>
-					Export CSS
+					Export File
 				</button>
 			</div>
 			<div
@@ -77,11 +105,15 @@ const IDE = (props: any) => {
 					value={code}
 					height="100%"
 					width="100%"
-					extensions={[css()]}
+					extensions={
+						mode === 'css' ? [css()] :
+						mode === 'javascript' ? [javascript({ jsx: true })] :
+						[jsonLang()]
+					}
 					onChange={setCode}
-					  theme={dracula}
+					theme={dracula}
 					basicSetup={{ lineNumbers: true, autocompletion: true }}
-					  style={{ minHeight: '375px', height: '100%', width: '100%', background: '#18181b', color: '#22c55e', fontFamily: 'monospace' }}
+					style={{ minHeight: '375px', height: '100%', width: '100%', background: '#18181b', color: '#22c55e', fontFamily: 'monospace' }}
 				/>
 				<style>{`
 					.cm-editor, .cm-scroller, .cm-content {

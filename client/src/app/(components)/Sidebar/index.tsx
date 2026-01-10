@@ -311,12 +311,12 @@ const Sidebar = () => {
         currentUserRole={currentUserRole} 
       />
               <SidebarLink 
-        href="/ide" 
-        icon={FileQuestionIcon}
-        label="CSS IDE"
-        isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
-      />
+              href="/ide" 
+              icon={FileQuestionIcon}
+              label="Code IDE"
+              isCollapsed={isSidebarCollapsed}
+              currentUserRole={currentUserRole} 
+            />
         <SidebarLink 
         href="/uploads" 
         icon={DrumstickIcon}

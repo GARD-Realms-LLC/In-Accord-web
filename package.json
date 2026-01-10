@@ -17,6 +17,7 @@
     "dev:all": "npx concurrently \"npm --prefix client run dev\" \"npm --prefix server run dev\""
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.6",
