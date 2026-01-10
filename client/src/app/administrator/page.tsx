@@ -464,6 +464,27 @@ const Administrator = (props: Props) => {
       }
     });
 
+    // Load authoritative users from backend so UI shows all roles
+    useEffect(() => {
+      let mounted = true;
+      (async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/users`);
+          if (!res.ok) return;
+          const j = await res.json();
+          if (!j || !Array.isArray(j.users)) return;
+          if (mounted) {
+            // Replace local users with server users (show all roles)
+            setUsers(j.users as User[]);
+            try { if (typeof window !== 'undefined') window.localStorage.setItem('users', JSON.stringify(j.users)); } catch {}
+          }
+        } catch (e) {
+          // ignore - keep local users
+        }
+      })();
+      return () => { mounted = false; };
+    }, []);
+
     useEffect(() => {
       try {
         if (typeof window !== 'undefined') window.localStorage.setItem('users', JSON.stringify(users));

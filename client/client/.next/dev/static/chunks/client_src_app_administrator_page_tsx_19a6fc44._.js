@@ -175,11 +175,11 @@ async function hashPassword(password) {
 // Password strength helper component
 function PasswordStrength(t0) {
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(9);
-    if ($[0] !== "c6a366bec45e5105994a4400feac3dfb69c17e725c178a7237018a17ec0eabbc") {
+    if ($[0] !== "155674d82c910a24f8ad5fb4d10f0159105c13727f0a885f930a1cb341568516") {
         for(let $i = 0; $i < 9; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "c6a366bec45e5105994a4400feac3dfb69c17e725c178a7237018a17ec0eabbc";
+        $[0] = "155674d82c910a24f8ad5fb4d10f0159105c13727f0a885f930a1cb341568516";
     }
     const { password } = t0;
     let t1;
@@ -563,6 +563,36 @@ const Administrator = (props)=>{
             }
         }
     }["Administrator.useState"]);
+    // Load authoritative users from backend so UI shows all roles
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "Administrator.useEffect": ()=>{
+            let mounted = true;
+            ({
+                "Administrator.useEffect": async ()=>{
+                    try {
+                        const res = await fetch(`${API_BASE}/api/admin/users`);
+                        if (!res.ok) return;
+                        const j = await res.json();
+                        if (!j || !Array.isArray(j.users)) return;
+                        if (mounted) {
+                            // Replace local users with server users (show all roles)
+                            setUsers(j.users);
+                            try {
+                                if ("TURBOPACK compile-time truthy", 1) window.localStorage.setItem('users', JSON.stringify(j.users));
+                            } catch  {}
+                        }
+                    } catch (e) {
+                    // ignore - keep local users
+                    }
+                }
+            })["Administrator.useEffect"]();
+            return ({
+                "Administrator.useEffect": ()=>{
+                    mounted = false;
+                }
+            })["Administrator.useEffect"];
+        }
+    }["Administrator.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Administrator.useEffect": ()=>{
             try {
@@ -577,13 +607,13 @@ const Administrator = (props)=>{
     // Try to load real session data from server; fall back to simulated local sessions
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "Administrator.useEffect": ()=>{
-            let mounted = true;
+            let mounted_0 = true;
             ({
                 "Administrator.useEffect": async ()=>{
                     try {
-                        const res = await fetch(`${API_BASE}/api/admin/sessions`);
-                        if (!res.ok) return;
-                        const data = await res.json();
+                        const res_0 = await fetch(`${API_BASE}/api/admin/sessions`);
+                        if (!res_0.ok) return;
+                        const data = await res_0.json();
                         if (!Array.isArray(data.sessions)) return;
                         const mapped = data.sessions.map({
                             "Administrator.useEffect.mapped": (s)=>({
@@ -596,15 +626,15 @@ const Administrator = (props)=>{
                                     avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
                                 })
                         }["Administrator.useEffect.mapped"]);
-                        if (mounted) setOnlineUsers(mapped);
-                    } catch (e) {
+                        if (mounted_0) setOnlineUsers(mapped);
+                    } catch (e_0) {
                     // ignore; keep simulated
                     }
                 }
             })["Administrator.useEffect"]();
             return ({
                 "Administrator.useEffect": ()=>{
-                    mounted = false;
+                    mounted_0 = false;
                 }
             })["Administrator.useEffect"];
         }
@@ -617,9 +647,9 @@ const Administrator = (props)=>{
                 ({
                     "Administrator.useEffect.handler": async ()=>{
                         try {
-                            const res_0 = await fetch(`${API_BASE}/api/admin/sessions`);
-                            if (!res_0.ok) return;
-                            const data_0 = await res_0.json();
+                            const res_1 = await fetch(`${API_BASE}/api/admin/sessions`);
+                            if (!res_1.ok) return;
+                            const data_0 = await res_1.json();
                             if (!Array.isArray(data_0.sessions)) return;
                             const mapped_0 = data_0.sessions.map({
                                 "Administrator.useEffect.handler.mapped_0": (s_0)=>({
@@ -633,7 +663,7 @@ const Administrator = (props)=>{
                                     })
                             }["Administrator.useEffect.handler.mapped_0"]);
                             setOnlineUsers(mapped_0);
-                        } catch (e_0) {}
+                        } catch (e_1) {}
                     }
                 })["Administrator.useEffect.handler"]();
             }
@@ -669,7 +699,7 @@ const Administrator = (props)=>{
                     sessionId
                 })
             });
-        } catch (e_1) {}
+        } catch (e_2) {}
         alert(`${s_1?.name ?? 'User'} has been booted.`);
     };
     const [refreshingOnline, setRefreshingOnline] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
@@ -695,20 +725,20 @@ const Administrator = (props)=>{
             await fetch(`${API_BASE}/api/admin/sessions/terminate-all`, {
                 method: 'POST'
             });
-        } catch (e_2) {}
+        } catch (e_3) {}
         alert(`Booted ${copy.length} sessions.`);
     };
     // Refresh online sessions from server (best-effort)
     const refreshOnlineUsers = async ()=>{
         setRefreshingOnline(true);
         try {
-            const res_1 = await fetch(`${API_BASE}/api/admin/sessions`);
-            if (!res_1.ok) {
-                console.warn('refreshOnlineUsers: non-ok response', res_1.status);
+            const res_2 = await fetch(`${API_BASE}/api/admin/sessions`);
+            if (!res_2.ok) {
+                console.warn('refreshOnlineUsers: non-ok response', res_2.status);
                 alert('Failed to refresh sessions from server');
                 return;
             }
-            const data_1 = await res_1.json();
+            const data_1 = await res_2.json();
             if (!Array.isArray(data_1.sessions)) {
                 console.warn('refreshOnlineUsers: unexpected payload', data_1);
                 alert('No session data returned');
@@ -735,8 +765,8 @@ const Administrator = (props)=>{
                     },
                     ...prev_2
                 ]);
-        } catch (e_3) {
-            console.warn('refreshOnlineUsers failed', e_3);
+        } catch (e_4) {
+            console.warn('refreshOnlineUsers failed', e_4);
             alert('Network error while refreshing sessions');
         } finally{
             setRefreshingOnline(false);
@@ -835,8 +865,8 @@ const Administrator = (props)=>{
                             passwordHash: hashed
                         })
                     });
-                } catch (e_4) {
-                    console.warn('Failed to POST password to server', e_4);
+                } catch (e_5) {
+                    console.warn('Failed to POST password to server', e_5);
                 }
                 return {
                     ...u_1,
@@ -863,8 +893,8 @@ const Administrator = (props)=>{
             a.click();
             a.remove();
             URL.revokeObjectURL(url_0);
-        } catch (e_5) {
-            console.warn('Export failed', e_5);
+        } catch (e_6) {
+            console.warn('Export failed', e_6);
         }
         setShowBulkPasswords(false);
         setBulkPasswords({});
@@ -967,8 +997,8 @@ const Administrator = (props)=>{
                             passwordHash: hashed_0
                         })
                     });
-                } catch (e_6) {
-                    console.warn('Failed to POST password to server', e_6);
+                } catch (e_7) {
+                    console.warn('Failed to POST password to server', e_7);
                 }
                 // also upsert full user metadata to server
                 try {
@@ -981,8 +1011,8 @@ const Administrator = (props)=>{
                             user: updated_0.find((u_4)=>u_4.id === editingUser.id)
                         })
                     });
-                } catch (e_7) {
-                    console.warn('Failed to upsert user to server', e_7);
+                } catch (e_8) {
+                    console.warn('Failed to upsert user to server', e_8);
                 }
             }
             setAuditLogEntries((prev_5)=>[
@@ -1034,8 +1064,8 @@ const Administrator = (props)=>{
                         passwordHash: hashed_1
                     })
                 });
-            } catch (e_8) {
-                console.warn('Failed to POST new password to server', e_8);
+            } catch (e_9) {
+                console.warn('Failed to POST new password to server', e_9);
             }
             // also send full user metadata to server so login by username/email works
             try {
@@ -1048,8 +1078,8 @@ const Administrator = (props)=>{
                         user: newUser
                     })
                 });
-            } catch (e_9) {
-                console.warn('Failed to upsert new user to server', e_9);
+            } catch (e_10) {
+                console.warn('Failed to upsert new user to server', e_10);
             }
             setAuditLogEntries((prev_6)=>[
                     {
@@ -1121,8 +1151,8 @@ const Administrator = (props)=>{
                         passwordHash: hashed_2
                     })
                 });
-            } catch (e_11) {
-                console.warn('Failed to POST password to server', e_11);
+            } catch (e_12) {
+                console.warn('Failed to POST password to server', e_12);
             }
             setAuditLogEntries((prev_9)=>[
                     {
@@ -1144,8 +1174,8 @@ const Administrator = (props)=>{
             // hide reveal after 8s and toast after 3s
             setTimeout(()=>setShowSavedReveal(false), 8000);
             setTimeout(()=>setToastVisible(false), 3000);
-        } catch (e_10) {
-            console.error('savePasswordOnly failed', e_10);
+        } catch (e_11) {
+            console.error('savePasswordOnly failed', e_11);
             alert('Failed to save password.');
         }
     };
@@ -1351,12 +1381,12 @@ const Administrator = (props)=>{
     };
     const refreshTablesFromServer = async ()=>{
         try {
-            const res_2 = await fetch('/api/schemas');
-            if (!res_2.ok) return;
-            const data_3 = await res_2.json();
+            const res_3 = await fetch('/api/schemas');
+            if (!res_3.ok) return;
+            const data_3 = await res_3.json();
             if (data_3 && Array.isArray(data_3.tables)) setCustomTables(data_3.tables);
-        } catch (e_12) {
-            console.warn('Failed to refresh tables from server', e_12);
+        } catch (e_13) {
+            console.warn('Failed to refresh tables from server', e_13);
         }
     };
     const defaultUserFields = [
@@ -1576,8 +1606,8 @@ const Administrator = (props)=>{
                     sidebarLogo: parsed.sidebarLogo ?? defaultSystemConfig.sidebarLogo,
                     sidebarUrl: parsed.sidebarUrl ?? defaultSystemConfig.sidebarUrl
                 };
-            } catch (e_13) {
-                console.warn('Failed to parse system_config from localStorage', e_13);
+            } catch (e_14) {
+                console.warn('Failed to parse system_config from localStorage', e_14);
                 return defaultSystemConfig;
             }
         }
@@ -1600,7 +1630,7 @@ const Administrator = (props)=>{
         setIntegrationSaveStatus('saving');
         setIntegrationSaveMessage('Saving...');
         try {
-            const res_3 = await fetch('/api/integrations/config', {
+            const res_4 = await fetch('/api/integrations/config', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1610,7 +1640,7 @@ const Administrator = (props)=>{
                     discord: systemConfig.oauth.discord
                 })
             });
-            if (res_3.ok) {
+            if (res_4.ok) {
                 setIntegrationSaveStatus('saved');
                 setIntegrationSaveMessage('Integration config saved');
                 setAuditLogEntries((prev_28)=>[
@@ -1625,12 +1655,12 @@ const Administrator = (props)=>{
                         ...prev_28
                     ]);
             } else {
-                const j = await res_3.json().catch(()=>({}));
+                const j_0 = await res_4.json().catch(()=>({}));
                 setIntegrationSaveStatus('error');
-                setIntegrationSaveMessage(j.error || 'Failed to save config');
+                setIntegrationSaveMessage(j_0.error || 'Failed to save config');
             }
-        } catch (e_14) {
-            console.warn('Failed to save integration config to server', e_14);
+        } catch (e_15) {
+            console.warn('Failed to save integration config to server', e_15);
             setIntegrationSaveStatus('error');
             setIntegrationSaveMessage('Network or server error');
         }
@@ -1883,8 +1913,8 @@ const Administrator = (props)=>{
                             })
                     }["Administrator.useEffect.normalized"]);
                     setTeamMembers(normalized);
-                } catch (e_15) {
-                    console.error('Error loading team members:', e_15);
+                } catch (e_16) {
+                    console.error('Error loading team members:', e_16);
                 }
             }
         }
@@ -1895,9 +1925,9 @@ const Administrator = (props)=>{
             ({
                 "Administrator.useEffect": async ()=>{
                     try {
-                        const res_4 = await fetch('/api/integrations/config');
-                        if (!res_4.ok) return;
-                        const data_4 = await res_4.json();
+                        const res_5 = await fetch('/api/integrations/config');
+                        if (!res_5.ok) return;
+                        const data_4 = await res_5.json();
                         if (data_4 && data_4.config) {
                             setSystemConfig({
                                 "Administrator.useEffect": (prev_38)=>({
@@ -1915,8 +1945,8 @@ const Administrator = (props)=>{
                                     })
                             }["Administrator.useEffect"]);
                         }
-                    } catch (e_16) {
-                        console.warn('Failed to load integration config', e_16);
+                    } catch (e_17) {
+                        console.warn('Failed to load integration config', e_17);
                     }
                 }
             })["Administrator.useEffect"]();
@@ -1961,8 +1991,8 @@ const Administrator = (props)=>{
             return next_0;
         });
     };
-    const handleSubmit = (index_0, e_17)=>{
-        e_17.preventDefault();
+    const handleSubmit = (index_0, e_18)=>{
+        e_18.preventDefault();
         const m_0 = teamMembers[index_0];
         const newErrors = {};
         if (!m_0.name?.trim()) newErrors.name = 'Name is required.';
@@ -2006,12 +2036,12 @@ const Administrator = (props)=>{
                     children: toastMessage
                 }, void 0, false, {
                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                    lineNumber: 1857,
+                    lineNumber: 1882,
                     columnNumber: 13
                 }, ("TURBOPACK compile-time value", void 0))
             }, void 0, false, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 1856,
+                lineNumber: 1881,
                 columnNumber: 26
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -2022,7 +2052,7 @@ const Administrator = (props)=>{
                         children: "User Management"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 1861,
+                        lineNumber: 1886,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2030,7 +2060,7 @@ const Administrator = (props)=>{
                         children: "Manage system users, permissions, and access control. View user activity, reset passwords, and configure role-based access levels."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 1862,
+                        lineNumber: 1887,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2044,7 +2074,7 @@ const Administrator = (props)=>{
                                         children: "Users"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1868,
+                                        lineNumber: 1893,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2056,7 +2086,7 @@ const Administrator = (props)=>{
                                                 children: "Create User"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1870,
+                                                lineNumber: 1895,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2068,19 +2098,19 @@ const Administrator = (props)=>{
                                                 children: "Reset"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1871,
+                                                lineNumber: 1896,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1869,
+                                        lineNumber: 1894,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 1867,
+                                lineNumber: 1892,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             showUserForm && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2096,23 +2126,23 @@ const Administrator = (props)=>{
                                                         children: "Full name"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1881,
+                                                        lineNumber: 1906,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         value: formName,
-                                                        onChange: (e_18)=>setFormName(e_18.target.value),
+                                                        onChange: (e_19)=>setFormName(e_19.target.value),
                                                         placeholder: "Full name",
                                                         className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1882,
+                                                        lineNumber: 1907,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1880,
+                                                lineNumber: 1905,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2122,23 +2152,23 @@ const Administrator = (props)=>{
                                                         children: "Username"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1886,
+                                                        lineNumber: 1911,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         value: formUsername,
-                                                        onChange: (e_19)=>setFormUsername(e_19.target.value),
+                                                        onChange: (e_20)=>setFormUsername(e_20.target.value),
                                                         placeholder: "username",
                                                         className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1887,
+                                                        lineNumber: 1912,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1885,
+                                                lineNumber: 1910,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2148,23 +2178,23 @@ const Administrator = (props)=>{
                                                         children: "Email"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1893,
+                                                        lineNumber: 1918,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         value: formEmail,
-                                                        onChange: (e_20)=>setFormEmail(e_20.target.value),
+                                                        onChange: (e_21)=>setFormEmail(e_21.target.value),
                                                         placeholder: "email@example.com",
                                                         className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1894,
+                                                        lineNumber: 1919,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1892,
+                                                lineNumber: 1917,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2174,58 +2204,58 @@ const Administrator = (props)=>{
                                                         children: "Role"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1898,
+                                                        lineNumber: 1923,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                         value: formRole,
-                                                        onChange: (e_21)=>setFormRole(e_21.target.value),
+                                                        onChange: (e_22)=>setFormRole(e_22.target.value),
                                                         className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Admin"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1900,
+                                                                lineNumber: 1925,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Manager"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1901,
+                                                                lineNumber: 1926,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "User"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1902,
+                                                                lineNumber: 1927,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Viewer"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1903,
+                                                                lineNumber: 1928,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1899,
+                                                        lineNumber: 1924,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1897,
+                                                lineNumber: 1922,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1879,
+                                        lineNumber: 1904,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2236,7 +2266,7 @@ const Administrator = (props)=>{
                                                 children: "Avatar & Password"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1908,
+                                                lineNumber: 1933,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2249,13 +2279,13 @@ const Administrator = (props)=>{
                                                                 src: formAvatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User'),
                                                                 alt: "avatar",
                                                                 className: "w-12 h-12 rounded-full object-cover",
-                                                                onError: (e_22)=>{
-                                                                    e_22.currentTarget.onerror = null;
-                                                                    e_22.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User');
+                                                                onError: (e_23)=>{
+                                                                    e_23.currentTarget.onerror = null;
+                                                                    e_23.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(formName || 'User');
                                                                 }
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1911,
+                                                                lineNumber: 1936,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2279,7 +2309,7 @@ const Administrator = (props)=>{
                                                                         children: "Upload"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1916,
+                                                                        lineNumber: 1941,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2289,19 +2319,19 @@ const Administrator = (props)=>{
                                                                         children: "Clear"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1929,
+                                                                        lineNumber: 1954,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1915,
+                                                                lineNumber: 1940,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1910,
+                                                        lineNumber: 1935,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2312,7 +2342,7 @@ const Administrator = (props)=>{
                                                                 children: "New Password"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1934,
+                                                                lineNumber: 1959,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2320,13 +2350,13 @@ const Administrator = (props)=>{
                                                                 children: [
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                         value: formPassword,
-                                                                        onChange: (e_23)=>setFormPassword(e_23.target.value),
+                                                                        onChange: (e_24)=>setFormPassword(e_24.target.value),
                                                                         placeholder: "New password",
                                                                         type: showPassword ? 'text' : 'password',
                                                                         className: "mt-0 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm w-full"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1936,
+                                                                        lineNumber: 1961,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2338,13 +2368,13 @@ const Administrator = (props)=>{
                                                                         children: "Save Password"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1937,
+                                                                        lineNumber: 1962,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1935,
+                                                                lineNumber: 1960,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2356,12 +2386,12 @@ const Administrator = (props)=>{
                                                                             password: formPassword
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 1942,
+                                                                            lineNumber: 1967,
                                                                             columnNumber: 64
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1942,
+                                                                        lineNumber: 1967,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -2370,23 +2400,23 @@ const Administrator = (props)=>{
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                                 type: "checkbox",
                                                                                 checked: showPassword,
-                                                                                onChange: (e_24)=>setShowPassword(e_24.target.checked)
+                                                                                onChange: (e_25)=>setShowPassword(e_25.target.checked)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 1943,
+                                                                                lineNumber: 1968,
                                                                                 columnNumber: 109
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             " Show"
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1943,
+                                                                        lineNumber: 1968,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1941,
+                                                                lineNumber: 1966,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             showSavedReveal && lastSavedPlain && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2397,7 +2427,7 @@ const Administrator = (props)=>{
                                                                         children: "Saved Password (temporary)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1946,
+                                                                        lineNumber: 1971,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2408,7 +2438,7 @@ const Administrator = (props)=>{
                                                                                 children: lastSavedPlain
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 1948,
+                                                                                lineNumber: 1973,
                                                                                 columnNumber: 29
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2423,37 +2453,37 @@ const Administrator = (props)=>{
                                                                                 children: "Copy"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 1949,
+                                                                                lineNumber: 1974,
                                                                                 columnNumber: 29
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1947,
+                                                                        lineNumber: 1972,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1945,
+                                                                lineNumber: 1970,
                                                                 columnNumber: 61
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1933,
+                                                        lineNumber: 1958,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1909,
+                                                lineNumber: 1934,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1907,
+                                        lineNumber: 1932,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2464,23 +2494,23 @@ const Administrator = (props)=>{
                                                 children: "Password Expires"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1961,
+                                                lineNumber: 1986,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 type: "date",
                                                 value: formPasswordExpiresAt ?? '',
-                                                onChange: (e_25)=>setFormPasswordExpiresAt(e_25.target.value || undefined),
+                                                onChange: (e_26)=>setFormPasswordExpiresAt(e_26.target.value || undefined),
                                                 className: "px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1962,
+                                                lineNumber: 1987,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1960,
+                                        lineNumber: 1985,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2492,7 +2522,7 @@ const Administrator = (props)=>{
                                                 children: "Save"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1965,
+                                                lineNumber: 1990,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2501,19 +2531,19 @@ const Administrator = (props)=>{
                                                 children: "Cancel"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1966,
+                                                lineNumber: 1991,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1964,
+                                        lineNumber: 1989,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 1878,
+                                lineNumber: 1903,
                                 columnNumber: 30
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2531,7 +2561,7 @@ const Administrator = (props)=>{
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1973,
+                                                lineNumber: 1998,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2544,7 +2574,7 @@ const Administrator = (props)=>{
                                                         children: refreshingOnline ? 'Refreshing...' : 'Refresh'
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1975,
+                                                        lineNumber: 2000,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2555,19 +2585,19 @@ const Administrator = (props)=>{
                                                         children: "Boot All"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1978,
+                                                        lineNumber: 2003,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1974,
+                                                lineNumber: 1999,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1972,
+                                        lineNumber: 1997,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     onlineUsers.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2575,7 +2605,7 @@ const Administrator = (props)=>{
                                         children: "No users are currently online."
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1984,
+                                        lineNumber: 2009,
                                         columnNumber: 43
                                     }, ("TURBOPACK compile-time value", void 0)) : // Render online users in a responsive grid: 4 per row, unlimited rows, fixed height with custom scrollbar
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2587,13 +2617,13 @@ const Administrator = (props)=>{
                                                         src: s_3.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s_3.name),
                                                         alt: "",
                                                         className: "w-10 h-10 rounded-full object-cover",
-                                                        onError: (e_26)=>{
-                                                            e_26.currentTarget.onerror = null;
-                                                            e_26.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s_3.name);
+                                                        onError: (e_27)=>{
+                                                            e_27.currentTarget.onerror = null;
+                                                            e_27.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(s_3.name);
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1988,
+                                                        lineNumber: 2013,
                                                         columnNumber: 23
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2613,13 +2643,13 @@ const Administrator = (props)=>{
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 1993,
+                                                                        lineNumber: 2018,
                                                                         columnNumber: 65
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1993,
+                                                                lineNumber: 2018,
                                                                 columnNumber: 25
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2632,13 +2662,13 @@ const Administrator = (props)=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 1994,
+                                                                lineNumber: 2019,
                                                                 columnNumber: 25
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1992,
+                                                        lineNumber: 2017,
                                                         columnNumber: 23
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2648,29 +2678,29 @@ const Administrator = (props)=>{
                                                             children: "Boot"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 1997,
+                                                            lineNumber: 2022,
                                                             columnNumber: 25
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 1996,
+                                                        lineNumber: 2021,
                                                         columnNumber: 23
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, s_3.id, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 1987,
+                                                lineNumber: 2012,
                                                 columnNumber: 43
                                             }, ("TURBOPACK compile-time value", void 0)))
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 1986,
+                                        lineNumber: 2011,
                                         columnNumber: 11
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 1971,
+                                lineNumber: 1996,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2687,7 +2717,7 @@ const Administrator = (props)=>{
                                                         children: "Name"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2007,
+                                                        lineNumber: 2032,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2695,7 +2725,7 @@ const Administrator = (props)=>{
                                                         children: "Username"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2008,
+                                                        lineNumber: 2033,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2703,7 +2733,7 @@ const Administrator = (props)=>{
                                                         children: "Password"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2009,
+                                                        lineNumber: 2034,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2711,7 +2741,7 @@ const Administrator = (props)=>{
                                                         children: "Expires"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2010,
+                                                        lineNumber: 2035,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2719,7 +2749,7 @@ const Administrator = (props)=>{
                                                         children: "Email"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2011,
+                                                        lineNumber: 2036,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2727,7 +2757,7 @@ const Administrator = (props)=>{
                                                         children: "Role"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2012,
+                                                        lineNumber: 2037,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2735,7 +2765,7 @@ const Administrator = (props)=>{
                                                         children: "Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2013,
+                                                        lineNumber: 2038,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2743,7 +2773,7 @@ const Administrator = (props)=>{
                                                         children: "Created"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2014,
+                                                        lineNumber: 2039,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -2751,18 +2781,18 @@ const Administrator = (props)=>{
                                                         children: "Actions"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2015,
+                                                        lineNumber: 2040,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2006,
+                                                lineNumber: 2031,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2005,
+                                            lineNumber: 2030,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -2775,7 +2805,7 @@ const Administrator = (props)=>{
                                                             children: u_10.name
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2020,
+                                                            lineNumber: 2045,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2783,7 +2813,7 @@ const Administrator = (props)=>{
                                                             children: u_10.username
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2021,
+                                                            lineNumber: 2046,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2793,12 +2823,12 @@ const Administrator = (props)=>{
                                                                 children: "Unset"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2022,
+                                                                lineNumber: 2047,
                                                                 columnNumber: 109
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2022,
+                                                            lineNumber: 2047,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2808,12 +2838,12 @@ const Administrator = (props)=>{
                                                                 children: "Never"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2023,
+                                                                lineNumber: 2048,
                                                                 columnNumber: 133
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2023,
+                                                            lineNumber: 2048,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2821,7 +2851,7 @@ const Administrator = (props)=>{
                                                             children: u_10.email
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2024,
+                                                            lineNumber: 2049,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2831,12 +2861,12 @@ const Administrator = (props)=>{
                                                                 children: u_10.role
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2025,
+                                                                lineNumber: 2050,
                                                                 columnNumber: 49
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2025,
+                                                            lineNumber: 2050,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2846,19 +2876,19 @@ const Administrator = (props)=>{
                                                                 children: "Active"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2026,
+                                                                lineNumber: 2051,
                                                                 columnNumber: 77
                                                             }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                 className: "px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded",
                                                                 children: "Suspended"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2026,
+                                                                lineNumber: 2051,
                                                                 columnNumber: 215
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2026,
+                                                            lineNumber: 2051,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2866,7 +2896,7 @@ const Administrator = (props)=>{
                                                             children: u_10.createdAt
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2027,
+                                                            lineNumber: 2052,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -2878,7 +2908,7 @@ const Administrator = (props)=>{
                                                                     children: "Edit"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2029,
+                                                                    lineNumber: 2054,
                                                                     columnNumber: 25
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2896,7 +2926,7 @@ const Administrator = (props)=>{
                                                                     children: "Reset Password"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2030,
+                                                                    lineNumber: 2055,
                                                                     columnNumber: 25
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2905,7 +2935,7 @@ const Administrator = (props)=>{
                                                                     children: "Delete"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2040,
+                                                                    lineNumber: 2065,
                                                                     columnNumber: 25
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2914,35 +2944,35 @@ const Administrator = (props)=>{
                                                                     children: "Toggle Status"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2041,
+                                                                    lineNumber: 2066,
                                                                     columnNumber: 25
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2028,
+                                                            lineNumber: 2053,
                                                             columnNumber: 23
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, u_10.id, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2019,
+                                                    lineNumber: 2044,
                                                     columnNumber: 38
                                                 }, ("TURBOPACK compile-time value", void 0)))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2018,
+                                            lineNumber: 2043,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 2004,
+                                    lineNumber: 2029,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2003,
+                                lineNumber: 2028,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2956,7 +2986,7 @@ const Administrator = (props)=>{
                                                 children: "All User Fields"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2050,
+                                                lineNumber: 2075,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2968,7 +2998,7 @@ const Administrator = (props)=>{
                                                         children: "Refresh from Server"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2052,
+                                                        lineNumber: 2077,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2977,7 +3007,7 @@ const Administrator = (props)=>{
                                                         children: "Bulk Passwords"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2053,
+                                                        lineNumber: 2078,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3003,19 +3033,19 @@ const Administrator = (props)=>{
                                                         children: "Export"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2054,
+                                                        lineNumber: 2079,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2051,
+                                                lineNumber: 2076,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2049,
+                                        lineNumber: 2074,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3032,7 +3062,7 @@ const Administrator = (props)=>{
                                                                 children: "Bulk Password Migration"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2077,
+                                                                lineNumber: 2102,
                                                                 columnNumber: 25
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3051,7 +3081,7 @@ const Administrator = (props)=>{
                                                                         children: "Randomize"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2079,
+                                                                        lineNumber: 2104,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3060,7 +3090,7 @@ const Administrator = (props)=>{
                                                                         children: "Apply"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2087,
+                                                                        lineNumber: 2112,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3069,7 +3099,7 @@ const Administrator = (props)=>{
                                                                         children: "Export"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2088,
+                                                                        lineNumber: 2113,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3078,19 +3108,19 @@ const Administrator = (props)=>{
                                                                         children: "Close"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2089,
+                                                                        lineNumber: 2114,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2078,
+                                                                lineNumber: 2103,
                                                                 columnNumber: 25
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2076,
+                                                        lineNumber: 2101,
                                                         columnNumber: 23
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3101,7 +3131,7 @@ const Administrator = (props)=>{
                                                                 children: "No users require migration."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2093,
+                                                                lineNumber: 2118,
                                                                 columnNumber: 69
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             Object.keys(bulkPasswords).map((id_10)=>{
@@ -3119,20 +3149,20 @@ const Administrator = (props)=>{
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2097,
+                                                                            lineNumber: 2122,
                                                                             columnNumber: 31
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             value: bulkPasswords[id_10] ?? '',
-                                                                            onChange: (e_27)=>setBulkPasswords((prev_43)=>({
+                                                                            onChange: (e_28)=>setBulkPasswords((prev_43)=>({
                                                                                         ...prev_43,
-                                                                                        [id_10]: e_27.target.value
+                                                                                        [id_10]: e_28.target.value
                                                                                     })),
                                                                             placeholder: "new password",
                                                                             className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2098,
+                                                                            lineNumber: 2123,
                                                                             columnNumber: 31
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3144,26 +3174,26 @@ const Administrator = (props)=>{
                                                                             children: "Rand"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2102,
+                                                                            lineNumber: 2127,
                                                                             columnNumber: 31
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, id_10, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2096,
+                                                                    lineNumber: 2121,
                                                                     columnNumber: 26
                                                                 }, ("TURBOPACK compile-time value", void 0));
                                                             })
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2092,
+                                                        lineNumber: 2117,
                                                         columnNumber: 23
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2075,
+                                                lineNumber: 2100,
                                                 columnNumber: 41
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3173,7 +3203,7 @@ const Administrator = (props)=>{
                                                         children: "Default User Fields"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2111,
+                                                        lineNumber: 2136,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3186,7 +3216,7 @@ const Administrator = (props)=>{
                                                                         children: f_5.name
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2114,
+                                                                        lineNumber: 2139,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3198,7 +3228,7 @@ const Administrator = (props)=>{
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2115,
+                                                                        lineNumber: 2140,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3210,30 +3240,30 @@ const Administrator = (props)=>{
                                                                                 children: f_5.example
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2116,
+                                                                                lineNumber: 2141,
                                                                                 columnNumber: 99
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2116,
+                                                                        lineNumber: 2141,
                                                                         columnNumber: 27
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, f_5.name, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2113,
+                                                                lineNumber: 2138,
                                                                 columnNumber: 53
                                                             }, ("TURBOPACK compile-time value", void 0)))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2112,
+                                                        lineNumber: 2137,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2110,
+                                                lineNumber: 2135,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3247,7 +3277,7 @@ const Administrator = (props)=>{
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2122,
+                                                        lineNumber: 2147,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3258,12 +3288,12 @@ const Administrator = (props)=>{
                                                                 children: [
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                         value: newTableName,
-                                                                        onChange: (e_28)=>setNewTableName(e_28.target.value),
+                                                                        onChange: (e_29)=>setNewTableName(e_29.target.value),
                                                                         placeholder: "New table name",
                                                                         className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2126,
+                                                                        lineNumber: 2151,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3272,7 +3302,7 @@ const Administrator = (props)=>{
                                                                         children: "+ Field"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2127,
+                                                                        lineNumber: 2152,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3281,13 +3311,13 @@ const Administrator = (props)=>{
                                                                         children: "Create"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2128,
+                                                                        lineNumber: 2153,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2125,
+                                                                lineNumber: 2150,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             newTableFields.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3297,20 +3327,20 @@ const Administrator = (props)=>{
                                                                         children: [
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                                 value: f_6.name,
-                                                                                onChange: (e_29)=>updateNewField(f_6.id, {
-                                                                                        name: e_29.target.value
+                                                                                onChange: (e_30)=>updateNewField(f_6.id, {
+                                                                                        name: e_30.target.value
                                                                                     }),
                                                                                 placeholder: "field name",
                                                                                 className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2133,
+                                                                                lineNumber: 2158,
                                                                                 columnNumber: 31
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                                                 value: f_6.type,
-                                                                                onChange: (e_30)=>updateNewField(f_6.id, {
-                                                                                        type: e_30.target.value
+                                                                                onChange: (e_31)=>updateNewField(f_6.id, {
+                                                                                        type: e_31.target.value
                                                                                     }),
                                                                                 className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm",
                                                                                 children: [
@@ -3319,7 +3349,7 @@ const Administrator = (props)=>{
                                                                                         children: "string"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2139,
+                                                                                        lineNumber: 2164,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3327,7 +3357,7 @@ const Administrator = (props)=>{
                                                                                         children: "number"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2140,
+                                                                                        lineNumber: 2165,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3335,7 +3365,7 @@ const Administrator = (props)=>{
                                                                                         children: "date"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2141,
+                                                                                        lineNumber: 2166,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3343,7 +3373,7 @@ const Administrator = (props)=>{
                                                                                         children: "boolean"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2142,
+                                                                                        lineNumber: 2167,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3351,13 +3381,13 @@ const Administrator = (props)=>{
                                                                                         children: "enum"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2143,
+                                                                                        lineNumber: 2168,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2136,
+                                                                                lineNumber: 2161,
                                                                                 columnNumber: 31
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3366,24 +3396,24 @@ const Administrator = (props)=>{
                                                                                 children: "Remove"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2145,
+                                                                                lineNumber: 2170,
                                                                                 columnNumber: 31
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, f_6.id, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2132,
+                                                                        lineNumber: 2157,
                                                                         columnNumber: 54
                                                                     }, ("TURBOPACK compile-time value", void 0)))
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2131,
+                                                                lineNumber: 2156,
                                                                 columnNumber: 53
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2124,
+                                                        lineNumber: 2149,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     customTables.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3391,7 +3421,7 @@ const Administrator = (props)=>{
                                                         children: "No custom tables defined."
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2150,
+                                                        lineNumber: 2175,
                                                         columnNumber: 50
                                                     }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "space-y-2",
@@ -3408,7 +3438,7 @@ const Administrator = (props)=>{
                                                                                 children: t_3.name
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2155,
+                                                                                lineNumber: 2180,
                                                                                 columnNumber: 33
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3421,18 +3451,18 @@ const Administrator = (props)=>{
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                    lineNumber: 2157,
+                                                                                    lineNumber: 2182,
                                                                                     columnNumber: 35
                                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2156,
+                                                                                lineNumber: 2181,
                                                                                 columnNumber: 33
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2154,
+                                                                        lineNumber: 2179,
                                                                         columnNumber: 31
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     isEditing ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3440,14 +3470,14 @@ const Administrator = (props)=>{
                                                                         children: [
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                                 value: editingTableDraft?.name ?? '',
-                                                                                onChange: (e_31)=>setEditingTableDraft((prev_45)=>prev_45 ? {
+                                                                                onChange: (e_32)=>setEditingTableDraft((prev_45)=>prev_45 ? {
                                                                                             ...prev_45,
-                                                                                            name: e_31.target.value
+                                                                                            name: e_32.target.value
                                                                                         } : prev_45),
                                                                                 className: "px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2162,
+                                                                                lineNumber: 2187,
                                                                                 columnNumber: 35
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3457,27 +3487,27 @@ const Administrator = (props)=>{
                                                                                         children: [
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                                                 value: f_7.name,
-                                                                                                onChange: (e_32)=>setEditingTableDraft((prev_46)=>prev_46 ? {
+                                                                                                onChange: (e_33)=>setEditingTableDraft((prev_46)=>prev_46 ? {
                                                                                                             ...prev_46,
                                                                                                             fields: prev_46.fields.map((ff)=>ff.id === f_7.id ? {
                                                                                                                     ...ff,
-                                                                                                                    name: e_32.target.value
+                                                                                                                    name: e_33.target.value
                                                                                                                 } : ff)
                                                                                                         } : prev_46),
                                                                                                 placeholder: "field name",
                                                                                                 className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                lineNumber: 2169,
+                                                                                                lineNumber: 2194,
                                                                                                 columnNumber: 41
                                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                                                                 value: f_7.type,
-                                                                                                onChange: (e_33)=>setEditingTableDraft((prev_47)=>prev_47 ? {
+                                                                                                onChange: (e_34)=>setEditingTableDraft((prev_47)=>prev_47 ? {
                                                                                                             ...prev_47,
                                                                                                             fields: prev_47.fields.map((ff_0)=>ff_0.id === f_7.id ? {
                                                                                                                     ...ff_0,
-                                                                                                                    type: e_33.target.value
+                                                                                                                    type: e_34.target.value
                                                                                                                 } : ff_0)
                                                                                                         } : prev_47),
                                                                                                 className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm",
@@ -3487,7 +3517,7 @@ const Administrator = (props)=>{
                                                                                                         children: "string"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                        lineNumber: 2183,
+                                                                                                        lineNumber: 2208,
                                                                                                         columnNumber: 43
                                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3495,7 +3525,7 @@ const Administrator = (props)=>{
                                                                                                         children: "number"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                        lineNumber: 2184,
+                                                                                                        lineNumber: 2209,
                                                                                                         columnNumber: 43
                                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3503,7 +3533,7 @@ const Administrator = (props)=>{
                                                                                                         children: "date"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                        lineNumber: 2185,
+                                                                                                        lineNumber: 2210,
                                                                                                         columnNumber: 43
                                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3511,7 +3541,7 @@ const Administrator = (props)=>{
                                                                                                         children: "boolean"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                        lineNumber: 2186,
+                                                                                                        lineNumber: 2211,
                                                                                                         columnNumber: 43
                                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3519,13 +3549,13 @@ const Administrator = (props)=>{
                                                                                                         children: "enum"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                        lineNumber: 2187,
+                                                                                                        lineNumber: 2212,
                                                                                                         columnNumber: 43
                                                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                lineNumber: 2176,
+                                                                                                lineNumber: 2201,
                                                                                                 columnNumber: 41
                                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3537,18 +3567,18 @@ const Administrator = (props)=>{
                                                                                                 children: "Remove"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                                lineNumber: 2189,
+                                                                                                lineNumber: 2214,
                                                                                                 columnNumber: 41
                                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                                         ]
                                                                                     }, f_7.id, true, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2168,
+                                                                                        lineNumber: 2193,
                                                                                         columnNumber: 75
                                                                                     }, ("TURBOPACK compile-time value", void 0)))
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2167,
+                                                                                lineNumber: 2192,
                                                                                 columnNumber: 35
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3570,7 +3600,7 @@ const Administrator = (props)=>{
                                                                                         children: "Add Field"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2197,
+                                                                                        lineNumber: 2222,
                                                                                         columnNumber: 37
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3579,7 +3609,7 @@ const Administrator = (props)=>{
                                                                                         children: "Save"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2205,
+                                                                                        lineNumber: 2230,
                                                                                         columnNumber: 37
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3588,19 +3618,19 @@ const Administrator = (props)=>{
                                                                                         children: "Cancel"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2206,
+                                                                                        lineNumber: 2231,
                                                                                         columnNumber: 37
                                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2196,
+                                                                                lineNumber: 2221,
                                                                                 columnNumber: 35
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2161,
+                                                                        lineNumber: 2186,
                                                                         columnNumber: 44
                                                                     }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                                         children: [
@@ -3616,12 +3646,12 @@ const Administrator = (props)=>{
                                                                                         ]
                                                                                     }, f_8.id, true, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2210,
+                                                                                        lineNumber: 2235,
                                                                                         columnNumber: 60
                                                                                     }, ("TURBOPACK compile-time value", void 0)))
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2209,
+                                                                                lineNumber: 2234,
                                                                                 columnNumber: 35
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3633,7 +3663,7 @@ const Administrator = (props)=>{
                                                                                         children: "Edit"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2214,
+                                                                                        lineNumber: 2239,
                                                                                         columnNumber: 37
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3642,13 +3672,13 @@ const Administrator = (props)=>{
                                                                                         children: "Delete"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 2215,
+                                                                                        lineNumber: 2240,
                                                                                         columnNumber: 37
                                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2213,
+                                                                                lineNumber: 2238,
                                                                                 columnNumber: 35
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
@@ -3656,37 +3686,37 @@ const Administrator = (props)=>{
                                                                 ]
                                                             }, t_3.id, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2153,
+                                                                lineNumber: 2178,
                                                                 columnNumber: 26
                                                             }, ("TURBOPACK compile-time value", void 0));
                                                         })
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2150,
+                                                        lineNumber: 2175,
                                                         columnNumber: 123
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2121,
+                                                lineNumber: 2146,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2073,
+                                        lineNumber: 2098,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2048,
+                                lineNumber: 2073,
                                 columnNumber: 15
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 1866,
+                        lineNumber: 1891,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3700,7 +3730,7 @@ const Administrator = (props)=>{
                                         children: "User Groups"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2228,
+                                        lineNumber: 2253,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3708,13 +3738,13 @@ const Administrator = (props)=>{
                                         children: "Create and manage user groups and their members."
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2229,
+                                        lineNumber: 2254,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2227,
+                                lineNumber: 2252,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3728,17 +3758,17 @@ const Administrator = (props)=>{
                                                 children: "Group Name"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2234,
+                                                lineNumber: 2259,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 value: newGroupName,
-                                                onChange: (e_34)=>setNewGroupName(e_34.target.value),
+                                                onChange: (e_35)=>setNewGroupName(e_35.target.value),
                                                 placeholder: "e.g. Sales Team",
                                                 className: "mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2235,
+                                                lineNumber: 2260,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -3746,17 +3776,17 @@ const Administrator = (props)=>{
                                                 children: "Description"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2236,
+                                                lineNumber: 2261,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                 value: newGroupDesc,
-                                                onChange: (e_35)=>setNewGroupDesc(e_35.target.value),
+                                                onChange: (e_36)=>setNewGroupDesc(e_36.target.value),
                                                 placeholder: "Optional description",
                                                 className: "mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2237,
+                                                lineNumber: 2262,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3764,7 +3794,7 @@ const Administrator = (props)=>{
                                                 children: "Members"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2239,
+                                                lineNumber: 2264,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3778,7 +3808,7 @@ const Administrator = (props)=>{
                                                                 onChange: ()=>toggleNewGroupMember(u_12.id)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2242,
+                                                                lineNumber: 2267,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3791,24 +3821,24 @@ const Administrator = (props)=>{
                                                                         children: u_12.email
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2243,
+                                                                        lineNumber: 2268,
                                                                         columnNumber: 63
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2243,
+                                                                lineNumber: 2268,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, u_12.id, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2241,
+                                                        lineNumber: 2266,
                                                         columnNumber: 38
                                                     }, ("TURBOPACK compile-time value", void 0)))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2240,
+                                                lineNumber: 2265,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3820,7 +3850,7 @@ const Administrator = (props)=>{
                                                         children: "Create Group"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2248,
+                                                        lineNumber: 2273,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3833,19 +3863,19 @@ const Administrator = (props)=>{
                                                         children: "Clear"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2249,
+                                                        lineNumber: 2274,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2247,
+                                                lineNumber: 2272,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2233,
+                                        lineNumber: 2258,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3855,7 +3885,7 @@ const Administrator = (props)=>{
                                             children: "No groups defined."
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2258,
+                                            lineNumber: 2283,
                                             columnNumber: 40
                                         }, ("TURBOPACK compile-time value", void 0)) : groups.map((g_3)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "p-2 bg-white dark:bg-gray-800 border rounded",
@@ -3863,27 +3893,27 @@ const Administrator = (props)=>{
                                                     children: [
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                             value: editingGroupDraft?.name ?? '',
-                                                            onChange: (e_36)=>setEditingGroupDraft((prev_50)=>prev_50 ? {
+                                                            onChange: (e_37)=>setEditingGroupDraft((prev_50)=>prev_50 ? {
                                                                         ...prev_50,
-                                                                        name: e_36.target.value
+                                                                        name: e_37.target.value
                                                                     } : prev_50),
                                                             className: "px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2260,
+                                                            lineNumber: 2285,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                             value: editingGroupDraft?.description ?? '',
-                                                            onChange: (e_37)=>setEditingGroupDraft((prev_51)=>prev_51 ? {
+                                                            onChange: (e_38)=>setEditingGroupDraft((prev_51)=>prev_51 ? {
                                                                         ...prev_51,
-                                                                        description: e_37.target.value
+                                                                        description: e_38.target.value
                                                                     } : prev_51),
                                                             className: "mt-2 px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm",
                                                             placeholder: "Description"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2264,
+                                                            lineNumber: 2289,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3891,7 +3921,7 @@ const Administrator = (props)=>{
                                                             children: "Members"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2269,
+                                                            lineNumber: 2294,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3911,25 +3941,25 @@ const Administrator = (props)=>{
                                                                                     } : prev_52)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2272,
+                                                                            lineNumber: 2297,
                                                                             columnNumber: 33
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                             children: u_13.name
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2276,
+                                                                            lineNumber: 2301,
                                                                             columnNumber: 33
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, u_13.id, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2271,
+                                                                    lineNumber: 2296,
                                                                     columnNumber: 48
                                                                 }, ("TURBOPACK compile-time value", void 0)))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2270,
+                                                            lineNumber: 2295,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3941,7 +3971,7 @@ const Administrator = (props)=>{
                                                                     children: "Save"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2281,
+                                                                    lineNumber: 2306,
                                                                     columnNumber: 29
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3950,19 +3980,19 @@ const Administrator = (props)=>{
                                                                     children: "Cancel"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2282,
+                                                                    lineNumber: 2307,
                                                                     columnNumber: 29
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2280,
+                                                            lineNumber: 2305,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2259,
+                                                    lineNumber: 2284,
                                                     columnNumber: 52
                                                 }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     children: [
@@ -3976,7 +4006,7 @@ const Administrator = (props)=>{
                                                                             children: g_3.name
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2287,
+                                                                            lineNumber: 2312,
                                                                             columnNumber: 31
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         g_3.description && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3984,13 +4014,13 @@ const Administrator = (props)=>{
                                                                             children: g_3.description
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2288,
+                                                                            lineNumber: 2313,
                                                                             columnNumber: 51
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2286,
+                                                                    lineNumber: 2311,
                                                                     columnNumber: 29
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4002,7 +4032,7 @@ const Administrator = (props)=>{
                                                                             children: "Edit"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2291,
+                                                                            lineNumber: 2316,
                                                                             columnNumber: 31
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4011,19 +4041,19 @@ const Administrator = (props)=>{
                                                                             children: "Delete"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2292,
+                                                                            lineNumber: 2317,
                                                                             columnNumber: 31
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2290,
+                                                                    lineNumber: 2315,
                                                                     columnNumber: 29
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2285,
+                                                            lineNumber: 2310,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4038,7 +4068,7 @@ const Administrator = (props)=>{
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2297,
+                                                                    lineNumber: 2322,
                                                                     columnNumber: 29
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4048,52 +4078,52 @@ const Administrator = (props)=>{
                                                                             children: users.find((u_14)=>u_14.id === mid)?.name ?? mid
                                                                         }, mid, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2299,
+                                                                            lineNumber: 2324,
                                                                             columnNumber: 55
                                                                         }, ("TURBOPACK compile-time value", void 0)))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2298,
+                                                                    lineNumber: 2323,
                                                                     columnNumber: 29
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2296,
+                                                            lineNumber: 2321,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2284,
+                                                    lineNumber: 2309,
                                                     columnNumber: 34
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, g_3.id, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2258,
+                                                lineNumber: 2283,
                                                 columnNumber: 124
                                             }, ("TURBOPACK compile-time value", void 0)))
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2257,
+                                        lineNumber: 2282,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2232,
+                                lineNumber: 2257,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2226,
+                        lineNumber: 2251,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 1860,
+                lineNumber: 1885,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -4104,7 +4134,7 @@ const Administrator = (props)=>{
                         children: "System Configuration"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2311,
+                        lineNumber: 2336,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4112,7 +4142,7 @@ const Administrator = (props)=>{
                         children: "Configure system settings, manage integrations, and monitor application health."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2312,
+                        lineNumber: 2337,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4127,19 +4157,19 @@ const Administrator = (props)=>{
                                             children: "Application Name"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2319,
+                                            lineNumber: 2344,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                             value: systemConfig.appName,
-                                            onChange: (e_38)=>setSystemConfig((prev_53)=>({
+                                            onChange: (e_39)=>setSystemConfig((prev_53)=>({
                                                         ...prev_53,
-                                                        appName: e_38.target.value
+                                                        appName: e_39.target.value
                                                     })),
                                             className: "mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2320,
+                                            lineNumber: 2345,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4151,13 +4181,13 @@ const Administrator = (props)=>{
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                             type: "checkbox",
                                                             checked: systemConfig.maintenanceMode,
-                                                            onChange: (e_39)=>setSystemConfig((prev_54)=>({
+                                                            onChange: (e_40)=>setSystemConfig((prev_54)=>({
                                                                         ...prev_54,
-                                                                        maintenanceMode: e_39.target.checked
+                                                                        maintenanceMode: e_40.target.checked
                                                                     }))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2327,
+                                                            lineNumber: 2352,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4165,13 +4195,13 @@ const Administrator = (props)=>{
                                                             children: "Maintenance Mode"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2331,
+                                                            lineNumber: 2356,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2326,
+                                                    lineNumber: 2351,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4179,13 +4209,13 @@ const Administrator = (props)=>{
                                                     children: "When enabled, non-admin access is limited."
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2333,
+                                                    lineNumber: 2358,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2325,
+                                            lineNumber: 2350,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4196,14 +4226,14 @@ const Administrator = (props)=>{
                                                     children: "Logging Level"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2337,
+                                                    lineNumber: 2362,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                     value: systemConfig.loggingLevel,
-                                                    onChange: (e_40)=>setSystemConfig((prev_55)=>({
+                                                    onChange: (e_41)=>setSystemConfig((prev_55)=>({
                                                                 ...prev_55,
-                                                                loggingLevel: e_40.target.value
+                                                                loggingLevel: e_41.target.value
                                                             })),
                                                     className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800",
                                                     children: [
@@ -4212,7 +4242,7 @@ const Administrator = (props)=>{
                                                             children: "Debug"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2342,
+                                                            lineNumber: 2367,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4220,7 +4250,7 @@ const Administrator = (props)=>{
                                                             children: "Info"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2343,
+                                                            lineNumber: 2368,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4228,7 +4258,7 @@ const Administrator = (props)=>{
                                                             children: "Warn"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2344,
+                                                            lineNumber: 2369,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4236,19 +4266,19 @@ const Administrator = (props)=>{
                                                             children: "Error"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2345,
+                                                            lineNumber: 2370,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2338,
+                                                    lineNumber: 2363,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2336,
+                                            lineNumber: 2361,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4259,25 +4289,25 @@ const Administrator = (props)=>{
                                                     children: "Allowed Origins (one per line)"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2350,
+                                                    lineNumber: 2375,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
                                                     value: systemConfig.allowedOrigins.join('\n'),
-                                                    onChange: (e_41)=>setSystemConfig((prev_56)=>({
+                                                    onChange: (e_42)=>setSystemConfig((prev_56)=>({
                                                                 ...prev_56,
-                                                                allowedOrigins: e_41.target.value.split(/\r?\n/).map((s_4)=>s_4.trim()).filter(Boolean)
+                                                                allowedOrigins: e_42.target.value.split(/\r?\n/).map((s_4)=>s_4.trim()).filter(Boolean)
                                                             })),
                                                     className: "mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 h-24 text-sm"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2351,
+                                                    lineNumber: 2376,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2349,
+                                            lineNumber: 2374,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4288,14 +4318,14 @@ const Administrator = (props)=>{
                                                     children: "Backup Schedule"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2358,
+                                                    lineNumber: 2383,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                     value: systemConfig.backupSchedule,
-                                                    onChange: (e_42)=>setSystemConfig((prev_57)=>({
+                                                    onChange: (e_43)=>setSystemConfig((prev_57)=>({
                                                                 ...prev_57,
-                                                                backupSchedule: e_42.target.value
+                                                                backupSchedule: e_43.target.value
                                                             })),
                                                     className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800",
                                                     children: [
@@ -4304,7 +4334,7 @@ const Administrator = (props)=>{
                                                             children: "Daily"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2363,
+                                                            lineNumber: 2388,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4312,7 +4342,7 @@ const Administrator = (props)=>{
                                                             children: "Weekly"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2364,
+                                                            lineNumber: 2389,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -4320,19 +4350,19 @@ const Administrator = (props)=>{
                                                             children: "Monthly"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2365,
+                                                            lineNumber: 2390,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2359,
+                                                    lineNumber: 2384,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2357,
+                                            lineNumber: 2382,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4343,20 +4373,20 @@ const Administrator = (props)=>{
                                                     children: "Sidebar Top Logo (Image URL or upload)"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2370,
+                                                    lineNumber: 2395,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                     value: systemConfig.sidebarLogo || '',
-                                                    onChange: (e_43)=>setSystemConfig((prev_58)=>({
+                                                    onChange: (e_44)=>setSystemConfig((prev_58)=>({
                                                                 ...prev_58,
-                                                                sidebarLogo: e_43.target.value
+                                                                sidebarLogo: e_44.target.value
                                                             })),
                                                     placeholder: "https://example.com/logo.png or data:image/...",
                                                     className: "mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2371,
+                                                    lineNumber: 2396,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -4364,20 +4394,20 @@ const Administrator = (props)=>{
                                                     children: "Sidebar Top Link (URL)"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2376,
+                                                    lineNumber: 2401,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                     value: systemConfig.sidebarUrl || '',
-                                                    onChange: (e_44)=>setSystemConfig((prev_59)=>({
+                                                    onChange: (e_45)=>setSystemConfig((prev_59)=>({
                                                                 ...prev_59,
-                                                                sidebarUrl: e_44.target.value
+                                                                sidebarUrl: e_45.target.value
                                                             })),
                                                     placeholder: "https://example.com",
                                                     className: "mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2377,
+                                                    lineNumber: 2402,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4392,19 +4422,19 @@ const Administrator = (props)=>{
                                                                 className: "max-h-12 object-contain"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2386,
+                                                                lineNumber: 2411,
                                                                 columnNumber: 19
                                                             }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                 className: "text-xs text-gray-500",
                                                                 children: "No logo set"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2386,
+                                                                lineNumber: 2411,
                                                                 columnNumber: 124
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2383,
+                                                            lineNumber: 2408,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4414,11 +4444,11 @@ const Administrator = (props)=>{
                                                                     id: "sidebarLogoFile",
                                                                     type: "file",
                                                                     accept: "image/*",
-                                                                    onChange: (e_45)=>handleSidebarLogoUpload(e_45.target.files?.[0] ?? null),
+                                                                    onChange: (e_46)=>handleSidebarLogoUpload(e_46.target.files?.[0] ?? null),
                                                                     className: "hidden"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2390,
+                                                                    lineNumber: 2415,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4427,7 +4457,7 @@ const Administrator = (props)=>{
                                                                     children: "Upload"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2391,
+                                                                    lineNumber: 2416,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4442,7 +4472,7 @@ const Administrator = (props)=>{
                                                                     children: "Clear"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2392,
+                                                                    lineNumber: 2417,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4454,25 +4484,25 @@ const Administrator = (props)=>{
                                                                     children: "Copy Logo URL"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2399,
+                                                                    lineNumber: 2424,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2389,
+                                                            lineNumber: 2414,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2382,
+                                                    lineNumber: 2407,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2369,
+                                            lineNumber: 2394,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4484,7 +4514,7 @@ const Administrator = (props)=>{
                                                     children: "Save Configuration"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2408,
+                                                    lineNumber: 2433,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4493,7 +4523,7 @@ const Administrator = (props)=>{
                                                     children: "Reset Defaults"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2409,
+                                                    lineNumber: 2434,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4504,7 +4534,7 @@ const Administrator = (props)=>{
                                                             children: integrationSaveMessage || 'Saving...'
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2411,
+                                                            lineNumber: 2436,
                                                             columnNumber: 60
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         integrationSaveStatus === 'saved' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4512,7 +4542,7 @@ const Administrator = (props)=>{
                                                             children: integrationSaveMessage || 'Saved'
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2412,
+                                                            lineNumber: 2437,
                                                             columnNumber: 59
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         integrationSaveStatus === 'error' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4520,25 +4550,25 @@ const Administrator = (props)=>{
                                                             children: integrationSaveMessage || 'Save failed'
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2413,
+                                                            lineNumber: 2438,
                                                             columnNumber: 59
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2410,
+                                                    lineNumber: 2435,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2407,
+                                            lineNumber: 2432,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 2318,
+                                    lineNumber: 2343,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4548,7 +4578,7 @@ const Administrator = (props)=>{
                                             children: "Integration Management"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2419,
+                                            lineNumber: 2444,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4566,7 +4596,7 @@ const Administrator = (props)=>{
                                                                         children: "Issue/Telemetry Integrations"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2425,
+                                                                        lineNumber: 2450,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4574,13 +4604,13 @@ const Administrator = (props)=>{
                                                                         children: "Enable basic integrations like GitHub issue sync, Sentry, and analytics."
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2426,
+                                                                        lineNumber: 2451,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2424,
+                                                                lineNumber: 2449,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4589,63 +4619,63 @@ const Administrator = (props)=>{
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                         type: "checkbox",
                                                                         checked: systemConfig.integrations.github,
-                                                                        onChange: (e_46)=>setSystemConfig((prev_61)=>({
+                                                                        onChange: (e_47)=>setSystemConfig((prev_61)=>({
                                                                                     ...prev_61,
                                                                                     integrations: {
                                                                                         ...prev_61.integrations,
-                                                                                        github: e_46.target.checked
+                                                                                        github: e_47.target.checked
                                                                                     }
                                                                                 }))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2429,
+                                                                        lineNumber: 2454,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                         type: "checkbox",
                                                                         checked: systemConfig.integrations.sentry,
-                                                                        onChange: (e_47)=>setSystemConfig((prev_62)=>({
+                                                                        onChange: (e_48)=>setSystemConfig((prev_62)=>({
                                                                                     ...prev_62,
                                                                                     integrations: {
                                                                                         ...prev_62.integrations,
-                                                                                        sentry: e_47.target.checked
+                                                                                        sentry: e_48.target.checked
                                                                                     }
                                                                                 }))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2436,
+                                                                        lineNumber: 2461,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                         type: "checkbox",
                                                                         checked: systemConfig.integrations.analytics,
-                                                                        onChange: (e_48)=>setSystemConfig((prev_63)=>({
+                                                                        onChange: (e_49)=>setSystemConfig((prev_63)=>({
                                                                                     ...prev_63,
                                                                                     integrations: {
                                                                                         ...prev_63.integrations,
-                                                                                        analytics: e_48.target.checked
+                                                                                        analytics: e_49.target.checked
                                                                                     }
                                                                                 }))
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2443,
+                                                                        lineNumber: 2468,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2428,
+                                                                lineNumber: 2453,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2423,
+                                                        lineNumber: 2448,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2422,
+                                                    lineNumber: 2447,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4661,7 +4691,7 @@ const Administrator = (props)=>{
                                                                             children: "GitHub Login"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2458,
+                                                                            lineNumber: 2483,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4669,13 +4699,13 @@ const Administrator = (props)=>{
                                                                             children: "Configure GitHub OAuth login (optional)."
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2459,
+                                                                            lineNumber: 2484,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2457,
+                                                                    lineNumber: 2482,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4686,37 +4716,37 @@ const Administrator = (props)=>{
                                                                             children: "Enabled"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2462,
+                                                                            lineNumber: 2487,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             type: "checkbox",
                                                                             checked: systemConfig.oauth.github.enabled,
-                                                                            onChange: (e_49)=>setSystemConfig((prev_64)=>({
+                                                                            onChange: (e_50)=>setSystemConfig((prev_64)=>({
                                                                                         ...prev_64,
                                                                                         oauth: {
                                                                                             ...prev_64.oauth,
                                                                                             github: {
                                                                                                 ...prev_64.oauth.github,
-                                                                                                enabled: e_49.target.checked
+                                                                                                enabled: e_50.target.checked
                                                                                             }
                                                                                         }
                                                                                     }))
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2463,
+                                                                            lineNumber: 2488,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2461,
+                                                                    lineNumber: 2486,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2456,
+                                                            lineNumber: 2481,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4729,31 +4759,31 @@ const Administrator = (props)=>{
                                                                             children: "Client ID"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2478,
+                                                                            lineNumber: 2503,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             value: systemConfig.oauth.github.clientId,
-                                                                            onChange: (e_50)=>setSystemConfig((prev_65)=>({
+                                                                            onChange: (e_51)=>setSystemConfig((prev_65)=>({
                                                                                         ...prev_65,
                                                                                         oauth: {
                                                                                             ...prev_65.oauth,
                                                                                             github: {
                                                                                                 ...prev_65.oauth.github,
-                                                                                                clientId: e_50.target.value
+                                                                                                clientId: e_51.target.value
                                                                                             }
                                                                                         }
                                                                                     })),
                                                                             className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2479,
+                                                                            lineNumber: 2504,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2477,
+                                                                    lineNumber: 2502,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4763,38 +4793,38 @@ const Administrator = (props)=>{
                                                                             children: "Client Secret"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2491,
+                                                                            lineNumber: 2516,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             type: "password",
                                                                             value: systemConfig.oauth.github.clientSecret,
-                                                                            onChange: (e_51)=>setSystemConfig((prev_66)=>({
+                                                                            onChange: (e_52)=>setSystemConfig((prev_66)=>({
                                                                                         ...prev_66,
                                                                                         oauth: {
                                                                                             ...prev_66.oauth,
                                                                                             github: {
                                                                                                 ...prev_66.oauth.github,
-                                                                                                clientSecret: e_51.target.value
+                                                                                                clientSecret: e_52.target.value
                                                                                             }
                                                                                         }
                                                                                     })),
                                                                             className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2492,
+                                                                            lineNumber: 2517,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2490,
+                                                                    lineNumber: 2515,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2476,
+                                                            lineNumber: 2501,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4808,31 +4838,31 @@ const Administrator = (props)=>{
                                                                             children: "Redirect URI"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2507,
+                                                                            lineNumber: 2532,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             value: systemConfig.oauth.github.redirectUri,
-                                                                            onChange: (e_52)=>setSystemConfig((prev_67)=>({
+                                                                            onChange: (e_53)=>setSystemConfig((prev_67)=>({
                                                                                         ...prev_67,
                                                                                         oauth: {
                                                                                             ...prev_67.oauth,
                                                                                             github: {
                                                                                                 ...prev_67.oauth.github,
-                                                                                                redirectUri: e_52.target.value
+                                                                                                redirectUri: e_53.target.value
                                                                                             }
                                                                                         }
                                                                                     })),
                                                                             className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2508,
+                                                                            lineNumber: 2533,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2506,
+                                                                    lineNumber: 2531,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4843,18 +4873,18 @@ const Administrator = (props)=>{
                                                                                 try {
                                                                                     const r_2 = await fetch('/api/auth/github/url');
                                                                                     if (r_2.ok) {
-                                                                                        const j_0 = await r_2.json();
+                                                                                        const j_1 = await r_2.json();
                                                                                         try {
-                                                                                            await navigator.clipboard.writeText(j_0.url);
+                                                                                            await navigator.clipboard.writeText(j_1.url);
                                                                                             alert('Auth URL copied');
                                                                                         } catch  {
-                                                                                            alert(j_0.url);
+                                                                                            alert(j_1.url);
                                                                                         }
                                                                                     } else {
                                                                                         alert('Failed to fetch auth url');
                                                                                     }
-                                                                                } catch (e_53) {
-                                                                                    console.warn(e_53);
+                                                                                } catch (e_54) {
+                                                                                    console.warn(e_54);
                                                                                     alert('Failed to fetch auth url');
                                                                                 }
                                                                             },
@@ -4862,7 +4892,7 @@ const Administrator = (props)=>{
                                                                             children: "Copy Auth URL"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2520,
+                                                                            lineNumber: 2545,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4870,13 +4900,13 @@ const Administrator = (props)=>{
                                                                                 try {
                                                                                     const r_3 = await fetch('/api/auth/github/url');
                                                                                     if (r_3.ok) {
-                                                                                        const j_1 = await r_3.json();
-                                                                                        window.open(j_1.url, '_blank');
+                                                                                        const j_2 = await r_3.json();
+                                                                                        window.open(j_2.url, '_blank');
                                                                                     } else {
                                                                                         alert('Failed to fetch auth url');
                                                                                     }
-                                                                                } catch (e_54) {
-                                                                                    console.warn(e_54);
+                                                                                } catch (e_55) {
+                                                                                    console.warn(e_55);
                                                                                     alert('Failed to start OAuth');
                                                                                 }
                                                                             },
@@ -4884,7 +4914,7 @@ const Administrator = (props)=>{
                                                                             children: "Start OAuth"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2540,
+                                                                            lineNumber: 2565,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4917,19 +4947,19 @@ const Administrator = (props)=>{
                                                                             children: "Test / Connect"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2555,
+                                                                            lineNumber: 2580,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2519,
+                                                                    lineNumber: 2544,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2505,
+                                                            lineNumber: 2530,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4944,20 +4974,20 @@ const Administrator = (props)=>{
                                                                             children: "Connected"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2581,
+                                                                            lineNumber: 2606,
                                                                             columnNumber: 95
                                                                         }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                             className: "text-gray-500",
                                                                             children: "Not Connected"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2581,
+                                                                            lineNumber: 2606,
                                                                             columnNumber: 159
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2581,
+                                                                    lineNumber: 2606,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4991,7 +5021,7 @@ const Administrator = (props)=>{
                                                                             children: "Simulate Connect"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2583,
+                                                                            lineNumber: 2608,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5022,25 +5052,25 @@ const Administrator = (props)=>{
                                                                             children: "Disconnect"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2603,
+                                                                            lineNumber: 2628,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2582,
+                                                                    lineNumber: 2607,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2580,
+                                                            lineNumber: 2605,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2455,
+                                                    lineNumber: 2480,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5056,7 +5086,7 @@ const Administrator = (props)=>{
                                                                             children: "Discord Login"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2630,
+                                                                            lineNumber: 2655,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5064,13 +5094,13 @@ const Administrator = (props)=>{
                                                                             children: "Configure Discord OAuth login (optional)."
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2631,
+                                                                            lineNumber: 2656,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2629,
+                                                                    lineNumber: 2654,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5081,37 +5111,37 @@ const Administrator = (props)=>{
                                                                             children: "Enabled"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2634,
+                                                                            lineNumber: 2659,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             type: "checkbox",
                                                                             checked: systemConfig.oauth.discord.enabled,
-                                                                            onChange: (e_55)=>setSystemConfig((prev_74)=>({
+                                                                            onChange: (e_56)=>setSystemConfig((prev_74)=>({
                                                                                         ...prev_74,
                                                                                         oauth: {
                                                                                             ...prev_74.oauth,
                                                                                             discord: {
                                                                                                 ...prev_74.oauth.discord,
-                                                                                                enabled: e_55.target.checked
+                                                                                                enabled: e_56.target.checked
                                                                                             }
                                                                                         }
                                                                                     }))
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2635,
+                                                                            lineNumber: 2660,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2633,
+                                                                    lineNumber: 2658,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2628,
+                                                            lineNumber: 2653,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5124,31 +5154,31 @@ const Administrator = (props)=>{
                                                                             children: "Client ID"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2650,
+                                                                            lineNumber: 2675,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             value: systemConfig.oauth.discord.clientId,
-                                                                            onChange: (e_56)=>setSystemConfig((prev_75)=>({
+                                                                            onChange: (e_57)=>setSystemConfig((prev_75)=>({
                                                                                         ...prev_75,
                                                                                         oauth: {
                                                                                             ...prev_75.oauth,
                                                                                             discord: {
                                                                                                 ...prev_75.oauth.discord,
-                                                                                                clientId: e_56.target.value
+                                                                                                clientId: e_57.target.value
                                                                                             }
                                                                                         }
                                                                                     })),
                                                                             className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2651,
+                                                                            lineNumber: 2676,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2649,
+                                                                    lineNumber: 2674,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5158,38 +5188,38 @@ const Administrator = (props)=>{
                                                                             children: "Client Secret"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2663,
+                                                                            lineNumber: 2688,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             type: "password",
                                                                             value: systemConfig.oauth.discord.clientSecret,
-                                                                            onChange: (e_57)=>setSystemConfig((prev_76)=>({
+                                                                            onChange: (e_58)=>setSystemConfig((prev_76)=>({
                                                                                         ...prev_76,
                                                                                         oauth: {
                                                                                             ...prev_76.oauth,
                                                                                             discord: {
                                                                                                 ...prev_76.oauth.discord,
-                                                                                                clientSecret: e_57.target.value
+                                                                                                clientSecret: e_58.target.value
                                                                                             }
                                                                                         }
                                                                                     })),
                                                                             className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2664,
+                                                                            lineNumber: 2689,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2662,
+                                                                    lineNumber: 2687,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2648,
+                                                            lineNumber: 2673,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5203,31 +5233,31 @@ const Administrator = (props)=>{
                                                                             children: "Redirect URI"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2679,
+                                                                            lineNumber: 2704,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                             value: systemConfig.oauth.discord.redirectUri,
-                                                                            onChange: (e_58)=>setSystemConfig((prev_77)=>({
+                                                                            onChange: (e_59)=>setSystemConfig((prev_77)=>({
                                                                                         ...prev_77,
                                                                                         oauth: {
                                                                                             ...prev_77.oauth,
                                                                                             discord: {
                                                                                                 ...prev_77.oauth.discord,
-                                                                                                redirectUri: e_58.target.value
+                                                                                                redirectUri: e_59.target.value
                                                                                             }
                                                                                         }
                                                                                     })),
                                                                             className: "w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2680,
+                                                                            lineNumber: 2705,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2678,
+                                                                    lineNumber: 2703,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5238,18 +5268,18 @@ const Administrator = (props)=>{
                                                                                 try {
                                                                                     const r_4 = await fetch('/api/auth/discord/url');
                                                                                     if (r_4.ok) {
-                                                                                        const j_2 = await r_4.json();
+                                                                                        const j_3 = await r_4.json();
                                                                                         try {
-                                                                                            await navigator.clipboard.writeText(j_2.url);
+                                                                                            await navigator.clipboard.writeText(j_3.url);
                                                                                             alert('Auth URL copied');
                                                                                         } catch  {
-                                                                                            alert(j_2.url);
+                                                                                            alert(j_3.url);
                                                                                         }
                                                                                     } else {
                                                                                         alert('Failed to fetch auth url');
                                                                                     }
-                                                                                } catch (e_59) {
-                                                                                    console.warn(e_59);
+                                                                                } catch (e_60) {
+                                                                                    console.warn(e_60);
                                                                                     alert('Failed to fetch auth url');
                                                                                 }
                                                                             },
@@ -5257,7 +5287,7 @@ const Administrator = (props)=>{
                                                                             children: "Copy Auth URL"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2692,
+                                                                            lineNumber: 2717,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5265,13 +5295,13 @@ const Administrator = (props)=>{
                                                                                 try {
                                                                                     const r_5 = await fetch('/api/auth/discord/url');
                                                                                     if (r_5.ok) {
-                                                                                        const j_3 = await r_5.json();
-                                                                                        window.open(j_3.url, '_blank');
+                                                                                        const j_4 = await r_5.json();
+                                                                                        window.open(j_4.url, '_blank');
                                                                                     } else {
                                                                                         alert('Failed to fetch auth url');
                                                                                     }
-                                                                                } catch (e_60) {
-                                                                                    console.warn(e_60);
+                                                                                } catch (e_61) {
+                                                                                    console.warn(e_61);
                                                                                     alert('Failed to start OAuth');
                                                                                 }
                                                                             },
@@ -5279,7 +5309,7 @@ const Administrator = (props)=>{
                                                                             children: "Start OAuth"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2712,
+                                                                            lineNumber: 2737,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5312,19 +5342,19 @@ const Administrator = (props)=>{
                                                                             children: "Test / Connect"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2727,
+                                                                            lineNumber: 2752,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2691,
+                                                                    lineNumber: 2716,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2677,
+                                                            lineNumber: 2702,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5339,20 +5369,20 @@ const Administrator = (props)=>{
                                                                             children: "Connected"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2753,
+                                                                            lineNumber: 2778,
                                                                             columnNumber: 96
                                                                         }, ("TURBOPACK compile-time value", void 0)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                             className: "text-gray-500",
                                                                             children: "Not Connected"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2753,
+                                                                            lineNumber: 2778,
                                                                             columnNumber: 160
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2753,
+                                                                    lineNumber: 2778,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5386,7 +5416,7 @@ const Administrator = (props)=>{
                                                                             children: "Simulate Connect"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2755,
+                                                                            lineNumber: 2780,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5417,31 +5447,31 @@ const Administrator = (props)=>{
                                                                             children: "Disconnect"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                            lineNumber: 2775,
+                                                                            lineNumber: 2800,
                                                                             columnNumber: 25
                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 2754,
+                                                                    lineNumber: 2779,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2752,
+                                                            lineNumber: 2777,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2627,
+                                                    lineNumber: 2652,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2420,
+                                            lineNumber: 2445,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
@@ -5449,7 +5479,7 @@ const Administrator = (props)=>{
                                             children: "API Keys"
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2801,
+                                            lineNumber: 2826,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5464,7 +5494,7 @@ const Administrator = (props)=>{
                                                             className: "flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2804,
+                                                            lineNumber: 2829,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5482,13 +5512,13 @@ const Administrator = (props)=>{
                                                             children: "Create"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2805,
+                                                            lineNumber: 2830,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2803,
+                                                    lineNumber: 2828,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5504,7 +5534,7 @@ const Administrator = (props)=>{
                                                                                 children: k_0.name
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2820,
+                                                                                lineNumber: 2845,
                                                                                 columnNumber: 27
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5515,13 +5545,13 @@ const Administrator = (props)=>{
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2821,
+                                                                                lineNumber: 2846,
                                                                                 columnNumber: 27
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2819,
+                                                                        lineNumber: 2844,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5536,7 +5566,7 @@ const Administrator = (props)=>{
                                                                                 children: "Copy"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2824,
+                                                                                lineNumber: 2849,
                                                                                 columnNumber: 27
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5545,19 +5575,19 @@ const Administrator = (props)=>{
                                                                                 children: "Delete"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 2828,
+                                                                                lineNumber: 2853,
                                                                                 columnNumber: 27
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 2823,
+                                                                        lineNumber: 2848,
                                                                         columnNumber: 25
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, k_0.id, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2818,
+                                                                lineNumber: 2843,
                                                                 columnNumber: 54
                                                             }, ("TURBOPACK compile-time value", void 0))),
                                                         systemConfig.apiKeys.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5565,42 +5595,42 @@ const Administrator = (props)=>{
                                                             children: "No API keys configured."
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2831,
+                                                            lineNumber: 2856,
                                                             columnNumber: 59
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2817,
+                                                    lineNumber: 2842,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 2802,
+                                            lineNumber: 2827,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 2418,
+                                    lineNumber: 2443,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                            lineNumber: 2317,
+                            lineNumber: 2342,
                             columnNumber: 13
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2316,
+                        lineNumber: 2341,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 2310,
+                lineNumber: 2335,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -5611,7 +5641,7 @@ const Administrator = (props)=>{
                         children: "Security & Permissions"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2841,
+                        lineNumber: 2866,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5619,7 +5649,7 @@ const Administrator = (props)=>{
                         children: "Manage authentication, two-factor settings, password policies, and access controls."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2842,
+                        lineNumber: 2867,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5635,7 +5665,7 @@ const Administrator = (props)=>{
                                                 children: "Authentication"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2848,
+                                                lineNumber: 2873,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -5644,13 +5674,13 @@ const Administrator = (props)=>{
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "checkbox",
                                                         checked: securityConfig?.require2FA ?? false,
-                                                        onChange: (e_61)=>setSecurityConfig((prev_84)=>({
+                                                        onChange: (e_62)=>setSecurityConfig((prev_84)=>({
                                                                     ...prev_84,
-                                                                    require2FA: e_61.target.checked
+                                                                    require2FA: e_62.target.checked
                                                                 }))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2850,
+                                                        lineNumber: 2875,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5658,13 +5688,13 @@ const Administrator = (props)=>{
                                                         children: "Require Two-Factor Authentication for all admins"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2854,
+                                                        lineNumber: 2879,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2849,
+                                                lineNumber: 2874,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5675,14 +5705,14 @@ const Administrator = (props)=>{
                                                         children: "Session Timeout (minutes)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2858,
+                                                        lineNumber: 2883,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                         value: securityConfig?.sessionTimeout ?? 60,
-                                                        onChange: (e_62)=>setSecurityConfig((prev_85)=>({
+                                                        onChange: (e_63)=>setSecurityConfig((prev_85)=>({
                                                                     ...prev_85,
-                                                                    sessionTimeout: Number(e_62.target.value)
+                                                                    sessionTimeout: Number(e_63.target.value)
                                                                 })),
                                                         className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800",
                                                         children: [
@@ -5691,7 +5721,7 @@ const Administrator = (props)=>{
                                                                 children: "15"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2863,
+                                                                lineNumber: 2888,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5699,7 +5729,7 @@ const Administrator = (props)=>{
                                                                 children: "30"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2864,
+                                                                lineNumber: 2889,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5707,7 +5737,7 @@ const Administrator = (props)=>{
                                                                 children: "60"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2865,
+                                                                lineNumber: 2890,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5715,7 +5745,7 @@ const Administrator = (props)=>{
                                                                 children: "120"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2866,
+                                                                lineNumber: 2891,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5723,19 +5753,19 @@ const Administrator = (props)=>{
                                                                 children: "1440 (1 day)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2867,
+                                                                lineNumber: 2892,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2859,
+                                                        lineNumber: 2884,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2857,
+                                                lineNumber: 2882,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5746,31 +5776,31 @@ const Administrator = (props)=>{
                                                         children: "Allowed IP Ranges (CIDR / one per line)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2872,
+                                                        lineNumber: 2897,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
                                                         value: securityConfig?.allowedIPs?.join('\n') ?? '',
-                                                        onChange: (e_63)=>setSecurityConfig((prev_86)=>({
+                                                        onChange: (e_64)=>setSecurityConfig((prev_86)=>({
                                                                     ...prev_86,
-                                                                    allowedIPs: e_63.target.value.split(/\r?\n/).map((s_5)=>s_5.trim()).filter(Boolean)
+                                                                    allowedIPs: e_64.target.value.split(/\r?\n/).map((s_5)=>s_5.trim()).filter(Boolean)
                                                                 })),
                                                         className: "mt-1 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 h-24 text-sm"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2873,
+                                                        lineNumber: 2898,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2871,
+                                                lineNumber: 2896,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2847,
+                                        lineNumber: 2872,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5780,7 +5810,7 @@ const Administrator = (props)=>{
                                                 children: "Password Policy"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2881,
+                                                lineNumber: 2906,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5793,29 +5823,29 @@ const Administrator = (props)=>{
                                                                 children: "Minimum Length"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2884,
+                                                                lineNumber: 2909,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "number",
                                                                 value: securityConfig?.passwordPolicy?.minLength ?? 8,
-                                                                onChange: (e_64)=>setSecurityConfig((prev_87)=>({
+                                                                onChange: (e_65)=>setSecurityConfig((prev_87)=>({
                                                                             ...prev_87,
                                                                             passwordPolicy: {
                                                                                 ...prev_87.passwordPolicy,
-                                                                                minLength: Number(e_64.target.value)
+                                                                                minLength: Number(e_65.target.value)
                                                                             }
                                                                         })),
                                                                 className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2885,
+                                                                lineNumber: 2910,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2883,
+                                                        lineNumber: 2908,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5825,35 +5855,35 @@ const Administrator = (props)=>{
                                                                 children: "Expire (days)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2894,
+                                                                lineNumber: 2919,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "number",
                                                                 value: securityConfig?.passwordPolicy?.expireDays ?? 90,
-                                                                onChange: (e_65)=>setSecurityConfig((prev_88)=>({
+                                                                onChange: (e_66)=>setSecurityConfig((prev_88)=>({
                                                                             ...prev_88,
                                                                             passwordPolicy: {
                                                                                 ...prev_88.passwordPolicy,
-                                                                                expireDays: Number(e_65.target.value)
+                                                                                expireDays: Number(e_66.target.value)
                                                                             }
                                                                         })),
                                                                 className: "mt-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2895,
+                                                                lineNumber: 2920,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2893,
+                                                        lineNumber: 2918,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2882,
+                                                lineNumber: 2907,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5865,16 +5895,16 @@ const Administrator = (props)=>{
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "checkbox",
                                                                 checked: securityConfig?.passwordPolicy?.requireNumbers ?? true,
-                                                                onChange: (e_66)=>setSecurityConfig((prev_89)=>({
+                                                                onChange: (e_67)=>setSecurityConfig((prev_89)=>({
                                                                             ...prev_89,
                                                                             passwordPolicy: {
                                                                                 ...prev_89.passwordPolicy,
-                                                                                requireNumbers: e_66.target.checked
+                                                                                requireNumbers: e_67.target.checked
                                                                             }
                                                                         }))
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2906,
+                                                                lineNumber: 2931,
                                                                 columnNumber: 62
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             " ",
@@ -5883,13 +5913,13 @@ const Administrator = (props)=>{
                                                                 children: "Require numbers"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2912,
+                                                                lineNumber: 2937,
                                                                 columnNumber: 25
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2906,
+                                                        lineNumber: 2931,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -5898,16 +5928,16 @@ const Administrator = (props)=>{
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "checkbox",
                                                                 checked: securityConfig?.passwordPolicy?.requireSpecial ?? true,
-                                                                onChange: (e_67)=>setSecurityConfig((prev_90)=>({
+                                                                onChange: (e_68)=>setSecurityConfig((prev_90)=>({
                                                                             ...prev_90,
                                                                             passwordPolicy: {
                                                                                 ...prev_90.passwordPolicy,
-                                                                                requireSpecial: e_67.target.checked
+                                                                                requireSpecial: e_68.target.checked
                                                                             }
                                                                         }))
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2913,
+                                                                lineNumber: 2938,
                                                                 columnNumber: 62
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             " ",
@@ -5916,19 +5946,19 @@ const Administrator = (props)=>{
                                                                 children: "Require special characters"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2919,
+                                                                lineNumber: 2944,
                                                                 columnNumber: 25
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2913,
+                                                        lineNumber: 2938,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2905,
+                                                lineNumber: 2930,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5940,7 +5970,7 @@ const Administrator = (props)=>{
                                                         children: "Save Security Settings"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2923,
+                                                        lineNumber: 2948,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5949,25 +5979,25 @@ const Administrator = (props)=>{
                                                         children: "Reset Defaults"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2924,
+                                                        lineNumber: 2949,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2922,
+                                                lineNumber: 2947,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2880,
+                                        lineNumber: 2905,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2846,
+                                lineNumber: 2871,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5978,7 +6008,7 @@ const Administrator = (props)=>{
                                         children: "Blocked IPs"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2930,
+                                        lineNumber: 2955,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5990,7 +6020,7 @@ const Administrator = (props)=>{
                                                 className: "flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2932,
+                                                lineNumber: 2957,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6024,13 +6054,13 @@ const Administrator = (props)=>{
                                                 children: "Block"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2933,
+                                                lineNumber: 2958,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2931,
+                                        lineNumber: 2956,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6044,7 +6074,7 @@ const Administrator = (props)=>{
                                                             children: ip
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2956,
+                                                            lineNumber: 2981,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6070,18 +6100,18 @@ const Administrator = (props)=>{
                                                                 children: "Unblock"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2958,
+                                                                lineNumber: 2983,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 2957,
+                                                            lineNumber: 2982,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, ip, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 2955,
+                                                    lineNumber: 2980,
                                                     columnNumber: 73
                                                 }, ("TURBOPACK compile-time value", void 0))),
                                             !(securityConfig?.blockedIPs || []).length && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6089,31 +6119,31 @@ const Administrator = (props)=>{
                                                 children: "No blocked IPs"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2974,
+                                                lineNumber: 2999,
                                                 columnNumber: 64
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2954,
+                                        lineNumber: 2979,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2929,
+                                lineNumber: 2954,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2845,
+                        lineNumber: 2870,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 2840,
+                lineNumber: 2865,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -6124,7 +6154,7 @@ const Administrator = (props)=>{
                         children: "Database Management"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2982,
+                        lineNumber: 3007,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -6132,7 +6162,7 @@ const Administrator = (props)=>{
                         children: "Monitor database performance, manage schemas, and optimize queries. View connection statistics, manage data integrity, and execute maintenance tasks."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2983,
+                        lineNumber: 3008,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6146,7 +6176,7 @@ const Administrator = (props)=>{
                                         children: "Database Status"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2991,
+                                        lineNumber: 3016,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6160,7 +6190,7 @@ const Administrator = (props)=>{
                                                         children: "Status:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2994,
+                                                        lineNumber: 3019,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6170,20 +6200,20 @@ const Administrator = (props)=>{
                                                                 className: "w-2 h-2 bg-green-500 rounded-full"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 2996,
+                                                                lineNumber: 3021,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             "Connected"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 2995,
+                                                        lineNumber: 3020,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 2993,
+                                                lineNumber: 3018,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6194,7 +6224,7 @@ const Administrator = (props)=>{
                                                         children: "Type:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3001,
+                                                        lineNumber: 3026,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6202,13 +6232,13 @@ const Administrator = (props)=>{
                                                         children: "PostgreSQL (Prisma)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3002,
+                                                        lineNumber: 3027,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3000,
+                                                lineNumber: 3025,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6219,7 +6249,7 @@ const Administrator = (props)=>{
                                                         children: "Size:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3005,
+                                                        lineNumber: 3030,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6227,13 +6257,13 @@ const Administrator = (props)=>{
                                                         children: "245 MB"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3006,
+                                                        lineNumber: 3031,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3004,
+                                                lineNumber: 3029,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6244,7 +6274,7 @@ const Administrator = (props)=>{
                                                         children: "Tables:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3009,
+                                                        lineNumber: 3034,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6252,13 +6282,13 @@ const Administrator = (props)=>{
                                                         children: "8"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3010,
+                                                        lineNumber: 3035,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3008,
+                                                lineNumber: 3033,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6269,7 +6299,7 @@ const Administrator = (props)=>{
                                                         children: "Last Check:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3013,
+                                                        lineNumber: 3038,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6277,25 +6307,25 @@ const Administrator = (props)=>{
                                                         children: "2 min ago"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3014,
+                                                        lineNumber: 3039,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3012,
+                                                lineNumber: 3037,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 2992,
+                                        lineNumber: 3017,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 2990,
+                                lineNumber: 3015,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6306,7 +6336,7 @@ const Administrator = (props)=>{
                                         children: "Connections"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3021,
+                                        lineNumber: 3046,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6322,7 +6352,7 @@ const Administrator = (props)=>{
                                                                 children: "Active Connections"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3025,
+                                                                lineNumber: 3050,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6330,13 +6360,13 @@ const Administrator = (props)=>{
                                                                 children: "12"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3026,
+                                                                lineNumber: 3051,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3024,
+                                                        lineNumber: 3049,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6348,18 +6378,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3029,
+                                                            lineNumber: 3054,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3028,
+                                                        lineNumber: 3053,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3023,
+                                                lineNumber: 3048,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6371,7 +6401,7 @@ const Administrator = (props)=>{
                                                             children: "Max Pool:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3036,
+                                                            lineNumber: 3061,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6379,18 +6409,18 @@ const Administrator = (props)=>{
                                                             children: "20"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3037,
+                                                            lineNumber: 3062,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3035,
+                                                    lineNumber: 3060,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3034,
+                                                lineNumber: 3059,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6402,7 +6432,7 @@ const Administrator = (props)=>{
                                                             children: "Idle Connections:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3042,
+                                                            lineNumber: 3067,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6410,18 +6440,18 @@ const Administrator = (props)=>{
                                                             children: "3"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3043,
+                                                            lineNumber: 3068,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3041,
+                                                    lineNumber: 3066,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3040,
+                                                lineNumber: 3065,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6433,7 +6463,7 @@ const Administrator = (props)=>{
                                                             children: "Avg Query Time:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3048,
+                                                            lineNumber: 3073,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6441,30 +6471,30 @@ const Administrator = (props)=>{
                                                             children: "8ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3049,
+                                                            lineNumber: 3074,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3047,
+                                                    lineNumber: 3072,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3046,
+                                                lineNumber: 3071,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3022,
+                                        lineNumber: 3047,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3020,
+                                lineNumber: 3045,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6475,7 +6505,7 @@ const Administrator = (props)=>{
                                         children: "Actions"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3057,
+                                        lineNumber: 3082,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6487,7 +6517,7 @@ const Administrator = (props)=>{
                                                 children: "Run Maintenance"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3059,
+                                                lineNumber: 3084,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6496,7 +6526,7 @@ const Administrator = (props)=>{
                                                 children: "Optimize Indexes"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3062,
+                                                lineNumber: 3087,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6505,7 +6535,7 @@ const Administrator = (props)=>{
                                                 children: "Verify Integrity"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3065,
+                                                lineNumber: 3090,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6514,25 +6544,25 @@ const Administrator = (props)=>{
                                                 children: "View Query Logs"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3068,
+                                                lineNumber: 3093,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3058,
+                                        lineNumber: 3083,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3056,
+                                lineNumber: 3081,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 2988,
+                        lineNumber: 3013,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6546,7 +6576,7 @@ const Administrator = (props)=>{
                                         children: "Database Tables"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3078,
+                                        lineNumber: 3103,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6555,13 +6585,13 @@ const Administrator = (props)=>{
                                         children: "Refresh Schema"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3079,
+                                        lineNumber: 3104,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3077,
+                                lineNumber: 3102,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6578,7 +6608,7 @@ const Administrator = (props)=>{
                                                         children: "Table Name"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3087,
+                                                        lineNumber: 3112,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6586,7 +6616,7 @@ const Administrator = (props)=>{
                                                         children: "Rows"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3088,
+                                                        lineNumber: 3113,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6594,7 +6624,7 @@ const Administrator = (props)=>{
                                                         children: "Size"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3089,
+                                                        lineNumber: 3114,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6602,7 +6632,7 @@ const Administrator = (props)=>{
                                                         children: "Indexes"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3090,
+                                                        lineNumber: 3115,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6610,7 +6640,7 @@ const Administrator = (props)=>{
                                                         children: "Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3091,
+                                                        lineNumber: 3116,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6618,18 +6648,18 @@ const Administrator = (props)=>{
                                                         children: "Actions"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3092,
+                                                        lineNumber: 3117,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3086,
+                                                lineNumber: 3111,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3085,
+                                            lineNumber: 3110,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -6643,7 +6673,7 @@ const Administrator = (props)=>{
                                                             children: "users"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3097,
+                                                            lineNumber: 3122,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6651,7 +6681,7 @@ const Administrator = (props)=>{
                                                             children: "9"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3098,
+                                                            lineNumber: 3123,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6659,7 +6689,7 @@ const Administrator = (props)=>{
                                                             children: "128 KB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3099,
+                                                            lineNumber: 3124,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6667,7 +6697,7 @@ const Administrator = (props)=>{
                                                             children: "2"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3100,
+                                                            lineNumber: 3125,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6677,12 +6707,12 @@ const Administrator = (props)=>{
                                                                 children: "Healthy"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3101,
+                                                                lineNumber: 3126,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3101,
+                                                            lineNumber: 3126,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6694,7 +6724,7 @@ const Administrator = (props)=>{
                                                                     children: "Edit"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3103,
+                                                                    lineNumber: 3128,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6703,19 +6733,19 @@ const Administrator = (props)=>{
                                                                     children: "Details"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3104,
+                                                                    lineNumber: 3129,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3102,
+                                                            lineNumber: 3127,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3096,
+                                                    lineNumber: 3121,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -6726,7 +6756,7 @@ const Administrator = (props)=>{
                                                             children: "products"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3108,
+                                                            lineNumber: 3133,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6734,7 +6764,7 @@ const Administrator = (props)=>{
                                                             children: "156"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3109,
+                                                            lineNumber: 3134,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6742,7 +6772,7 @@ const Administrator = (props)=>{
                                                             children: "892 KB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3110,
+                                                            lineNumber: 3135,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6750,7 +6780,7 @@ const Administrator = (props)=>{
                                                             children: "3"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3111,
+                                                            lineNumber: 3136,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6760,12 +6790,12 @@ const Administrator = (props)=>{
                                                                 children: "Healthy"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3112,
+                                                                lineNumber: 3137,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3112,
+                                                            lineNumber: 3137,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6777,7 +6807,7 @@ const Administrator = (props)=>{
                                                                     children: "Edit"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3114,
+                                                                    lineNumber: 3139,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6786,19 +6816,19 @@ const Administrator = (props)=>{
                                                                     children: "Details"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3115,
+                                                                    lineNumber: 3140,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3113,
+                                                            lineNumber: 3138,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3107,
+                                                    lineNumber: 3132,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -6809,7 +6839,7 @@ const Administrator = (props)=>{
                                                             children: "orders"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3119,
+                                                            lineNumber: 3144,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6817,7 +6847,7 @@ const Administrator = (props)=>{
                                                             children: "342"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3120,
+                                                            lineNumber: 3145,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6825,7 +6855,7 @@ const Administrator = (props)=>{
                                                             children: "1.8 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3121,
+                                                            lineNumber: 3146,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6833,7 +6863,7 @@ const Administrator = (props)=>{
                                                             children: "4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3122,
+                                                            lineNumber: 3147,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6843,12 +6873,12 @@ const Administrator = (props)=>{
                                                                 children: "Healthy"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3123,
+                                                                lineNumber: 3148,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3123,
+                                                            lineNumber: 3148,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6860,7 +6890,7 @@ const Administrator = (props)=>{
                                                                     children: "Edit"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3125,
+                                                                    lineNumber: 3150,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6869,19 +6899,19 @@ const Administrator = (props)=>{
                                                                     children: "Details"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3126,
+                                                                    lineNumber: 3151,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3124,
+                                                            lineNumber: 3149,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3118,
+                                                    lineNumber: 3143,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -6892,7 +6922,7 @@ const Administrator = (props)=>{
                                                             children: "inventory"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3130,
+                                                            lineNumber: 3155,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6900,7 +6930,7 @@ const Administrator = (props)=>{
                                                             children: "2,847"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3131,
+                                                            lineNumber: 3156,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6908,7 +6938,7 @@ const Administrator = (props)=>{
                                                             children: "4.2 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3132,
+                                                            lineNumber: 3157,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6916,7 +6946,7 @@ const Administrator = (props)=>{
                                                             children: "5"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3133,
+                                                            lineNumber: 3158,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6926,12 +6956,12 @@ const Administrator = (props)=>{
                                                                 children: "Healthy"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3134,
+                                                                lineNumber: 3159,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3134,
+                                                            lineNumber: 3159,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6943,7 +6973,7 @@ const Administrator = (props)=>{
                                                                     children: "Edit"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3136,
+                                                                    lineNumber: 3161,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6952,19 +6982,19 @@ const Administrator = (props)=>{
                                                                     children: "Details"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3137,
+                                                                    lineNumber: 3162,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3135,
+                                                            lineNumber: 3160,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3129,
+                                                    lineNumber: 3154,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -6975,7 +7005,7 @@ const Administrator = (props)=>{
                                                             children: "migrations"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3141,
+                                                            lineNumber: 3166,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6983,7 +7013,7 @@ const Administrator = (props)=>{
                                                             children: "12"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3142,
+                                                            lineNumber: 3167,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6991,7 +7021,7 @@ const Administrator = (props)=>{
                                                             children: "64 KB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3143,
+                                                            lineNumber: 3168,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6999,7 +7029,7 @@ const Administrator = (props)=>{
                                                             children: "1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3144,
+                                                            lineNumber: 3169,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -7009,12 +7039,12 @@ const Administrator = (props)=>{
                                                                 children: "Tracking"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3145,
+                                                                lineNumber: 3170,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3145,
+                                                            lineNumber: 3170,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -7026,7 +7056,7 @@ const Administrator = (props)=>{
                                                                     children: "Edit"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3147,
+                                                                    lineNumber: 3172,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7035,42 +7065,42 @@ const Administrator = (props)=>{
                                                                     children: "Details"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3148,
+                                                                    lineNumber: 3173,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3146,
+                                                            lineNumber: 3171,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3140,
+                                                    lineNumber: 3165,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3095,
+                                            lineNumber: 3120,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 3084,
+                                    lineNumber: 3109,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3083,
+                                lineNumber: 3108,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3076,
+                        lineNumber: 3101,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7084,7 +7114,7 @@ const Administrator = (props)=>{
                                         children: "Optimization"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3160,
+                                        lineNumber: 3185,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7100,7 +7130,7 @@ const Administrator = (props)=>{
                                                                 children: "Rebuild Indexes"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3164,
+                                                                lineNumber: 3189,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7108,13 +7138,13 @@ const Administrator = (props)=>{
                                                                 children: "Improve query performance"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3165,
+                                                                lineNumber: 3190,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3163,
+                                                        lineNumber: 3188,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7123,13 +7153,13 @@ const Administrator = (props)=>{
                                                         children: "Run"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3167,
+                                                        lineNumber: 3192,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3162,
+                                                lineNumber: 3187,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7142,7 +7172,7 @@ const Administrator = (props)=>{
                                                                 children: "Analyze Tables"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3171,
+                                                                lineNumber: 3196,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7150,13 +7180,13 @@ const Administrator = (props)=>{
                                                                 children: "Update table statistics"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3172,
+                                                                lineNumber: 3197,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3170,
+                                                        lineNumber: 3195,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7165,13 +7195,13 @@ const Administrator = (props)=>{
                                                         children: "Run"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3174,
+                                                        lineNumber: 3199,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3169,
+                                                lineNumber: 3194,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7184,7 +7214,7 @@ const Administrator = (props)=>{
                                                                 children: "Vacuum Database"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3178,
+                                                                lineNumber: 3203,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7192,13 +7222,13 @@ const Administrator = (props)=>{
                                                                 children: "Clean up dead rows"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3179,
+                                                                lineNumber: 3204,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3177,
+                                                        lineNumber: 3202,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7207,13 +7237,13 @@ const Administrator = (props)=>{
                                                         children: "Run"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3181,
+                                                        lineNumber: 3206,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3176,
+                                                lineNumber: 3201,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7226,7 +7256,7 @@ const Administrator = (props)=>{
                                                                 children: "Check Integrity"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3185,
+                                                                lineNumber: 3210,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7234,13 +7264,13 @@ const Administrator = (props)=>{
                                                                 children: "Verify data consistency"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3186,
+                                                                lineNumber: 3211,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3184,
+                                                        lineNumber: 3209,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7249,25 +7279,25 @@ const Administrator = (props)=>{
                                                         children: "Run"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3188,
+                                                        lineNumber: 3213,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3183,
+                                                lineNumber: 3208,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3161,
+                                        lineNumber: 3186,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3159,
+                                lineNumber: 3184,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7278,7 +7308,7 @@ const Administrator = (props)=>{
                                         children: "Performance Metrics"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3195,
+                                        lineNumber: 3220,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7294,7 +7324,7 @@ const Administrator = (props)=>{
                                                                 children: "CPU Usage"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3199,
+                                                                lineNumber: 3224,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7302,13 +7332,13 @@ const Administrator = (props)=>{
                                                                 children: "34%"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3200,
+                                                                lineNumber: 3225,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3198,
+                                                        lineNumber: 3223,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7320,18 +7350,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3203,
+                                                            lineNumber: 3228,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3202,
+                                                        lineNumber: 3227,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3197,
+                                                lineNumber: 3222,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7344,7 +7374,7 @@ const Administrator = (props)=>{
                                                                 children: "Memory Usage"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3210,
+                                                                lineNumber: 3235,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7352,13 +7382,13 @@ const Administrator = (props)=>{
                                                                 children: "58%"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3211,
+                                                                lineNumber: 3236,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3209,
+                                                        lineNumber: 3234,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7370,18 +7400,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3214,
+                                                            lineNumber: 3239,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3213,
+                                                        lineNumber: 3238,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3208,
+                                                lineNumber: 3233,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7394,7 +7424,7 @@ const Administrator = (props)=>{
                                                                 children: "Disk I/O"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3221,
+                                                                lineNumber: 3246,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7402,13 +7432,13 @@ const Administrator = (props)=>{
                                                                 children: "22%"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3222,
+                                                                lineNumber: 3247,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3220,
+                                                        lineNumber: 3245,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7420,18 +7450,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3225,
+                                                            lineNumber: 3250,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3224,
+                                                        lineNumber: 3249,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3219,
+                                                lineNumber: 3244,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7441,36 +7471,36 @@ const Administrator = (props)=>{
                                                     children: "Last updated: 1 minute ago"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3231,
+                                                    lineNumber: 3256,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3230,
+                                                lineNumber: 3255,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3196,
+                                        lineNumber: 3221,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3194,
+                                lineNumber: 3219,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3157,
+                        lineNumber: 3182,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 2981,
+                lineNumber: 3006,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -7481,7 +7511,7 @@ const Administrator = (props)=>{
                         children: "Backup & Recovery"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3240,
+                        lineNumber: 3265,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7489,7 +7519,7 @@ const Administrator = (props)=>{
                         children: "Schedule automated backups to local or cloud storage, manage backup files, and test disaster recovery procedures. Restore from backups, track backup history, and ensure data redundancy across systems."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3241,
+                        lineNumber: 3266,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7503,7 +7533,7 @@ const Administrator = (props)=>{
                                         children: "Automated Backup Schedule"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3249,
+                                        lineNumber: 3274,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7516,7 +7546,7 @@ const Administrator = (props)=>{
                                                         children: "Storage Location"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3252,
+                                                        lineNumber: 3277,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -7526,33 +7556,33 @@ const Administrator = (props)=>{
                                                                 children: "Local - E:/In-Accord-web/backups"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3254,
+                                                                lineNumber: 3279,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Cloudflare R2 - inaccord/In-Accord Backups"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3255,
+                                                                lineNumber: 3280,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Both (Local + Cloud)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3256,
+                                                                lineNumber: 3281,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3253,
+                                                        lineNumber: 3278,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3251,
+                                                lineNumber: 3276,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7562,7 +7592,7 @@ const Administrator = (props)=>{
                                                         children: "Backup Frequency"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3260,
+                                                        lineNumber: 3285,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -7572,40 +7602,40 @@ const Administrator = (props)=>{
                                                                 children: "Daily at 2:00 AM"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3262,
+                                                                lineNumber: 3287,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Every 6 hours"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3263,
+                                                                lineNumber: 3288,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Every 12 hours"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3264,
+                                                                lineNumber: 3289,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 children: "Weekly (Sunday 2:00 AM)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3265,
+                                                                lineNumber: 3290,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3261,
+                                                        lineNumber: 3286,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3259,
+                                                lineNumber: 3284,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7615,7 +7645,7 @@ const Administrator = (props)=>{
                                                         children: "What to Backup"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3269,
+                                                        lineNumber: 3294,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7630,7 +7660,7 @@ const Administrator = (props)=>{
                                                                         className: "mr-2"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3272,
+                                                                        lineNumber: 3297,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7638,13 +7668,13 @@ const Administrator = (props)=>{
                                                                         children: "Database (Prisma schema + data)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3273,
+                                                                        lineNumber: 3298,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3271,
+                                                                lineNumber: 3296,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -7656,7 +7686,7 @@ const Administrator = (props)=>{
                                                                         className: "mr-2"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3276,
+                                                                        lineNumber: 3301,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7664,13 +7694,13 @@ const Administrator = (props)=>{
                                                                         children: "Team member data (localStorage)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3277,
+                                                                        lineNumber: 3302,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3275,
+                                                                lineNumber: 3300,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -7682,7 +7712,7 @@ const Administrator = (props)=>{
                                                                         className: "mr-2"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3280,
+                                                                        lineNumber: 3305,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7690,25 +7720,25 @@ const Administrator = (props)=>{
                                                                         children: "Application files (client/server)"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3281,
+                                                                        lineNumber: 3306,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3279,
+                                                                lineNumber: 3304,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3270,
+                                                        lineNumber: 3295,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3268,
+                                                lineNumber: 3293,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7722,13 +7752,13 @@ const Administrator = (props)=>{
                                                                 children: "Today 2:00 AM"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3286,
+                                                                lineNumber: 3311,
                                                                 columnNumber: 91
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3286,
+                                                        lineNumber: 3311,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7737,25 +7767,25 @@ const Administrator = (props)=>{
                                                         children: "Run Now"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3287,
+                                                        lineNumber: 3312,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3285,
+                                                lineNumber: 3310,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3250,
+                                        lineNumber: 3275,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3248,
+                                lineNumber: 3273,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7766,7 +7796,7 @@ const Administrator = (props)=>{
                                         children: "Backup Storage Status"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3296,
+                                        lineNumber: 3321,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7782,7 +7812,7 @@ const Administrator = (props)=>{
                                                                 children: "Local Storage Used"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3300,
+                                                                lineNumber: 3325,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7790,13 +7820,13 @@ const Administrator = (props)=>{
                                                                 children: "3.1 GB / 50 GB"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3301,
+                                                                lineNumber: 3326,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3299,
+                                                        lineNumber: 3324,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7808,18 +7838,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3304,
+                                                            lineNumber: 3329,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3303,
+                                                        lineNumber: 3328,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3298,
+                                                lineNumber: 3323,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7832,7 +7862,7 @@ const Administrator = (props)=>{
                                                                 children: "Cloudflare R2 Used"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3311,
+                                                                lineNumber: 3336,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7840,13 +7870,13 @@ const Administrator = (props)=>{
                                                                 children: "1.8 GB / 10 GB"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3312,
+                                                                lineNumber: 3337,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3310,
+                                                        lineNumber: 3335,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7858,18 +7888,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3315,
+                                                            lineNumber: 3340,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3314,
+                                                        lineNumber: 3339,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3309,
+                                                lineNumber: 3334,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7883,7 +7913,7 @@ const Administrator = (props)=>{
                                                                 children: "Total Backups:"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3322,
+                                                                lineNumber: 3347,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7891,13 +7921,13 @@ const Administrator = (props)=>{
                                                                 children: "7 backups"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3323,
+                                                                lineNumber: 3348,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3321,
+                                                        lineNumber: 3346,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7908,7 +7938,7 @@ const Administrator = (props)=>{
                                                                 children: "Local Copies:"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3326,
+                                                                lineNumber: 3351,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7916,13 +7946,13 @@ const Administrator = (props)=>{
                                                                 children: "7 files"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3327,
+                                                                lineNumber: 3352,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3325,
+                                                        lineNumber: 3350,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7933,7 +7963,7 @@ const Administrator = (props)=>{
                                                                 children: "Cloud Copies:"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3330,
+                                                                lineNumber: 3355,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7941,13 +7971,13 @@ const Administrator = (props)=>{
                                                                 children: "5 files"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3331,
+                                                                lineNumber: 3356,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3329,
+                                                        lineNumber: 3354,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7958,7 +7988,7 @@ const Administrator = (props)=>{
                                                                 children: "Oldest Backup:"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3334,
+                                                                lineNumber: 3359,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7966,19 +7996,19 @@ const Administrator = (props)=>{
                                                                 children: "Jan 2, 2026"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3335,
+                                                                lineNumber: 3360,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3333,
+                                                        lineNumber: 3358,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3320,
+                                                lineNumber: 3345,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -7986,25 +8016,25 @@ const Administrator = (props)=>{
                                                 children: "Manage Storage Locations"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3338,
+                                                lineNumber: 3363,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3297,
+                                        lineNumber: 3322,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3295,
+                                lineNumber: 3320,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3246,
+                        lineNumber: 3271,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8018,7 +8048,7 @@ const Administrator = (props)=>{
                                         children: "Backup History"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3348,
+                                        lineNumber: 3373,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8026,13 +8056,13 @@ const Administrator = (props)=>{
                                         children: "View All"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3349,
+                                        lineNumber: 3374,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3347,
+                                lineNumber: 3372,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8049,7 +8079,7 @@ const Administrator = (props)=>{
                                                         children: "Date & Time"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3357,
+                                                        lineNumber: 3382,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -8057,7 +8087,7 @@ const Administrator = (props)=>{
                                                         children: "Backup Type"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3358,
+                                                        lineNumber: 3383,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -8065,7 +8095,7 @@ const Administrator = (props)=>{
                                                         children: "Location"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3359,
+                                                        lineNumber: 3384,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -8073,7 +8103,7 @@ const Administrator = (props)=>{
                                                         children: "Size"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3360,
+                                                        lineNumber: 3385,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -8081,7 +8111,7 @@ const Administrator = (props)=>{
                                                         children: "Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3361,
+                                                        lineNumber: 3386,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -8089,18 +8119,18 @@ const Administrator = (props)=>{
                                                         children: "Actions"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3362,
+                                                        lineNumber: 3387,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3356,
+                                                lineNumber: 3381,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3355,
+                                            lineNumber: 3380,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -8114,7 +8144,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-08 02:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3367,
+                                                            lineNumber: 3392,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8122,7 +8152,7 @@ const Administrator = (props)=>{
                                                             children: "Full (DB + Files)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3368,
+                                                            lineNumber: 3393,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8130,7 +8160,7 @@ const Administrator = (props)=>{
                                                             children: "Local + Cloud"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3369,
+                                                            lineNumber: 3394,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8138,7 +8168,7 @@ const Administrator = (props)=>{
                                                             children: "487 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3370,
+                                                            lineNumber: 3395,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8148,12 +8178,12 @@ const Administrator = (props)=>{
                                                                 children: "Complete"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3371,
+                                                                lineNumber: 3396,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3371,
+                                                            lineNumber: 3396,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8164,7 +8194,7 @@ const Administrator = (props)=>{
                                                                     children: "Restore"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3373,
+                                                                    lineNumber: 3398,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8172,19 +8202,19 @@ const Administrator = (props)=>{
                                                                     children: "Download"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3374,
+                                                                    lineNumber: 3399,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3372,
+                                                            lineNumber: 3397,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3366,
+                                                    lineNumber: 3391,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -8195,7 +8225,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-07 02:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3378,
+                                                            lineNumber: 3403,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8203,7 +8233,7 @@ const Administrator = (props)=>{
                                                             children: "Full (DB + Files)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3379,
+                                                            lineNumber: 3404,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8211,7 +8241,7 @@ const Administrator = (props)=>{
                                                             children: "Local + Cloud"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3380,
+                                                            lineNumber: 3405,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8219,7 +8249,7 @@ const Administrator = (props)=>{
                                                             children: "465 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3381,
+                                                            lineNumber: 3406,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8229,12 +8259,12 @@ const Administrator = (props)=>{
                                                                 children: "Complete"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3382,
+                                                                lineNumber: 3407,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3382,
+                                                            lineNumber: 3407,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8245,7 +8275,7 @@ const Administrator = (props)=>{
                                                                     children: "Restore"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3384,
+                                                                    lineNumber: 3409,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8253,19 +8283,19 @@ const Administrator = (props)=>{
                                                                     children: "Download"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3385,
+                                                                    lineNumber: 3410,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3383,
+                                                            lineNumber: 3408,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3377,
+                                                    lineNumber: 3402,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -8276,7 +8306,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-06 02:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3389,
+                                                            lineNumber: 3414,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8284,7 +8314,7 @@ const Administrator = (props)=>{
                                                             children: "Full (DB + Files)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3390,
+                                                            lineNumber: 3415,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8292,7 +8322,7 @@ const Administrator = (props)=>{
                                                             children: "Local + Cloud"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3391,
+                                                            lineNumber: 3416,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8300,7 +8330,7 @@ const Administrator = (props)=>{
                                                             children: "458 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3392,
+                                                            lineNumber: 3417,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8310,12 +8340,12 @@ const Administrator = (props)=>{
                                                                 children: "Complete"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3393,
+                                                                lineNumber: 3418,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3393,
+                                                            lineNumber: 3418,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8326,7 +8356,7 @@ const Administrator = (props)=>{
                                                                     children: "Restore"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3395,
+                                                                    lineNumber: 3420,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8334,19 +8364,19 @@ const Administrator = (props)=>{
                                                                     children: "Download"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3396,
+                                                                    lineNumber: 3421,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3394,
+                                                            lineNumber: 3419,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3388,
+                                                    lineNumber: 3413,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -8357,7 +8387,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-05 02:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3400,
+                                                            lineNumber: 3425,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8365,7 +8395,7 @@ const Administrator = (props)=>{
                                                             children: "Full (DB + Files)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3401,
+                                                            lineNumber: 3426,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8373,7 +8403,7 @@ const Administrator = (props)=>{
                                                             children: "Local Only"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3402,
+                                                            lineNumber: 3427,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8381,7 +8411,7 @@ const Administrator = (props)=>{
                                                             children: "442 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3403,
+                                                            lineNumber: 3428,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8391,12 +8421,12 @@ const Administrator = (props)=>{
                                                                 children: "Verified"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3404,
+                                                                lineNumber: 3429,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3404,
+                                                            lineNumber: 3429,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8407,7 +8437,7 @@ const Administrator = (props)=>{
                                                                     children: "Restore"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3406,
+                                                                    lineNumber: 3431,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8415,19 +8445,19 @@ const Administrator = (props)=>{
                                                                     children: "Download"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3407,
+                                                                    lineNumber: 3432,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3405,
+                                                            lineNumber: 3430,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3399,
+                                                    lineNumber: 3424,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -8438,7 +8468,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-04 02:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3411,
+                                                            lineNumber: 3436,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8446,7 +8476,7 @@ const Administrator = (props)=>{
                                                             children: "Full (DB + Files)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3412,
+                                                            lineNumber: 3437,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8454,7 +8484,7 @@ const Administrator = (props)=>{
                                                             children: "Local Only"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3413,
+                                                            lineNumber: 3438,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8462,7 +8492,7 @@ const Administrator = (props)=>{
                                                             children: "438 MB"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3414,
+                                                            lineNumber: 3439,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8472,12 +8502,12 @@ const Administrator = (props)=>{
                                                                 children: "Complete"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3415,
+                                                                lineNumber: 3440,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3415,
+                                                            lineNumber: 3440,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -8488,7 +8518,7 @@ const Administrator = (props)=>{
                                                                     children: "Restore"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3417,
+                                                                    lineNumber: 3442,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8496,42 +8526,42 @@ const Administrator = (props)=>{
                                                                     children: "Download"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                    lineNumber: 3418,
+                                                                    lineNumber: 3443,
                                                                     columnNumber: 23
                                                                 }, ("TURBOPACK compile-time value", void 0))
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3416,
+                                                            lineNumber: 3441,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3410,
+                                                    lineNumber: 3435,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3365,
+                                            lineNumber: 3390,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 3354,
+                                    lineNumber: 3379,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3353,
+                                lineNumber: 3378,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3346,
+                        lineNumber: 3371,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8545,7 +8575,7 @@ const Administrator = (props)=>{
                                         children: "Disaster Recovery Testing"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3430,
+                                        lineNumber: 3455,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8559,7 +8589,7 @@ const Administrator = (props)=>{
                                                         children: "Last DR Test:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3433,
+                                                        lineNumber: 3458,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8567,13 +8597,13 @@ const Administrator = (props)=>{
                                                         children: "2026-01-01 08:30"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3434,
+                                                        lineNumber: 3459,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3432,
+                                                lineNumber: 3457,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8584,7 +8614,7 @@ const Administrator = (props)=>{
                                                         children: "Test Result:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3437,
+                                                        lineNumber: 3462,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8592,13 +8622,13 @@ const Administrator = (props)=>{
                                                         children: "Passed"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3438,
+                                                        lineNumber: 3463,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3436,
+                                                lineNumber: 3461,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8609,7 +8639,7 @@ const Administrator = (props)=>{
                                                         children: "Recovery Time:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3441,
+                                                        lineNumber: 3466,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8617,13 +8647,13 @@ const Administrator = (props)=>{
                                                         children: "6m 14s"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3442,
+                                                        lineNumber: 3467,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3440,
+                                                lineNumber: 3465,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8634,7 +8664,7 @@ const Administrator = (props)=>{
                                                         children: "Backup Tested:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3445,
+                                                        lineNumber: 3470,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8642,13 +8672,13 @@ const Administrator = (props)=>{
                                                         children: "2025-12-31 backup"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3446,
+                                                        lineNumber: 3471,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3444,
+                                                lineNumber: 3469,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8659,7 +8689,7 @@ const Administrator = (props)=>{
                                                         children: "Next Test:"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3449,
+                                                        lineNumber: 3474,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8667,19 +8697,19 @@ const Administrator = (props)=>{
                                                         children: "Feb 1, 2026"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3450,
+                                                        lineNumber: 3475,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3448,
+                                                lineNumber: 3473,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3431,
+                                        lineNumber: 3456,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8690,7 +8720,7 @@ const Administrator = (props)=>{
                                                 children: "Run DR Test Now"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3454,
+                                                lineNumber: 3479,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -8698,19 +8728,19 @@ const Administrator = (props)=>{
                                                 children: "View Test History"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3457,
+                                                lineNumber: 3482,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3453,
+                                        lineNumber: 3478,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3429,
+                                lineNumber: 3454,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8721,7 +8751,7 @@ const Administrator = (props)=>{
                                         children: "Data Redundancy"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3465,
+                                        lineNumber: 3490,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8737,7 +8767,7 @@ const Administrator = (props)=>{
                                                                 className: "w-3 h-3 bg-green-500 rounded-full mr-3"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3469,
+                                                                lineNumber: 3494,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8747,7 +8777,7 @@ const Administrator = (props)=>{
                                                                         children: "Local Primary"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3471,
+                                                                        lineNumber: 3496,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8755,19 +8785,19 @@ const Administrator = (props)=>{
                                                                         children: "E:/In-Accord-web/backups"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3472,
+                                                                        lineNumber: 3497,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3470,
+                                                                lineNumber: 3495,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3468,
+                                                        lineNumber: 3493,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8775,13 +8805,13 @@ const Administrator = (props)=>{
                                                         children: "Active"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3475,
+                                                        lineNumber: 3500,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3467,
+                                                lineNumber: 3492,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8794,7 +8824,7 @@ const Administrator = (props)=>{
                                                                 className: "w-3 h-3 bg-green-500 rounded-full mr-3"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3479,
+                                                                lineNumber: 3504,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8804,7 +8834,7 @@ const Administrator = (props)=>{
                                                                         children: "Cloudflare R2"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3481,
+                                                                        lineNumber: 3506,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8812,19 +8842,19 @@ const Administrator = (props)=>{
                                                                         children: "inaccord/In-Accord Backups"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3482,
+                                                                        lineNumber: 3507,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3480,
+                                                                lineNumber: 3505,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3478,
+                                                        lineNumber: 3503,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8832,13 +8862,13 @@ const Administrator = (props)=>{
                                                         children: "Synced"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3485,
+                                                        lineNumber: 3510,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3477,
+                                                lineNumber: 3502,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8851,7 +8881,7 @@ const Administrator = (props)=>{
                                                                 className: "w-3 h-3 bg-blue-500 rounded-full mr-3"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3489,
+                                                                lineNumber: 3514,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8861,7 +8891,7 @@ const Administrator = (props)=>{
                                                                         children: "Database Schema"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3491,
+                                                                        lineNumber: 3516,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8869,19 +8899,19 @@ const Administrator = (props)=>{
                                                                         children: "server/prisma/schema.prisma"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3492,
+                                                                        lineNumber: 3517,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3490,
+                                                                lineNumber: 3515,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3488,
+                                                        lineNumber: 3513,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8889,13 +8919,13 @@ const Administrator = (props)=>{
                                                         children: "Git Tracked"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3495,
+                                                        lineNumber: 3520,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3487,
+                                                lineNumber: 3512,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8908,7 +8938,7 @@ const Administrator = (props)=>{
                                                                 className: "w-3 h-3 bg-blue-500 rounded-full mr-3"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3499,
+                                                                lineNumber: 3524,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8918,7 +8948,7 @@ const Administrator = (props)=>{
                                                                         children: "Team Data"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3501,
+                                                                        lineNumber: 3526,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8926,19 +8956,19 @@ const Administrator = (props)=>{
                                                                         children: "localStorage + backups"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3502,
+                                                                        lineNumber: 3527,
                                                                         columnNumber: 23
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3500,
+                                                                lineNumber: 3525,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3498,
+                                                        lineNumber: 3523,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8946,13 +8976,13 @@ const Administrator = (props)=>{
                                                         children: "Protected"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3505,
+                                                        lineNumber: 3530,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3497,
+                                                lineNumber: 3522,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8969,43 +8999,43 @@ const Administrator = (props)=>{
                                                             children: "Cloudflare R2"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3509,
+                                                            lineNumber: 3534,
                                                             columnNumber: 73
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         ". Database schema and migrations are version controlled in the GitHub repository (GARD-Realms-LLC/In-Accord-web)."
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3508,
+                                                    lineNumber: 3533,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3507,
+                                                lineNumber: 3532,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3466,
+                                        lineNumber: 3491,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3464,
+                                lineNumber: 3489,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3427,
+                        lineNumber: 3452,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 3239,
+                lineNumber: 3264,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -9016,7 +9046,7 @@ const Administrator = (props)=>{
                         children: "Audit Logs"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3519,
+                        lineNumber: 3544,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -9024,7 +9054,7 @@ const Administrator = (props)=>{
                         children: "View comprehensive audit trails of all system activities and user actions. Track changes, filter by user or action type, and export logs for compliance and investigation."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3520,
+                        lineNumber: 3545,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9038,7 +9068,7 @@ const Administrator = (props)=>{
                                         children: "Activity Log"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3527,
+                                        lineNumber: 3552,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9050,7 +9080,7 @@ const Administrator = (props)=>{
                                                 children: "Refresh"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3529,
+                                                lineNumber: 3554,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -9059,7 +9089,7 @@ const Administrator = (props)=>{
                                                 children: "Clear Logs"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3532,
+                                                lineNumber: 3557,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -9067,19 +9097,19 @@ const Administrator = (props)=>{
                                                 children: "Export Logs"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3535,
+                                                lineNumber: 3560,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3528,
+                                        lineNumber: 3553,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3526,
+                                lineNumber: 3551,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9096,7 +9126,7 @@ const Administrator = (props)=>{
                                                         children: "Timestamp"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3545,
+                                                        lineNumber: 3570,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9104,7 +9134,7 @@ const Administrator = (props)=>{
                                                         children: "User"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3546,
+                                                        lineNumber: 3571,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9112,7 +9142,7 @@ const Administrator = (props)=>{
                                                         children: "Page"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3547,
+                                                        lineNumber: 3572,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9120,7 +9150,7 @@ const Administrator = (props)=>{
                                                         children: "Action"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3548,
+                                                        lineNumber: 3573,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9128,7 +9158,7 @@ const Administrator = (props)=>{
                                                         children: "Details"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3549,
+                                                        lineNumber: 3574,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9136,18 +9166,18 @@ const Administrator = (props)=>{
                                                         children: "Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3550,
+                                                        lineNumber: 3575,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3544,
+                                                lineNumber: 3569,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3543,
+                                            lineNumber: 3568,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -9159,12 +9189,12 @@ const Administrator = (props)=>{
                                                     children: "No audit log entries. Click Refresh to reload."
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3555,
+                                                    lineNumber: 3580,
                                                     columnNumber: 23
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3554,
+                                                lineNumber: 3579,
                                                 columnNumber: 51
                                             }, ("TURBOPACK compile-time value", void 0)) : auditLogEntries.map((log, idx)=>{
                                                 const badgeClass = log.status === 'Success' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
@@ -9179,12 +9209,12 @@ const Administrator = (props)=>{
                                                                 children: log.timestamp
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3560,
+                                                                lineNumber: 3585,
                                                                 columnNumber: 72
                                                             }, ("TURBOPACK compile-time value", void 0)) : log.timestamp
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3559,
+                                                            lineNumber: 3584,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9192,7 +9222,7 @@ const Administrator = (props)=>{
                                                             children: log.user
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3564,
+                                                            lineNumber: 3589,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9200,7 +9230,7 @@ const Administrator = (props)=>{
                                                             children: log.page
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3565,
+                                                            lineNumber: 3590,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9208,7 +9238,7 @@ const Administrator = (props)=>{
                                                             children: log.action
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3566,
+                                                            lineNumber: 3591,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9216,7 +9246,7 @@ const Administrator = (props)=>{
                                                             children: log.details
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3567,
+                                                            lineNumber: 3592,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9226,41 +9256,41 @@ const Administrator = (props)=>{
                                                                 children: log.status
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3568,
+                                                                lineNumber: 3593,
                                                                 columnNumber: 53
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3568,
+                                                            lineNumber: 3593,
                                                             columnNumber: 27
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, `${log.timestamp}-${idx}`, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3558,
+                                                    lineNumber: 3583,
                                                     columnNumber: 24
                                                 }, ("TURBOPACK compile-time value", void 0));
                                             })
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3553,
+                                            lineNumber: 3578,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 3542,
+                                    lineNumber: 3567,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3541,
+                                lineNumber: 3566,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3525,
+                        lineNumber: 3550,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9274,7 +9304,7 @@ const Administrator = (props)=>{
                                         children: "Database Query Logs"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3579,
+                                        lineNumber: 3604,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9287,55 +9317,55 @@ const Administrator = (props)=>{
                                                         children: "All Queries"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3582,
+                                                        lineNumber: 3607,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "SELECT"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3583,
+                                                        lineNumber: 3608,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "INSERT"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3584,
+                                                        lineNumber: 3609,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "UPDATE"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3585,
+                                                        lineNumber: 3610,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "DELETE"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3586,
+                                                        lineNumber: 3611,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "Slow Queries (>100ms)"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3587,
+                                                        lineNumber: 3612,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                         children: "Failed Queries"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3588,
+                                                        lineNumber: 3613,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3581,
+                                                lineNumber: 3606,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -9343,19 +9373,19 @@ const Administrator = (props)=>{
                                                 children: "Clear Logs"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3590,
+                                                lineNumber: 3615,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3580,
+                                        lineNumber: 3605,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3578,
+                                lineNumber: 3603,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9372,7 +9402,7 @@ const Administrator = (props)=>{
                                                         children: "Timestamp"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3600,
+                                                        lineNumber: 3625,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9380,7 +9410,7 @@ const Administrator = (props)=>{
                                                         children: "Query Type"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3601,
+                                                        lineNumber: 3626,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9388,7 +9418,7 @@ const Administrator = (props)=>{
                                                         children: "Table"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3602,
+                                                        lineNumber: 3627,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9396,7 +9426,7 @@ const Administrator = (props)=>{
                                                         children: "Execution Time"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3603,
+                                                        lineNumber: 3628,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9404,7 +9434,7 @@ const Administrator = (props)=>{
                                                         children: "Rows Affected"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3604,
+                                                        lineNumber: 3629,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -9412,18 +9442,18 @@ const Administrator = (props)=>{
                                                         children: "Status"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3605,
+                                                        lineNumber: 3630,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3599,
+                                                lineNumber: 3624,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3598,
+                                            lineNumber: 3623,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -9437,7 +9467,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:45:32 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3610,
+                                                            lineNumber: 3635,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9447,12 +9477,12 @@ const Administrator = (props)=>{
                                                                 children: "SELECT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3611,
+                                                                lineNumber: 3636,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3611,
+                                                            lineNumber: 3636,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9460,7 +9490,7 @@ const Administrator = (props)=>{
                                                             children: "users"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3612,
+                                                            lineNumber: 3637,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9468,7 +9498,7 @@ const Administrator = (props)=>{
                                                             children: "3ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3613,
+                                                            lineNumber: 3638,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9476,7 +9506,7 @@ const Administrator = (props)=>{
                                                             children: "9"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3614,
+                                                            lineNumber: 3639,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9486,18 +9516,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3615,
+                                                                lineNumber: 3640,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3615,
+                                                            lineNumber: 3640,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3609,
+                                                    lineNumber: 3634,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9508,7 +9538,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:44:18 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3618,
+                                                            lineNumber: 3643,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9518,12 +9548,12 @@ const Administrator = (props)=>{
                                                                 children: "INSERT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3619,
+                                                                lineNumber: 3644,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3619,
+                                                            lineNumber: 3644,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9531,7 +9561,7 @@ const Administrator = (props)=>{
                                                             children: "products"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3620,
+                                                            lineNumber: 3645,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9539,7 +9569,7 @@ const Administrator = (props)=>{
                                                             children: "5ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3621,
+                                                            lineNumber: 3646,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9547,7 +9577,7 @@ const Administrator = (props)=>{
                                                             children: "1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3622,
+                                                            lineNumber: 3647,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9557,18 +9587,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3623,
+                                                                lineNumber: 3648,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3623,
+                                                            lineNumber: 3648,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3617,
+                                                    lineNumber: 3642,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9579,7 +9609,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:43:05 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3626,
+                                                            lineNumber: 3651,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9589,12 +9619,12 @@ const Administrator = (props)=>{
                                                                 children: "UPDATE"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3627,
+                                                                lineNumber: 3652,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3627,
+                                                            lineNumber: 3652,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9602,7 +9632,7 @@ const Administrator = (props)=>{
                                                             children: "inventory"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3628,
+                                                            lineNumber: 3653,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9610,7 +9640,7 @@ const Administrator = (props)=>{
                                                             children: "8ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3629,
+                                                            lineNumber: 3654,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9618,7 +9648,7 @@ const Administrator = (props)=>{
                                                             children: "47"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3630,
+                                                            lineNumber: 3655,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9628,18 +9658,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3631,
+                                                                lineNumber: 3656,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3631,
+                                                            lineNumber: 3656,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3625,
+                                                    lineNumber: 3650,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9650,7 +9680,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:41:52 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3634,
+                                                            lineNumber: 3659,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9660,12 +9690,12 @@ const Administrator = (props)=>{
                                                                 children: "DELETE"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3635,
+                                                                lineNumber: 3660,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3635,
+                                                            lineNumber: 3660,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9673,7 +9703,7 @@ const Administrator = (props)=>{
                                                             children: "orders"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3636,
+                                                            lineNumber: 3661,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9681,7 +9711,7 @@ const Administrator = (props)=>{
                                                             children: "4ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3637,
+                                                            lineNumber: 3662,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9689,7 +9719,7 @@ const Administrator = (props)=>{
                                                             children: "1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3638,
+                                                            lineNumber: 3663,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9699,18 +9729,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3639,
+                                                                lineNumber: 3664,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3639,
+                                                            lineNumber: 3664,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3633,
+                                                    lineNumber: 3658,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9721,7 +9751,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:40:38 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3642,
+                                                            lineNumber: 3667,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9731,12 +9761,12 @@ const Administrator = (props)=>{
                                                                 children: "SELECT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3643,
+                                                                lineNumber: 3668,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3643,
+                                                            lineNumber: 3668,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9744,7 +9774,7 @@ const Administrator = (props)=>{
                                                             children: "products"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3644,
+                                                            lineNumber: 3669,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9752,7 +9782,7 @@ const Administrator = (props)=>{
                                                             children: "12ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3645,
+                                                            lineNumber: 3670,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9760,7 +9790,7 @@ const Administrator = (props)=>{
                                                             children: "156"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3646,
+                                                            lineNumber: 3671,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9770,18 +9800,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3647,
+                                                                lineNumber: 3672,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3647,
+                                                            lineNumber: 3672,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3641,
+                                                    lineNumber: 3666,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9792,7 +9822,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:39:21 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3650,
+                                                            lineNumber: 3675,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9802,12 +9832,12 @@ const Administrator = (props)=>{
                                                                 children: "UPDATE"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3651,
+                                                                lineNumber: 3676,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3651,
+                                                            lineNumber: 3676,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9815,7 +9845,7 @@ const Administrator = (props)=>{
                                                             children: "users"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3652,
+                                                            lineNumber: 3677,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9823,7 +9853,7 @@ const Administrator = (props)=>{
                                                             children: "2ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3653,
+                                                            lineNumber: 3678,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9831,7 +9861,7 @@ const Administrator = (props)=>{
                                                             children: "1"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3654,
+                                                            lineNumber: 3679,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9841,18 +9871,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3655,
+                                                                lineNumber: 3680,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3655,
+                                                            lineNumber: 3680,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3649,
+                                                    lineNumber: 3674,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9863,7 +9893,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:38:07 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3658,
+                                                            lineNumber: 3683,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9873,12 +9903,12 @@ const Administrator = (props)=>{
                                                                 children: "SELECT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3659,
+                                                                lineNumber: 3684,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3659,
+                                                            lineNumber: 3684,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9886,7 +9916,7 @@ const Administrator = (props)=>{
                                                             children: "orders"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3660,
+                                                            lineNumber: 3685,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9894,7 +9924,7 @@ const Administrator = (props)=>{
                                                             children: "18ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3661,
+                                                            lineNumber: 3686,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9902,7 +9932,7 @@ const Administrator = (props)=>{
                                                             children: "342"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3662,
+                                                            lineNumber: 3687,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9912,18 +9942,18 @@ const Administrator = (props)=>{
                                                                 children: "Slow"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3663,
+                                                                lineNumber: 3688,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3663,
+                                                            lineNumber: 3688,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3657,
+                                                    lineNumber: 3682,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -9934,7 +9964,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:36:54 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3666,
+                                                            lineNumber: 3691,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9944,12 +9974,12 @@ const Administrator = (props)=>{
                                                                 children: "INSERT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3667,
+                                                                lineNumber: 3692,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3667,
+                                                            lineNumber: 3692,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9957,7 +9987,7 @@ const Administrator = (props)=>{
                                                             children: "inventory"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3668,
+                                                            lineNumber: 3693,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9965,7 +9995,7 @@ const Administrator = (props)=>{
                                                             children: "6ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3669,
+                                                            lineNumber: 3694,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9973,7 +10003,7 @@ const Administrator = (props)=>{
                                                             children: "15"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3670,
+                                                            lineNumber: 3695,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -9983,18 +10013,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3671,
+                                                                lineNumber: 3696,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3671,
+                                                            lineNumber: 3696,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3665,
+                                                    lineNumber: 3690,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -10005,7 +10035,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:35:42 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3674,
+                                                            lineNumber: 3699,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10015,12 +10045,12 @@ const Administrator = (props)=>{
                                                                 children: "SELECT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3675,
+                                                                lineNumber: 3700,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3675,
+                                                            lineNumber: 3700,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10028,7 +10058,7 @@ const Administrator = (props)=>{
                                                             children: "users"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3676,
+                                                            lineNumber: 3701,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10036,7 +10066,7 @@ const Administrator = (props)=>{
                                                             children: "2ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3677,
+                                                            lineNumber: 3702,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10044,7 +10074,7 @@ const Administrator = (props)=>{
                                                             children: "9"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3678,
+                                                            lineNumber: 3703,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10054,18 +10084,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3679,
+                                                                lineNumber: 3704,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3679,
+                                                            lineNumber: 3704,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3673,
+                                                    lineNumber: 3698,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -10076,7 +10106,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:34:15 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3682,
+                                                            lineNumber: 3707,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10086,12 +10116,12 @@ const Administrator = (props)=>{
                                                                 children: "SELECT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3683,
+                                                                lineNumber: 3708,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3683,
+                                                            lineNumber: 3708,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10099,7 +10129,7 @@ const Administrator = (props)=>{
                                                             children: "products"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3684,
+                                                            lineNumber: 3709,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10107,7 +10137,7 @@ const Administrator = (props)=>{
                                                             children: "7ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3685,
+                                                            lineNumber: 3710,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10115,7 +10145,7 @@ const Administrator = (props)=>{
                                                             children: "24"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3686,
+                                                            lineNumber: 3711,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10125,18 +10155,18 @@ const Administrator = (props)=>{
                                                                 children: "Success"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3687,
+                                                                lineNumber: 3712,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3687,
+                                                            lineNumber: 3712,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3681,
+                                                    lineNumber: 3706,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -10147,7 +10177,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:33:08 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3690,
+                                                            lineNumber: 3715,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10157,12 +10187,12 @@ const Administrator = (props)=>{
                                                                 children: "UPDATE"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3691,
+                                                                lineNumber: 3716,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3691,
+                                                            lineNumber: 3716,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10170,7 +10200,7 @@ const Administrator = (props)=>{
                                                             children: "products"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3692,
+                                                            lineNumber: 3717,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10178,7 +10208,7 @@ const Administrator = (props)=>{
                                                             children: "125ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3693,
+                                                            lineNumber: 3718,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10186,7 +10216,7 @@ const Administrator = (props)=>{
                                                             children: "3"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3694,
+                                                            lineNumber: 3719,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10196,18 +10226,18 @@ const Administrator = (props)=>{
                                                                 children: "Slow"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3695,
+                                                                lineNumber: 3720,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3695,
+                                                            lineNumber: 3720,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3689,
+                                                    lineNumber: 3714,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -10218,7 +10248,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:31:52 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3698,
+                                                            lineNumber: 3723,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10228,12 +10258,12 @@ const Administrator = (props)=>{
                                                                 children: "SELECT"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3699,
+                                                                lineNumber: 3724,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3699,
+                                                            lineNumber: 3724,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10241,7 +10271,7 @@ const Administrator = (props)=>{
                                                             children: "inventory"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3700,
+                                                            lineNumber: 3725,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10249,7 +10279,7 @@ const Administrator = (props)=>{
                                                             children: "34ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3701,
+                                                            lineNumber: 3726,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10257,7 +10287,7 @@ const Administrator = (props)=>{
                                                             children: "2847"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3702,
+                                                            lineNumber: 3727,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10267,18 +10297,18 @@ const Administrator = (props)=>{
                                                                 children: "Slow"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3703,
+                                                                lineNumber: 3728,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3703,
+                                                            lineNumber: 3728,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3697,
+                                                    lineNumber: 3722,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -10289,7 +10319,7 @@ const Administrator = (props)=>{
                                                             children: "2026-01-09 12:30:18 UTC−07:00"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3706,
+                                                            lineNumber: 3731,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10299,12 +10329,12 @@ const Administrator = (props)=>{
                                                                 children: "DELETE"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3707,
+                                                                lineNumber: 3732,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3707,
+                                                            lineNumber: 3732,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10312,7 +10342,7 @@ const Administrator = (props)=>{
                                                             children: "orders"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3708,
+                                                            lineNumber: 3733,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10320,7 +10350,7 @@ const Administrator = (props)=>{
                                                             children: "3ms"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3709,
+                                                            lineNumber: 3734,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10328,7 +10358,7 @@ const Administrator = (props)=>{
                                                             children: "0"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3710,
+                                                            lineNumber: 3735,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -10338,35 +10368,35 @@ const Administrator = (props)=>{
                                                                 children: "No Data"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3711,
+                                                                lineNumber: 3736,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3711,
+                                                            lineNumber: 3736,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3705,
+                                                    lineNumber: 3730,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3608,
+                                            lineNumber: 3633,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 3597,
+                                    lineNumber: 3622,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3596,
+                                lineNumber: 3621,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10380,7 +10410,7 @@ const Administrator = (props)=>{
                                                 children: "Total Queries"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3720,
+                                                lineNumber: 3745,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10388,13 +10418,13 @@ const Administrator = (props)=>{
                                                 children: "15,847"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3721,
+                                                lineNumber: 3746,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3719,
+                                        lineNumber: 3744,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10405,7 +10435,7 @@ const Administrator = (props)=>{
                                                 children: "Avg Execution Time"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3724,
+                                                lineNumber: 3749,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10413,13 +10443,13 @@ const Administrator = (props)=>{
                                                 children: "8.2ms"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3725,
+                                                lineNumber: 3750,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3723,
+                                        lineNumber: 3748,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10430,7 +10460,7 @@ const Administrator = (props)=>{
                                                 children: "Slow Queries"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3728,
+                                                lineNumber: 3753,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10438,13 +10468,13 @@ const Administrator = (props)=>{
                                                 children: "34"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3729,
+                                                lineNumber: 3754,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3727,
+                                        lineNumber: 3752,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10455,7 +10485,7 @@ const Administrator = (props)=>{
                                                 children: "Failed Queries"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3732,
+                                                lineNumber: 3757,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10463,31 +10493,31 @@ const Administrator = (props)=>{
                                                 children: "0"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3733,
+                                                lineNumber: 3758,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3731,
+                                        lineNumber: 3756,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3718,
+                                lineNumber: 3743,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3577,
+                        lineNumber: 3602,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 3518,
+                lineNumber: 3543,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -10498,7 +10528,7 @@ const Administrator = (props)=>{
                         children: "Integration Management"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3741,
+                        lineNumber: 3766,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10506,13 +10536,13 @@ const Administrator = (props)=>{
                         children: "Configure third-party integrations and manage API connections. Monitor webhook delivery, manage authentication tokens, and troubleshoot integration issues."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3742,
+                        lineNumber: 3767,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 3740,
+                lineNumber: 3765,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -10526,7 +10556,7 @@ const Administrator = (props)=>{
                                 children: "System Health & Monitoring"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3751,
+                                lineNumber: 3776,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -10535,13 +10565,13 @@ const Administrator = (props)=>{
                                 children: "Refresh"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3752,
+                                lineNumber: 3777,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3750,
+                        lineNumber: 3775,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10549,7 +10579,7 @@ const Administrator = (props)=>{
                         children: "Monitor server performance, CPU usage, memory allocation, and disk space. View uptime statistics, manage system alerts, and configure monitoring thresholds."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3756,
+                        lineNumber: 3781,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -10561,7 +10591,7 @@ const Administrator = (props)=>{
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3760,
+                        lineNumber: 3785,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10578,7 +10608,7 @@ const Administrator = (props)=>{
                                                 children: "App Status"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3768,
+                                                lineNumber: 3793,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -10586,13 +10616,13 @@ const Administrator = (props)=>{
                                                 children: appStatus
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3769,
+                                                lineNumber: 3794,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3767,
+                                        lineNumber: 3792,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10605,7 +10635,7 @@ const Administrator = (props)=>{
                                                         className: "w-3 h-3 bg-green-500 rounded-full mr-2"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3775,
+                                                        lineNumber: 3800,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -10613,13 +10643,13 @@ const Administrator = (props)=>{
                                                         children: "All services running normally"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3776,
+                                                        lineNumber: 3801,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3774,
+                                                lineNumber: 3799,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10629,7 +10659,7 @@ const Administrator = (props)=>{
                                                         className: "w-3 h-3 bg-green-500 rounded-full mr-2"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3779,
+                                                        lineNumber: 3804,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -10637,13 +10667,13 @@ const Administrator = (props)=>{
                                                         children: "No critical alerts"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3780,
+                                                        lineNumber: 3805,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3778,
+                                                lineNumber: 3803,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10653,7 +10683,7 @@ const Administrator = (props)=>{
                                                         className: "w-3 h-3 bg-green-500 rounded-full mr-2"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3783,
+                                                        lineNumber: 3808,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -10661,25 +10691,25 @@ const Administrator = (props)=>{
                                                         children: "API endpoints responsive"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3784,
+                                                        lineNumber: 3809,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3782,
+                                                lineNumber: 3807,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3773,
+                                        lineNumber: 3798,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3766,
+                                lineNumber: 3791,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10690,7 +10720,7 @@ const Administrator = (props)=>{
                                         children: "App Speed"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3791,
+                                        lineNumber: 3816,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10706,7 +10736,7 @@ const Administrator = (props)=>{
                                                                 children: "Avg Response Time"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3795,
+                                                                lineNumber: 3820,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -10717,7 +10747,7 @@ const Administrator = (props)=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3796,
+                                                                lineNumber: 3821,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             showBulkPasswords && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10731,7 +10761,7 @@ const Administrator = (props)=>{
                                                                                 children: "Bulk Password Migration"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 3799,
+                                                                                lineNumber: 3824,
                                                                                 columnNumber: 31
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10750,7 +10780,7 @@ const Administrator = (props)=>{
                                                                                         children: "Randomize"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 3801,
+                                                                                        lineNumber: 3826,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -10759,7 +10789,7 @@ const Administrator = (props)=>{
                                                                                         children: "Apply"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 3809,
+                                                                                        lineNumber: 3834,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -10768,19 +10798,19 @@ const Administrator = (props)=>{
                                                                                         children: "Close"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                        lineNumber: 3810,
+                                                                                        lineNumber: 3835,
                                                                                         columnNumber: 33
                                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 3800,
+                                                                                lineNumber: 3825,
                                                                                 columnNumber: 31
                                                                             }, ("TURBOPACK compile-time value", void 0))
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3798,
+                                                                        lineNumber: 3823,
                                                                         columnNumber: 29
                                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10791,7 +10821,7 @@ const Administrator = (props)=>{
                                                                                 children: "No users require migration."
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                lineNumber: 3814,
+                                                                                lineNumber: 3839,
                                                                                 columnNumber: 75
                                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                                             Object.keys(bulkPasswords).map((id_12)=>{
@@ -10809,20 +10839,20 @@ const Administrator = (props)=>{
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                            lineNumber: 3818,
+                                                                                            lineNumber: 3843,
                                                                                             columnNumber: 37
                                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                                             value: bulkPasswords[id_12] ?? '',
-                                                                                            onChange: (e_68)=>setBulkPasswords((prev_95)=>({
+                                                                                            onChange: (e_69)=>setBulkPasswords((prev_95)=>({
                                                                                                         ...prev_95,
-                                                                                                        [id_12]: e_68.target.value
+                                                                                                        [id_12]: e_69.target.value
                                                                                                     })),
                                                                                             placeholder: "new password",
                                                                                             className: "px-2 py-1 border rounded bg-white dark:bg-gray-800 text-sm flex-1"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                            lineNumber: 3819,
+                                                                                            lineNumber: 3844,
                                                                                             columnNumber: 37
                                                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -10834,32 +10864,32 @@ const Administrator = (props)=>{
                                                                                             children: "Rand"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                            lineNumber: 3823,
+                                                                                            lineNumber: 3848,
                                                                                             columnNumber: 37
                                                                                         }, ("TURBOPACK compile-time value", void 0))
                                                                                     ]
                                                                                 }, id_12, true, {
                                                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                                    lineNumber: 3817,
+                                                                                    lineNumber: 3842,
                                                                                     columnNumber: 30
                                                                                 }, ("TURBOPACK compile-time value", void 0));
                                                                             })
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                        lineNumber: 3813,
+                                                                        lineNumber: 3838,
                                                                         columnNumber: 29
                                                                     }, ("TURBOPACK compile-time value", void 0))
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3797,
+                                                                lineNumber: 3822,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3794,
+                                                        lineNumber: 3819,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10871,18 +10901,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3833,
+                                                            lineNumber: 3858,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3832,
+                                                        lineNumber: 3857,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3793,
+                                                lineNumber: 3818,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10892,24 +10922,24 @@ const Administrator = (props)=>{
                                                     children: "Optimal: <100ms | Target: <50ms"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3839,
+                                                    lineNumber: 3864,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3838,
+                                                lineNumber: 3863,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3792,
+                                        lineNumber: 3817,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3790,
+                                lineNumber: 3815,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10920,7 +10950,7 @@ const Administrator = (props)=>{
                                         children: "Uptime"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3846,
+                                        lineNumber: 3871,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10936,7 +10966,7 @@ const Administrator = (props)=>{
                                                                 children: "This Month"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3850,
+                                                                lineNumber: 3875,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -10947,13 +10977,13 @@ const Administrator = (props)=>{
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3851,
+                                                                lineNumber: 3876,
                                                                 columnNumber: 21
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3849,
+                                                        lineNumber: 3874,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10965,18 +10995,18 @@ const Administrator = (props)=>{
                                                             }
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3854,
+                                                            lineNumber: 3879,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3853,
+                                                        lineNumber: 3878,
                                                         columnNumber: 19
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3848,
+                                                lineNumber: 3873,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -10990,30 +11020,30 @@ const Administrator = (props)=>{
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3860,
+                                                    lineNumber: 3885,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3859,
+                                                lineNumber: 3884,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3847,
+                                        lineNumber: 3872,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3845,
+                                lineNumber: 3870,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3764,
+                        lineNumber: 3789,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11024,7 +11054,7 @@ const Administrator = (props)=>{
                                 children: "Performance Metrics"
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3868,
+                                lineNumber: 3893,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11041,7 +11071,7 @@ const Administrator = (props)=>{
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3871,
+                                                lineNumber: 3896,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11049,13 +11079,13 @@ const Administrator = (props)=>{
                                                 children: "Requests/min"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3872,
+                                                lineNumber: 3897,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3870,
+                                        lineNumber: 3895,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11069,7 +11099,7 @@ const Administrator = (props)=>{
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3875,
+                                                lineNumber: 3900,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11077,13 +11107,13 @@ const Administrator = (props)=>{
                                                 children: "Success Rate"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3876,
+                                                lineNumber: 3901,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3874,
+                                        lineNumber: 3899,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11097,7 +11127,7 @@ const Administrator = (props)=>{
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3879,
+                                                lineNumber: 3904,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11105,13 +11135,13 @@ const Administrator = (props)=>{
                                                 children: "P95 Latency"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3880,
+                                                lineNumber: 3905,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3878,
+                                        lineNumber: 3903,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11125,7 +11155,7 @@ const Administrator = (props)=>{
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3883,
+                                                lineNumber: 3908,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11133,31 +11163,31 @@ const Administrator = (props)=>{
                                                 children: "Memory Usage"
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3884,
+                                                lineNumber: 3909,
                                                 columnNumber: 17
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3882,
+                                        lineNumber: 3907,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3869,
+                                lineNumber: 3894,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3867,
+                        lineNumber: 3892,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 3749,
+                lineNumber: 3774,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -11168,7 +11198,7 @@ const Administrator = (props)=>{
                         children: "GitHub Repository Changes"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3892,
+                        lineNumber: 3917,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11176,7 +11206,7 @@ const Administrator = (props)=>{
                         children: "Track all commits and changes made to the In-Accord-web repository on GitHub. View commit messages, authors, dates, and file modifications for version control and deployment tracking."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3893,
+                        lineNumber: 3918,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11190,7 +11220,7 @@ const Administrator = (props)=>{
                                         children: "Recent Commits"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3900,
+                                        lineNumber: 3925,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -11201,13 +11231,13 @@ const Administrator = (props)=>{
                                         children: "View on GitHub"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3901,
+                                        lineNumber: 3926,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3899,
+                                lineNumber: 3924,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11224,7 +11254,7 @@ const Administrator = (props)=>{
                                                         children: "Date"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3910,
+                                                        lineNumber: 3935,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -11232,7 +11262,7 @@ const Administrator = (props)=>{
                                                         children: "Commit Message"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3911,
+                                                        lineNumber: 3936,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -11240,7 +11270,7 @@ const Administrator = (props)=>{
                                                         children: "Author"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3912,
+                                                        lineNumber: 3937,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -11248,7 +11278,7 @@ const Administrator = (props)=>{
                                                         children: "Files Changed"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3913,
+                                                        lineNumber: 3938,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -11256,18 +11286,18 @@ const Administrator = (props)=>{
                                                         children: "Type"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 3914,
+                                                        lineNumber: 3939,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 3909,
+                                                lineNumber: 3934,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         }, void 0, false, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3908,
+                                            lineNumber: 3933,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -11281,7 +11311,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-08"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3919,
+                                                            lineNumber: 3944,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11289,7 +11319,7 @@ const Administrator = (props)=>{
                                                             children: "Add Job Title field to team members"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3920,
+                                                            lineNumber: 3945,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11297,7 +11327,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3921,
+                                                            lineNumber: 3946,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11305,7 +11335,7 @@ const Administrator = (props)=>{
                                                             children: "2 files"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3922,
+                                                            lineNumber: 3947,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11315,18 +11345,18 @@ const Administrator = (props)=>{
                                                                 children: "Feature"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3923,
+                                                                lineNumber: 3948,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3923,
+                                                            lineNumber: 3948,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3918,
+                                                    lineNumber: 3943,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11337,7 +11367,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-08"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3926,
+                                                            lineNumber: 3951,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11345,7 +11375,7 @@ const Administrator = (props)=>{
                                                             children: "Implement controlled form inputs in admin panel"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3927,
+                                                            lineNumber: 3952,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11353,7 +11383,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3928,
+                                                            lineNumber: 3953,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11361,7 +11391,7 @@ const Administrator = (props)=>{
                                                             children: "1 file"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3929,
+                                                            lineNumber: 3954,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11371,18 +11401,18 @@ const Administrator = (props)=>{
                                                                 children: "Feature"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3930,
+                                                                lineNumber: 3955,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3930,
+                                                            lineNumber: 3955,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3925,
+                                                    lineNumber: 3950,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11393,7 +11423,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-08"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3933,
+                                                            lineNumber: 3958,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11401,7 +11431,7 @@ const Administrator = (props)=>{
                                                             children: "Add form validation with error messages"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3934,
+                                                            lineNumber: 3959,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11409,7 +11439,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3935,
+                                                            lineNumber: 3960,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11417,7 +11447,7 @@ const Administrator = (props)=>{
                                                             children: "1 file"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3936,
+                                                            lineNumber: 3961,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11427,18 +11457,18 @@ const Administrator = (props)=>{
                                                                 children: "Feature"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3937,
+                                                                lineNumber: 3962,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3937,
+                                                            lineNumber: 3962,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3932,
+                                                    lineNumber: 3957,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11449,7 +11479,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-08"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3940,
+                                                            lineNumber: 3965,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11457,7 +11487,7 @@ const Administrator = (props)=>{
                                                             children: "Add System Health & Monitoring metrics"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3941,
+                                                            lineNumber: 3966,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11465,7 +11495,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3942,
+                                                            lineNumber: 3967,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11473,7 +11503,7 @@ const Administrator = (props)=>{
                                                             children: "1 file"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3943,
+                                                            lineNumber: 3968,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11483,18 +11513,18 @@ const Administrator = (props)=>{
                                                                 children: "Enhancement"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3944,
+                                                                lineNumber: 3969,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3944,
+                                                            lineNumber: 3969,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3939,
+                                                    lineNumber: 3964,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11505,7 +11535,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-08"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3947,
+                                                            lineNumber: 3972,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11513,7 +11543,7 @@ const Administrator = (props)=>{
                                                             children: "Implement audit logs with scrollable table"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3948,
+                                                            lineNumber: 3973,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11521,7 +11551,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3949,
+                                                            lineNumber: 3974,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11529,7 +11559,7 @@ const Administrator = (props)=>{
                                                             children: "1 file"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3950,
+                                                            lineNumber: 3975,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11539,18 +11569,18 @@ const Administrator = (props)=>{
                                                                 children: "Enhancement"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3951,
+                                                                lineNumber: 3976,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3951,
+                                                            lineNumber: 3976,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3946,
+                                                    lineNumber: 3971,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11561,7 +11591,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-07"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3954,
+                                                            lineNumber: 3979,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11569,7 +11599,7 @@ const Administrator = (props)=>{
                                                             children: "Fix localStorage sync between pages"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3955,
+                                                            lineNumber: 3980,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11577,7 +11607,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3956,
+                                                            lineNumber: 3981,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11585,7 +11615,7 @@ const Administrator = (props)=>{
                                                             children: "2 files"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3957,
+                                                            lineNumber: 3982,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11595,18 +11625,18 @@ const Administrator = (props)=>{
                                                                 children: "Bugfix"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3958,
+                                                                lineNumber: 3983,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3958,
+                                                            lineNumber: 3983,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3953,
+                                                    lineNumber: 3978,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11617,7 +11647,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-07"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3961,
+                                                            lineNumber: 3986,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11625,7 +11655,7 @@ const Administrator = (props)=>{
                                                             children: "Update dark mode styling for team components"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3962,
+                                                            lineNumber: 3987,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11633,7 +11663,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3963,
+                                                            lineNumber: 3988,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11641,7 +11671,7 @@ const Administrator = (props)=>{
                                                             children: "1 file"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3964,
+                                                            lineNumber: 3989,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11651,18 +11681,18 @@ const Administrator = (props)=>{
                                                                 children: "Enhancement"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3965,
+                                                                lineNumber: 3990,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3965,
+                                                            lineNumber: 3990,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3960,
+                                                    lineNumber: 3985,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11673,7 +11703,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-06"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3968,
+                                                            lineNumber: 3993,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11681,7 +11711,7 @@ const Administrator = (props)=>{
                                                             children: "Initial team page setup with member cards"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3969,
+                                                            lineNumber: 3994,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11689,7 +11719,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3970,
+                                                            lineNumber: 3995,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11697,7 +11727,7 @@ const Administrator = (props)=>{
                                                             children: "3 files"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3971,
+                                                            lineNumber: 3996,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11707,18 +11737,18 @@ const Administrator = (props)=>{
                                                                 children: "Feature"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3972,
+                                                                lineNumber: 3997,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3972,
+                                                            lineNumber: 3997,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3967,
+                                                    lineNumber: 3992,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11729,7 +11759,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-06"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3975,
+                                                            lineNumber: 4000,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11737,7 +11767,7 @@ const Administrator = (props)=>{
                                                             children: "Add administrator panel sections"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3976,
+                                                            lineNumber: 4001,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11745,7 +11775,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3977,
+                                                            lineNumber: 4002,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11753,7 +11783,7 @@ const Administrator = (props)=>{
                                                             children: "1 file"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3978,
+                                                            lineNumber: 4003,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11763,18 +11793,18 @@ const Administrator = (props)=>{
                                                                 children: "Feature"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3979,
+                                                                lineNumber: 4004,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3979,
+                                                            lineNumber: 4004,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3974,
+                                                    lineNumber: 3999,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0)),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
@@ -11785,7 +11815,7 @@ const Administrator = (props)=>{
                                                             children: "2025-01-05"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3982,
+                                                            lineNumber: 4007,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11793,7 +11823,7 @@ const Administrator = (props)=>{
                                                             children: "Setup Next.js project structure"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3983,
+                                                            lineNumber: 4008,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11801,7 +11831,7 @@ const Administrator = (props)=>{
                                                             children: "DocRST"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3984,
+                                                            lineNumber: 4009,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11809,7 +11839,7 @@ const Administrator = (props)=>{
                                                             children: "5 files"
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3985,
+                                                            lineNumber: 4010,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0)),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -11819,35 +11849,35 @@ const Administrator = (props)=>{
                                                                 children: "Setup"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 3986,
+                                                                lineNumber: 4011,
                                                                 columnNumber: 47
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         }, void 0, false, {
                                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                            lineNumber: 3986,
+                                                            lineNumber: 4011,
                                                             columnNumber: 21
                                                         }, ("TURBOPACK compile-time value", void 0))
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                    lineNumber: 3981,
+                                                    lineNumber: 4006,
                                                     columnNumber: 19
                                                 }, ("TURBOPACK compile-time value", void 0))
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/client/src/app/administrator/page.tsx",
-                                            lineNumber: 3917,
+                                            lineNumber: 3942,
                                             columnNumber: 17
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/client/src/app/administrator/page.tsx",
-                                    lineNumber: 3907,
+                                    lineNumber: 3932,
                                     columnNumber: 15
                                 }, ("TURBOPACK compile-time value", void 0))
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3906,
+                                lineNumber: 3931,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11858,7 +11888,7 @@ const Administrator = (props)=>{
                                         children: "Export Logs"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3993,
+                                        lineNumber: 4018,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -11866,25 +11896,25 @@ const Administrator = (props)=>{
                                         children: "Refresh"
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 3996,
+                                        lineNumber: 4021,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 3992,
+                                lineNumber: 4017,
                                 columnNumber: 13
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 3898,
+                        lineNumber: 3923,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 3891,
+                lineNumber: 3916,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -11895,7 +11925,7 @@ const Administrator = (props)=>{
                         children: "Team Member Management"
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 4005,
+                        lineNumber: 4030,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11903,7 +11933,7 @@ const Administrator = (props)=>{
                         children: "Edit and manage team member information, profile details, and contact links for all team members."
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 4006,
+                        lineNumber: 4031,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11916,11 +11946,11 @@ const Administrator = (props)=>{
                                         children: index_1 === 0 ? 'Team Member 1 (Doc Cowles - DocRST)' : `Team Member ${index_1 + 1}`
                                     }, void 0, false, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 4012,
+                                        lineNumber: 4037,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
-                                        onSubmit: (e_69)=>handleSubmit(index_1, e_69),
+                                        onSubmit: (e_70)=>handleSubmit(index_1, e_70),
                                         className: "space-y-4",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11930,19 +11960,19 @@ const Administrator = (props)=>{
                                                         children: "Member Name"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4017,
+                                                        lineNumber: 4042,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "text",
                                                         name: "name",
                                                         value: member.name,
-                                                        onChange: (e_70)=>updateMemberField(index_1, 'name', e_70.target.value),
+                                                        onChange: (e_71)=>updateMemberField(index_1, 'name', e_71.target.value),
                                                         className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                         required: true
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4018,
+                                                        lineNumber: 4043,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     errors[index_1]?.name && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11950,13 +11980,13 @@ const Administrator = (props)=>{
                                                         children: errors[index_1]?.name
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4019,
+                                                        lineNumber: 4044,
                                                         columnNumber: 47
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 4016,
+                                                lineNumber: 4041,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -11966,19 +11996,19 @@ const Administrator = (props)=>{
                                                         children: "Job Title"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4022,
+                                                        lineNumber: 4047,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "text",
                                                         name: "jobTitle",
                                                         value: member.jobTitle,
-                                                        onChange: (e_71)=>updateMemberField(index_1, 'jobTitle', e_71.target.value),
+                                                        onChange: (e_72)=>updateMemberField(index_1, 'jobTitle', e_72.target.value),
                                                         className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                         required: true
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4023,
+                                                        lineNumber: 4048,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     errors[index_1]?.jobTitle && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -11986,13 +12016,13 @@ const Administrator = (props)=>{
                                                         children: errors[index_1]?.jobTitle
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4024,
+                                                        lineNumber: 4049,
                                                         columnNumber: 51
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 4021,
+                                                lineNumber: 4046,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12002,19 +12032,19 @@ const Administrator = (props)=>{
                                                         children: "Description"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4027,
+                                                        lineNumber: 4052,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
                                                         name: "description",
                                                         rows: 2,
                                                         value: member.description,
-                                                        onChange: (e_72)=>updateMemberField(index_1, 'description', e_72.target.value),
+                                                        onChange: (e_73)=>updateMemberField(index_1, 'description', e_73.target.value),
                                                         className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                         required: true
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4028,
+                                                        lineNumber: 4053,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     errors[index_1]?.description && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -12022,13 +12052,13 @@ const Administrator = (props)=>{
                                                         children: errors[index_1]?.description
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4029,
+                                                        lineNumber: 4054,
                                                         columnNumber: 54
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 4026,
+                                                lineNumber: 4051,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12038,19 +12068,19 @@ const Administrator = (props)=>{
                                                         children: "Profile Image URL"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4032,
+                                                        lineNumber: 4057,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                         type: "url",
                                                         name: "imageUrl",
                                                         value: member.imageUrl,
-                                                        onChange: (e_73)=>updateMemberField(index_1, 'imageUrl', e_73.target.value),
+                                                        onChange: (e_74)=>updateMemberField(index_1, 'imageUrl', e_74.target.value),
                                                         className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                         required: true
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4033,
+                                                        lineNumber: 4058,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     errors[index_1]?.imageUrl && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -12058,13 +12088,13 @@ const Administrator = (props)=>{
                                                         children: errors[index_1]?.imageUrl
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4034,
+                                                        lineNumber: 4059,
                                                         columnNumber: 51
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 4031,
+                                                lineNumber: 4056,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12077,19 +12107,19 @@ const Administrator = (props)=>{
                                                                 children: "Email"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4038,
+                                                                lineNumber: 4063,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "email",
                                                                 name: "email",
                                                                 value: member.email,
-                                                                onChange: (e_74)=>updateMemberField(index_1, 'email', e_74.target.value),
+                                                                onChange: (e_75)=>updateMemberField(index_1, 'email', e_75.target.value),
                                                                 className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                                 required: true
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4039,
+                                                                lineNumber: 4064,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             errors[index_1]?.email && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -12097,13 +12127,13 @@ const Administrator = (props)=>{
                                                                 children: errors[index_1]?.email
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4040,
+                                                                lineNumber: 4065,
                                                                 columnNumber: 50
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4037,
+                                                        lineNumber: 4062,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12113,19 +12143,19 @@ const Administrator = (props)=>{
                                                                 children: "Website"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4043,
+                                                                lineNumber: 4068,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "url",
                                                                 name: "website",
                                                                 value: member.website,
-                                                                onChange: (e_75)=>updateMemberField(index_1, 'website', e_75.target.value),
+                                                                onChange: (e_76)=>updateMemberField(index_1, 'website', e_76.target.value),
                                                                 className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                                 required: true
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4044,
+                                                                lineNumber: 4069,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             errors[index_1]?.website && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -12133,13 +12163,13 @@ const Administrator = (props)=>{
                                                                 children: errors[index_1]?.website
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4045,
+                                                                lineNumber: 4070,
                                                                 columnNumber: 52
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4042,
+                                                        lineNumber: 4067,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12149,19 +12179,19 @@ const Administrator = (props)=>{
                                                                 children: "GitHub"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4048,
+                                                                lineNumber: 4073,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "url",
                                                                 name: "github",
                                                                 value: member.github,
-                                                                onChange: (e_76)=>updateMemberField(index_1, 'github', e_76.target.value),
+                                                                onChange: (e_77)=>updateMemberField(index_1, 'github', e_77.target.value),
                                                                 className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                                 required: true
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4049,
+                                                                lineNumber: 4074,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             errors[index_1]?.github && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -12169,13 +12199,13 @@ const Administrator = (props)=>{
                                                                 children: errors[index_1]?.github
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4050,
+                                                                lineNumber: 4075,
                                                                 columnNumber: 51
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4047,
+                                                        lineNumber: 4072,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12185,19 +12215,19 @@ const Administrator = (props)=>{
                                                                 children: "Discord"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4053,
+                                                                lineNumber: 4078,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                                                                 type: "url",
                                                                 name: "discord",
                                                                 value: member.discord,
-                                                                onChange: (e_77)=>updateMemberField(index_1, 'discord', e_77.target.value),
+                                                                onChange: (e_78)=>updateMemberField(index_1, 'discord', e_78.target.value),
                                                                 className: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white",
                                                                 required: true
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4054,
+                                                                lineNumber: 4079,
                                                                 columnNumber: 23
                                                             }, ("TURBOPACK compile-time value", void 0)),
                                                             errors[index_1]?.discord && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -12205,19 +12235,19 @@ const Administrator = (props)=>{
                                                                 children: errors[index_1]?.discord
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                                lineNumber: 4055,
+                                                                lineNumber: 4080,
                                                                 columnNumber: 52
                                                             }, ("TURBOPACK compile-time value", void 0))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4052,
+                                                        lineNumber: 4077,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 4036,
+                                                lineNumber: 4061,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -12229,7 +12259,7 @@ const Administrator = (props)=>{
                                                         children: "Save Changes"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4059,
+                                                        lineNumber: 4084,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0)),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -12238,46 +12268,46 @@ const Administrator = (props)=>{
                                                         children: "Cancel"
                                                     }, void 0, false, {
                                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                        lineNumber: 4062,
+                                                        lineNumber: 4087,
                                                         columnNumber: 21
                                                     }, ("TURBOPACK compile-time value", void 0))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                                lineNumber: 4058,
+                                                lineNumber: 4083,
                                                 columnNumber: 19
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                                        lineNumber: 4015,
+                                        lineNumber: 4040,
                                         columnNumber: 17
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, index_1, true, {
                                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                                lineNumber: 4011,
+                                lineNumber: 4036,
                                 columnNumber: 51
                             }, ("TURBOPACK compile-time value", void 0)))
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/administrator/page.tsx",
-                        lineNumber: 4010,
+                        lineNumber: 4035,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/administrator/page.tsx",
-                lineNumber: 4004,
+                lineNumber: 4029,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/client/src/app/administrator/page.tsx",
-        lineNumber: 1854,
+        lineNumber: 1879,
         columnNumber: 10
     }, ("TURBOPACK compile-time value", void 0));
 };
-_s(Administrator, "d4QZm3R+08WfJ0ABx4yhd6NuxZs=");
+_s(Administrator, "W9jDs/dXmefJw7i2ODBsf0NcpQc=");
 _c1 = Administrator;
 const __TURBOPACK__default__export__ = Administrator;
 var _c, _c1;
