@@ -2127,146 +2127,34 @@ const Administrator = (props: Props) => {
                     </label>
                   </div>
 
-                  {/* OAuth provider management */}
-                  <div className="p-3 border rounded-lg bg-white dark:bg-gray-800 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-semibold">GitHub Login</div>
-                        <div className="text-xs text-gray-500">Configure GitHub OAuth login (optional).</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm">Enabled</label>
-                        <input type="checkbox" checked={oauthConfig.github.enabled} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, enabled: e.target.checked } }))} />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Client ID</label>
-                        <input value={oauthConfig.github.clientId} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, clientId: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
-                        <input type="password" value={oauthConfig.github.clientSecret} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, clientSecret: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
-                        <input value={oauthConfig.github.redirectUri} onChange={e => setOauthConfig(prev => ({ ...prev, github: { ...prev.github, redirectUri: e.target.value } }))} placeholder={`${API_BASE}/api/auth/github/callback`} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button onClick={() => copyOAuthURL('github')} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
-
-                        <button onClick={() => openOAuthFlow('github')} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
-
-                        <button onClick={() => testOAuthConnection('github')} disabled={integrationLoading} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50">Test / Connect</button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm">Status: {oauthConfig.github.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
-                      <div className="flex items-center gap-2">
-                        {oauthConfig.github.connected && (
-                          <button onClick={() => disconnectOAuth('github')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 border rounded-lg bg-white dark:bg-gray-800 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-semibold">Discord Login</div>
-                        <div className="text-xs text-gray-500">Configure Discord OAuth login (optional).</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm">Enabled</label>
-                        <input type="checkbox" checked={oauthConfig.discord.enabled} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, enabled: e.target.checked } }))} />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Client ID</label>
-                        <input value={oauthConfig.discord.clientId} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, clientId: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600 mb-1">Client Secret</label>
-                        <input type="password" value={oauthConfig.discord.clientSecret} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, clientSecret: e.target.value } }))} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs text-gray-600 mb-1">Redirect URI</label>
-                        <input value={oauthConfig.discord.redirectUri} onChange={e => setOauthConfig(prev => ({ ...prev, discord: { ...prev.discord, redirectUri: e.target.value } }))} placeholder={`${API_BASE}/api/auth/discord/callback`} className="w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button onClick={() => copyOAuthURL('discord')} className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded">Copy Auth URL</button>
-
-                        <button onClick={() => openOAuthFlow('discord')} className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded">Start OAuth</button>
-
-                        <button onClick={() => testOAuthConnection('discord')} disabled={integrationLoading} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded disabled:opacity-50">Test / Connect</button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm">Status: {oauthConfig.discord.connected ? <span className="text-green-600 font-medium">Connected</span> : <span className="text-gray-500">Not Connected</span>}</div>
-                      <div className="flex items-center gap-2">
-                        {oauthConfig.discord.connected && (
-                          <button onClick={() => disconnectOAuth('discord')} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Disconnect</button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Save Configuration Button */}
-                  <div className="flex items-center justify-between mt-4">
-                    <button 
-                      onClick={saveOAuthConfig} 
-                      disabled={integrationLoading}
-                      className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg disabled:opacity-50"
-                    >
-                      {integrationLoading ? 'Saving...' : 'Save OAuth Configuration'}
-                    </button>
-                    {integrationMessage && (
-                      <span className={`text-sm ${integrationMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
-                        {integrationMessage}
-                      </span>
-                    )}
-                  </div>
-
-                  </div>
-
                   <h4 className="text-md font-semibold text-gray-900 dark:text-white mt-6">API Keys</h4>
-                <div className="mt-2">
-                  <div className="mb-2 flex gap-2">
-                    <input id="newKeyName" placeholder="Key name" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
-                    <button onClick={() => {
-                      const el: any = document.getElementById('newKeyName');
-                      if (!el || !el.value.trim()) { alert('Enter a key name'); return; }
-                      const newKey = addApiKey(el.value.trim());
-                      alert(`New API Key created: ${newKey.key}`);
-                      el.value = '';
-                    }} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Create</button>
-                  </div>
+                  <div className="mt-2">
+                    <div className="mb-2 flex gap-2">
+                      <input id="newKeyName" placeholder="Key name" className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                      <button onClick={() => {
+                        const el: any = document.getElementById('newKeyName');
+                        if (!el || !el.value.trim()) { alert('Enter a key name'); return; }
+                        const newKey = addApiKey(el.value.trim());
+                        alert(`New API Key created: ${newKey.key}`);
+                        el.value = '';
+                      }} className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">Create</button>
+                    </div>
 
-                  <div className="space-y-2">
-                    {systemConfig.apiKeys.map(k => (
-                      <div key={k.id} className="flex items-center justify-between p-2 border rounded-lg">
-                        <div>
-                          <div className="font-medium text-sm">{k.name}</div>
-                          <div className="text-xs text-gray-500">Created: {new Date(k.createdAt).toLocaleString()}</div>
+                    <div className="space-y-2">
+                      {systemConfig.apiKeys.map(k => (
+                        <div key={k.id} className="flex items-center justify-between p-2 border rounded-lg">
+                          <div>
+                            <div className="font-medium text-sm">{k.name}</div>
+                            <div className="text-xs text-gray-500">Created: {new Date(k.createdAt).toLocaleString()}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => { navigator.clipboard.writeText(k.key); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
+                            <button onClick={() => deleteApiKey(k.id)} className="text-sm px-2 py-1 border rounded text-red-600">Delete</button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => { navigator.clipboard.writeText(k.key); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
-                          <button onClick={() => deleteApiKey(k.id)} className="text-sm px-2 py-1 border rounded text-red-600">Delete</button>
-                        </div>
-                      </div>
-                    ))}
-                    {systemConfig.apiKeys.length === 0 && <div className="text-sm text-gray-500">No API keys configured.</div>}
+                      ))}
+                      {systemConfig.apiKeys.length === 0 && <div className="text-sm text-gray-500">No API keys configured.</div>}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3637,6 +3525,183 @@ const Administrator = (props: Props) => {
                 </form>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Section 10 */}
+        <section className="border-b pb-8">
+          <h2 className="text-3xl font-bold mb-2">Dependencies & Versions</h2>
+          <p className="text-gray-600 mb-4">View all project dependencies with their current versions and last update information.</p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Frontend Dependencies */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Frontend Dependencies</h3>
+              
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Production Dependencies</h4>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {[
+                    { name: '@emotion/react', version: '^11.14.0' },
+                    { name: '@emotion/styled', version: '^11.14.1' },
+                    { name: '@mui/material', version: '^7.3.6' },
+                    { name: '@mui/x-data-grid', version: '^8.23.0' },
+                    { name: '@radix-ui/react-collapsible', version: '^1.1.12' },
+                    { name: '@radix-ui/react-dropdown-menu', version: '^2.1.16' },
+                    { name: '@radix-ui/react-scroll-area', version: '^1.2.10' },
+                    { name: '@radix-ui/react-tooltip', version: '^1.2.8' },
+                    { name: 'axios', version: '^1.13.2' },
+                    { name: 'lucide-react', version: '^0.562.0' },
+                    { name: 'next', version: '16.1.1' },
+                    { name: 'numeral', version: '^2.0.6' },
+                    { name: 'react', version: '19.2.3' },
+                    { name: 'react-dom', version: '19.2.3' },
+                    { name: 'recharts', version: '^3.6.0' },
+                    { name: 'redux-persist', version: '^6.0.0' },
+                    { name: 'uuid', version: '^13.0.0' },
+                  ].map((dep) => (
+                    <div key={dep.name} className="flex items-center justify-between p-2 border border-gray-100 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <span className="text-sm font-mono text-gray-900 dark:text-gray-100">{dep.name}</span>
+                      <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded font-mono">{dep.version}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Development Dependencies</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {[
+                    { name: '@tailwindcss/postcss', version: '^4' },
+                    { name: '@types/node', version: '^20.19.27' },
+                    { name: '@types/numeral', version: '^2.0.5' },
+                    { name: '@types/react', version: '^19' },
+                    { name: '@types/react-dom', version: '^19' },
+                    { name: '@types/uuid', version: '^10.0.0' },
+                    { name: 'babel-plugin-react-compiler', version: '1.0.0' },
+                    { name: 'eslint', version: '^9' },
+                    { name: 'eslint-config-next', version: '16.1.1' },
+                    { name: 'tailwindcss', version: '^4' },
+                    { name: 'tw-colors', version: '^3.3.2' },
+                    { name: 'typescript', version: '^5' },
+                  ].map((dep) => (
+                    <div key={dep.name} className="flex items-center justify-between p-2 border border-gray-100 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <span className="text-sm font-mono text-gray-900 dark:text-gray-100">{dep.name}</span>
+                      <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-100 px-2 py-1 rounded font-mono">{dep.version}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Backend Dependencies */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Backend Dependencies</h3>
+              
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Production Dependencies</h4>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {[
+                    { name: '@prisma/client', version: '^5.16.2' },
+                    { name: 'body-parser', version: '^1.20.4' },
+                    { name: 'concurrently', version: '^8.2.2' },
+                    { name: 'cors', version: '^2.8.5' },
+                    { name: 'dotenv', version: '^16.6.1' },
+                    { name: 'express', version: '^4.22.1' },
+                    { name: 'helmet', version: '^7.1.0' },
+                    { name: 'morgan', version: '^1.10.1' },
+                    { name: 'nodemailer', version: '^6.9.3' },
+                    { name: 'prisma', version: '^5.22.0' },
+                    { name: 'rimraf', version: '^6.1.2' },
+                  ].map((dep) => (
+                    <div key={dep.name} className="flex items-center justify-between p-2 border border-gray-100 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <span className="text-sm font-mono text-gray-900 dark:text-gray-100">{dep.name}</span>
+                      <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 px-2 py-1 rounded font-mono">{dep.version}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Development Dependencies</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {[
+                    { name: '@types/cors', version: '^2.8.19' },
+                    { name: '@types/express', version: '^4.17.25' },
+                    { name: '@types/morgan', version: '^1.9.10' },
+                    { name: '@types/node', version: '^20.14.10' },
+                    { name: '@types/nodemailer', version: '^7.0.4' },
+                    { name: 'cross-env', version: '^10.1.0' },
+                    { name: 'nodemon', version: '^3.1.11' },
+                    { name: 'ts-node', version: '^10.9.2' },
+                    { name: 'typescript', version: '^5.5.3' },
+                  ].map((dep) => (
+                    <div key={dep.name} className="flex items-center justify-between p-2 border border-gray-100 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <span className="text-sm font-mono text-gray-900 dark:text-gray-100">{dep.name}</span>
+                      <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100 px-2 py-1 rounded font-mono">{dep.version}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Last Updated Info */}
+          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="text-blue-600 dark:text-blue-400 mt-1">ℹ️</div>
+              <div>
+                <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">Last Dependency Update</p>
+                <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">January 10, 2026</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">Frontend: Next.js 16.1.1, React 19.2.3 | Backend: Express 4.22.1, Prisma 5.22.0</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Sidebar Footer */}
+        <section className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Connect With Us</h3>
+              
+              <div className="flex justify-center items-center gap-4 mb-6">
+                <a href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Discord" className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-[#5865F2]">
+                    <path d="M20.317 4.369A19.791 19.791 0 0 0 16.558 3c-.19.335-.41.78-.563 1.137a18.27 18.27 0 0 0-4.01 0A8.84 8.84 0 0 0 11.422 3c-1.33.242-2.63.62-3.86 1.137C4.913 6.354 3.924 8.62 4.13 12.02c1.4 1.05 2.75 1.69 4.08 2.1.33-.46.62-.95.87-1.46-.48-.18-.94-.4-1.38-.66.12-.09.24-.18.36-.28 2.64 1.23 5.49 1.23 8.09 0 .12.1.24.19.36.28-.44.26-.9.48-1.38.66.25.51.54 1 .87 1.46 1.33-.41 2.68-1.05 4.08-2.1.33-5.22-.92-7.46-2.74-7.651ZM9.68 11.21c-.79 0-1.43.72-1.43 1.6 0 .88.64 1.6 1.43 1.6.79 0 1.44-.72 1.43-1.6 0-.88-.64-1.6-1.43-1.6Zm4.64 0c-.79 0-1.43.72-1.43 1.6 0 .88.64 1.6 1.43 1.6.79 0 1.43-.72 1.43-1.6 0-.88-.64-1.6-1.43-1.6Z" />
+                  </svg>
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-[#1877F2]">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-[#0A66C2]">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                  </svg>
+                </a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-black dark:text-white">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                  </svg>
+                </a>
+              </div>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium text-gray-900 dark:text-white">&copy; 2026 In-Accord</span>
+                  <span className="mx-2">|</span>
+                  <span className="text-gray-600 dark:text-gray-400">GARD Realms LLC</span>
+                </p>
+                <p className="text-center text-xs text-gray-500 dark:text-gray-500 mt-2">
+                  All rights reserved. | 
+                  <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400 ml-1">Privacy Policy</a>
+                  <span className="mx-1">|</span>
+                  <a href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Terms of Service</a>
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>
