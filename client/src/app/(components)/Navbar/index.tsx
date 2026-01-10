@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/redux';
 import { setIsDarkMode, setIsSidebarCollapsed} from '@/state';
-import { Bell, Menu, Moon, Settings, Sun } from 'lucide-react';
+import { Bell, Menu, Moon, Settings, Sun, User } from 'lucide-react';
 import Link from 'next/link';
 import LoginModal from './LoginModal';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -34,6 +34,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
   }, [currentUser]);
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   async function handleLogin(username: string, password: string) {
     const name = (username || '').trim();
@@ -131,12 +132,18 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
           </div>
            <hr className="w-0 h-7 border border-solid border-l border-gray-300 mx-3" />
            <div className="flex items-center gap-3">
-            <img
-              src={currentUser?.avatar || 'https://ui-avatars.com/api/?name=DocRST'}
-              alt="user"
-              className="w-9 h-9 rounded-full object-cover"
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser?.name || 'DocRST'); }}
-            />
+            {!avatarError ? (
+              <img
+                src={currentUser?.avatar || 'https://ui-avatars.com/api/?name=DocRST'}
+                alt={currentUser?.name ?? 'user'}
+                className="w-9 h-9 rounded-full object-cover bg-gray-200"
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center">
+                <User className="text-gray-600" size={18} />
+              </div>
+            )}
             <span className="font-semibold">{currentUser?.name ?? 'DocRST'}</span>
           </div>
           <div className="flex items-center gap-2">
