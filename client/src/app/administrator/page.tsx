@@ -558,45 +558,6 @@ const Administrator = (props: Props) => {
       }
     };
 
-    // Migration: ensure all users have username and password fields
-    // Helpers: hash passwords and detect hashed values
-    const hashPassword = async (pwd: string) => {
-      if (!pwd) return '';
-      const enc = new TextEncoder();
-      const data = enc.encode(pwd);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    };
-
-    const looksHashed = (p: string | undefined) => {
-      return typeof p === 'string' && /^[0-9a-f]{64}$/.test(p);
-    };
-
-    // Migration: hash any plaintext passwords and ensure username exists
-    useEffect(() => {
-      let mounted = true;
-      (async () => {
-        try {
-          const needs = users.some(u => !u.username || !looksHashed(u.password));
-          if (!needs) return;
-          const migrated = await Promise.all(users.map(async (u) => {
-            const username = (u as any).username ?? (u.email ? u.email.split('@')[0] : '');
-            const passwordRaw = (u as any).password ?? '';
-            const password = looksHashed(passwordRaw) ? passwordRaw : (passwordRaw ? await hashPassword(passwordRaw) : '');
-            const created = u.createdAt || new Date().toISOString().slice(0,10);
-            const defaultExpire = new Date(created);
-            defaultExpire.setFullYear(defaultExpire.getFullYear() + 1);
-            const passwordExpiresAt = (u as any).passwordExpiresAt ?? defaultExpire.toISOString().slice(0,10);
-            return { ...u, username, password, passwordExpiresAt } as User;
-          }));
-          if (mounted) setUsers(migrated as User[]);
-        } catch (e) { console.warn('User migration failed', e); }
-      })();
-      return () => { mounted = false; };
-      // run once
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     const [showUserForm, setShowUserForm] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formName, setFormName] = useState('');
@@ -610,6 +571,7 @@ const Administrator = (props: Props) => {
     // Bulk password migration state
     const [showBulkPasswords, setShowBulkPasswords] = useState(false);
     const [bulkPasswords, setBulkPasswords] = useState<Record<string,string>>({});
+    const [refreshing, setRefreshing] = useState(false);
 
     const generateRandomPassword = (len = 12) => {
       const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
@@ -1341,7 +1303,9 @@ const Administrator = (props: Props) => {
                 <div className="flex items-center justify-between mb-3">
                 <div className="font-semibold">Online Users ({onlineUsers.length})</div>
                 <div className="flex gap-2">
-                  <button onClick={refreshOnlineUsers} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Refresh</button>
+                  <button onClick={refreshOnlineUsers} disabled={refreshing} className={refreshing ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
+                    {refreshing ? 'Refreshing...' : 'Refresh'}
+                  </button>
                   <button
                     onClick={bootAllSessions}
                     disabled={onlineUsers.length === 0}
