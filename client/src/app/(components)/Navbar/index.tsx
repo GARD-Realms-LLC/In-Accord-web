@@ -34,7 +34,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
         const raw = localStorage.getItem('currentUser');
         const updated = raw ? JSON.parse(raw) : null;
         setCurrentUser(updated);
-      } catch {}
+        console.log('Navbar: userUpdated event received, updated user:', updated);
+      } catch (e) {
+        console.error('Navbar: Error parsing currentUser from localStorage:', e);
+      }
     };
 
     // Listen for storage events (from other tabs) and custom events (from same tab)

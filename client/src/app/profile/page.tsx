@@ -271,7 +271,9 @@ const Profile = () => {
           role: formData.role,
           avatar: avatarToUse,
         };
+        console.log('Profile: Saving updatedUser to localStorage:', updatedUser);
         window.localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        console.log('Profile: userUpdated event dispatching...');
         
         // Update session avatar on server
         const sessionId = window.localStorage.getItem('sessionId');
@@ -289,6 +291,7 @@ const Profile = () => {
         
         // Notify other components (like Navbar) that the user was updated
         window.dispatchEvent(new Event('userUpdated'));
+        console.log('Profile: userUpdated event dispatched');
       } else {
           const errorData = await response.json().catch(() => ({}));
           console.error('Failed to save profile:', response.status, errorData);
