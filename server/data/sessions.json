@@ -11,18 +11,6 @@
         "email": "docrst@gmail.com",
         "username": "docrst"
       }
-    },
-    {
-      "id": "sess-uo0dcod2",
-      "userId": "uo0dcod2",
-      "ip": "::1",
-      "since": "2026-01-10T07:15:22.277Z",
-      "user": {
-        "id": "uo0dcod2",
-        "name": "Worlds Of Wogwarts",
-        "email": "dacowles@gmail.com",
-        "username": "WorldsOfWogwarts"
-      }
     }
   ]
 }
