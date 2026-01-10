@@ -51,6 +51,26 @@ const SidebarLink = ({
     return null;
   }
 
+  const [sidebarLogoSrc, setSidebarLogoSrc] = React.useState<string | null>(null);
+  const [sidebarLink, setSidebarLink] = React.useState<string>('/home');
+
+  useEffect(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('system_config') : null;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const logo = parsed?.sidebarLogo as string | undefined;
+        const link = parsed?.sidebarUrl as string | undefined;
+        if (logo && typeof logo === 'string' && logo.length > 0) setSidebarLogoSrc(logo);
+        if (link && typeof link === 'string' && link.length > 0) setSidebarLink(link);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const fallbackLogo = "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg";
+
   return (
     <Link href={href}>
       <div className={`cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md ${
@@ -236,9 +256,9 @@ const Sidebar = () => {
       isSidebarCollapsed ? 'px-2' : 'px-4'
     }`}
     >
-      <Link href="/home" aria-label="Go to home">
+      <Link href={sidebarLink || '/home'} aria-label="Go to home">
         <img 
-          src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg" 
+          src={sidebarLogoSrc || fallbackLogo} 
           alt="In-Accord" 
           className={`${isSidebarCollapsed ? 'w-10 h-10' : 'w-full'} object-contain`}
         />

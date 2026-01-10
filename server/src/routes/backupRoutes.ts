@@ -83,6 +83,37 @@ router.get('/settings', (_req: Request, res: Response) => {
   return res.json({ ok: true, settings });
 });
 
+router.get('/list', (_req: Request, res: Response) => {
+  try {
+    const settings = loadBackupSettings();
+    const localPath = settings.localBackupPath || backupDir;
+    
+    if (!fs.existsSync(localPath)) {
+      return res.json({ ok: true, backups: [] });
+    }
+
+    const files = fs.readdirSync(localPath);
+    const backupFiles = files
+      .filter(f => f.startsWith('backup-') && f.endsWith('.json'))
+      .map(f => {
+        const filePath = path.join(localPath, f);
+        const stats = fs.statSync(filePath);
+        return {
+          name: f.replace('.json', ''),
+          size: stats.size,
+          created: stats.birthtime.toISOString(),
+          modified: stats.mtime.toISOString(),
+        };
+      })
+      .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+
+    return res.json({ ok: true, backups: backupFiles });
+  } catch (err) {
+    console.error('[backup] failed to list backups', err);
+    return res.status(500).json({ ok: false, error: 'Failed to list backups', detail: String((err as Error)?.message || err) });
+  }
+});
+
 router.put('/settings', (req: Request, res: Response) => {
   const body = req.body || {};
   const current = loadBackupSettings();

@@ -1,8 +1,13 @@
-import type { NextConfig } from "next";
+import path from "path";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,  
-};
+// Using a lax type to allow Next's experimental fields like `turbopack.root`.
+const nextConfig = {
+  reactCompiler: true,
+  // Ensure Turbopack treats `client/` as the workspace root to avoid
+  // picking the repository root lockfile.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+} as any;
 
 export default nextConfig;
