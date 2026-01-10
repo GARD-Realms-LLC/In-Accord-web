@@ -42,6 +42,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
     setAvatarError(false);
   }, [avatarUrl]);
 
+  useEffect(() => {
+    try {
+      // Debugging: log current avatar state to help diagnose why navbar shows fallback
+      // Remove these logs once the issue is resolved.
+      // eslint-disable-next-line no-console
+      console.log('Navbar avatar debug:', { avatarUrl, isGeneratedAvatar, avatarError, currentUser });
+    } catch (e) {}
+  }, [avatarUrl, isGeneratedAvatar, avatarError, currentUser]);
+
   async function handleLogin(username: string, password: string) {
     const name = (username || '').trim();
     if (!name) return { ok: false, error: 'Username required' } as const;
