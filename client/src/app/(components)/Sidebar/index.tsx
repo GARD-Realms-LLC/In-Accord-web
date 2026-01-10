@@ -123,11 +123,13 @@ const Sidebar = () => {
     window.addEventListener('userUpdated', handleUserUpdate);
     window.addEventListener('storage', handleUserUpdate);
     window.addEventListener('sessionCreated', handleUserUpdate);
+    window.addEventListener('logout', handleUserUpdate);
 
     return () => {
       window.removeEventListener('userUpdated', handleUserUpdate);
       window.removeEventListener('storage', handleUserUpdate);
       window.removeEventListener('sessionCreated', handleUserUpdate);
+      window.removeEventListener('logout', handleUserUpdate);
     };
   }, []);
 

@@ -73,10 +73,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     window.addEventListener('userUpdated', onAuthUpdate);
     window.addEventListener('storage', onAuthUpdate);
     window.addEventListener('sessionCreated', onAuthUpdate);
+    window.addEventListener('logout', onAuthUpdate);
     return () => {
       window.removeEventListener('userUpdated', onAuthUpdate);
       window.removeEventListener('storage', onAuthUpdate);
       window.removeEventListener('sessionCreated', onAuthUpdate);
+      window.removeEventListener('logout', onAuthUpdate);
     };
   }, [pathname, router]);
 

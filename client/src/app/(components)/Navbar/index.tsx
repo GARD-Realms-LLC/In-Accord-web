@@ -236,7 +236,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
                   // Clear user immediately and notify listeners
                   try { localStorage.removeItem('currentUser'); } catch {}
                   setCurrentUser(null);
-                  try { window.dispatchEvent(new Event('userUpdated')); } catch {}
+                  try {
+                    // Emit dedicated logout and general update events
+                    window.dispatchEvent(new Event('logout'));
+                    window.dispatchEvent(new Event('userUpdated'));
+                  } catch {}
                   // Prefer a hard navigation to ensure protected pages unload
                   try { router.replace('/home'); } catch {}
                   // Fallback in case router navigation is blocked
