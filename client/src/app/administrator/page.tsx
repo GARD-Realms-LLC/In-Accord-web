@@ -2041,6 +2041,11 @@ const Administrator = (props: Props) => {
 
     return (
       <div className="space-y-8 p-8">
+        {/* Prominent Admin Header */}
+        <h1 className="text-4xl font-extrabold text-center text-blue-700 dark:text-blue-300 mb-10 mt-2">
+          Administration Area for In-Accord
+        </h1>
+
         {/* Toast */}
         {toastVisible && (
           <div className="fixed right-4 bottom-4 z-50">
@@ -2430,6 +2435,7 @@ const Administrator = (props: Props) => {
             </div>
           </div>
         </section>
+
 
         {/* Section 2 */}
         <section className="border-b pb-8">
