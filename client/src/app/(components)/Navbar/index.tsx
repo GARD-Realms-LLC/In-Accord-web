@@ -160,12 +160,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
       <div className="flex justify-between items-center gap-5">
       <div className="hidden md:flex justify-between items-center gap-5">
       </div>  
+      {currentUser && (
       <button 
         className="px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600" 
         onClick={toggleSidebar}
         >
          <Menu className="w-4 h-4 dark:text-gray-300" />
         </button>
+      )}
       </div>
       <div className='relative'>
         <input 
