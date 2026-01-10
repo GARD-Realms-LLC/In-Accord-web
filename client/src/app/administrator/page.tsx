@@ -319,7 +319,9 @@ interface TeamMember {
 const initialUsers: User[] = [
   { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', avatarUrl: '', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10', passwordExpiresAt: '2025-01-10' },
   { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', avatarUrl: '', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02', passwordExpiresAt: '2026-05-02' },
-  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', avatarUrl: '', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12', passwordExpiresAt: '2026-09-12' }
+  { id: 'u3', name: 'Bob Smith', username: 'bob', password: 'password', avatarUrl: '', email: 'bob@example.com', role: 'User', status: 'Suspended', createdAt: '2025-09-12', passwordExpiresAt: '2026-09-12' },
+  { id: 'u4', name: 'Carly V. Salzberger', username: 'cvansalzberger0', password: 'password', avatarUrl: '', email: 'cvansalzberger0@cisco.com', role: 'Viewer', status: 'Active', createdAt: '2025-11-01', passwordExpiresAt: '2026-11-01' },
+  { id: 'u5', name: 'Ethan Park', username: 'ethanp', password: 'password', avatarUrl: '', email: 'ethan.park@example.com', role: 'User', status: 'Active', createdAt: '2025-12-15', passwordExpiresAt: '2026-12-15' }
 ];
 
 const Administrator = (props: Props) => {
@@ -1454,8 +1456,9 @@ const Administrator = (props: Props) => {
             </div>
 
             <div className="overflow-x-auto">
+              <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
               <table className="w-full text-sm">
-                <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <thead className="sticky top-0 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 z-10">
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Name</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Username</th>
@@ -1489,6 +1492,7 @@ const Administrator = (props: Props) => {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
               {/* All User Fields & Custom Tables */}
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
