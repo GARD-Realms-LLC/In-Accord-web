@@ -2363,24 +2363,24 @@ const Administrator = (props: Props) => {
                 </div>
               </div>
             </div>
-          {/* User Security Groups */}
+          {/* User Roles */}
           <div className="mt-6">
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-md font-semibold text-gray-900 dark:text-white">User Security Groups</h4>
-                <div className="text-sm text-gray-500">View and edit user security groups. Assign users to groups for access control and permissions.</div>
+                <h4 className="text-md font-semibold text-gray-900 dark:text-white">User Roles</h4>
+                <div className="text-sm text-gray-500">View and edit user roles. Assign users to roles for access control and permissions.</div>
               </div>
 
-              <div className="text-xs text-blue-700 dark:text-blue-300 mb-3">Security groups can be used to manage permissions and restrict access to features or data.</div>
+              <div className="text-xs text-blue-700 dark:text-blue-300 mb-3">Roles can be used to manage permissions and restrict access to features or data.</div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Group Name</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Role Name</label>
                     <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Admins, Sales Team" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-3">Description</label>
                     <input value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} placeholder="Optional description" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
 
-                    <div className="text-sm font-medium mt-3">Group Members</div>
+                    <div className="text-sm font-medium mt-3">Role Members</div>
                     <div className="mt-2 max-h-40 overflow-auto grid grid-cols-1 gap-2">
                       {users.map(u => (
                         <label key={u.id} className="flex items-center gap-2 text-sm">
@@ -2401,7 +2401,7 @@ const Administrator = (props: Props) => {
                     </div>
 
                     <div className="mt-3 flex gap-2">
-                      <button onClick={addGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create Group</button>
+                      <button onClick={addGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create Role</button>
                       <button onClick={() => { setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]); setNewGroupPermissions([]); }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Clear</button>
                     </div>
                   </div>
@@ -2420,7 +2420,7 @@ const Administrator = (props: Props) => {
                   <tbody>
                     {groups.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="text-center text-gray-500 py-4">No security groups defined.</td>
+                        <td colSpan={5} className="text-center text-gray-500 py-4">No roles defined.</td>
                       </tr>
                     )}
                     {groups.length > 0 && groups.map(g => (
