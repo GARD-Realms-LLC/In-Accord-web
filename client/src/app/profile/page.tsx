@@ -74,7 +74,37 @@ interface BotAdForm {
   contact: string;
 }
 
+interface HostingAd {
+  id: string;
+  planName: string;
+  shortDescription: string;
+  pricePerMonth: string;
+  features: string[];
+  badge?: string;
+  targetAudience?: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  contactEmail?: string;
+  isFeatured?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  managedBy?: string;
+}
+
+interface HostingAdForm {
+  planName: string;
+  shortDescription: string;
+  pricePerMonth: string;
+  featuresText: string;
+  badge: string;
+  targetAudience: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  contactEmail: string;
+}
+
 const BOT_AD_STORAGE_KEY = 'discord_bot_ads';
+const HOSTING_AD_STORAGE_KEY = 'hosting_ads';
 
 const BOT_ROLE_SYNONYMS: Record<string, CanonicalBotRole> = {
   admin: 'admin',
@@ -130,6 +160,23 @@ const collectCanonicalRoles = (
   return canonical;
 };
 
+const collectRoleTokens = (user: UnknownUser): Set<string> => {
+  const tokens = new Set<string>();
+  const register = (value: unknown) => {
+    if (typeof value !== 'string') return;
+    const matches = value.match(/[A-Za-z0-9]+/g);
+    if (!matches) return;
+    matches.forEach((match) => tokens.add(match.toLowerCase()));
+  };
+
+  register(user?.role);
+  if (Array.isArray(user?.roles)) {
+    user.roles.forEach(register);
+  }
+
+  return tokens;
+};
+
 const formatRoleLabel = (user: UnknownUser): string => {
   if (Array.isArray(user?.roles) && user.roles.length) {
     return user.roles
@@ -157,11 +204,30 @@ const emptyBotAdForm: BotAdForm = {
   contact: '',
 };
 
+const emptyHostingAdForm: HostingAdForm = {
+  planName: '',
+  shortDescription: '',
+  pricePerMonth: '',
+  featuresText: '',
+  badge: '',
+  targetAudience: '',
+  ctaLabel: '',
+  ctaUrl: '',
+  contactEmail: '',
+};
+
 const generateBotAdId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
   return `bot-ad-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const generateHostingAdId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `hosting-ad-${Math.random().toString(36).slice(2, 10)}`;
 };
 
 const formatBotAdTimestamp = (iso: string) => {
@@ -220,10 +286,53 @@ const Profile = () => {
   const [botIdentity, setBotIdentity] = useState<string | null>(null);
   const [editingBotAdId, setEditingBotAdId] = useState<string | null>(null);
   const [userBotAds, setUserBotAds] = useState<BotAd[]>([]);
+  const [hostingForm, setHostingForm] = useState<HostingAdForm>(emptyHostingAdForm);
+  const [hostingStatusMessage, setHostingStatusMessage] = useState<string | null>(null);
+  const [hostingRoleLabel, setHostingRoleLabel] = useState('');
+  const [canPublishHostingAd, setCanPublishHostingAd] = useState(false);
+  const [editingHostingAdId, setEditingHostingAdId] = useState<string | null>(null);
+  const [hostingAds, setHostingAds] = useState<HostingAd[]>([]);
   const resetBotAdForm = useCallback(() => {
     setBotAdForm(emptyBotAdForm);
     setEditingBotAdId(null);
   }, []);
+  const resetHostingForm = useCallback(() => {
+    setHostingForm(emptyHostingAdForm);
+    setEditingHostingAdId(null);
+  }, []);
+
+  const hostingAdsFromStorage = (): HostingAd[] => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = window.localStorage.getItem(HOSTING_AD_STORAGE_KEY);
+      if (!stored) return [];
+      const parsed = JSON.parse(stored) as HostingAd[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const setHostingAdsInStorage = (ads: HostingAd[]) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(HOSTING_AD_STORAGE_KEY, JSON.stringify(ads));
+    window.dispatchEvent(new Event('hostingAdsUpdated'));
+  };
+
+  const handleHostingFormChange = (field: keyof HostingAdForm, value: string) => {
+    setHostingForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const resolveHostingManager = () => {
+    const candidates = [
+      profile?.name,
+      profile?.email,
+      botIdentity,
+      hostingRoleLabel,
+    ];
+    const match = candidates.find((candidate) => candidate && candidate.toString().trim().length);
+    return match ? match.toString().trim() : 'Hosting Manager';
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -326,10 +435,14 @@ const Profile = () => {
         const canonical = collectCanonicalRoles(parsedUser, BOT_ROLE_SYNONYMS);
         const hasAdmin = canonical.has('admin');
         const hasBots = canonical.has('bots');
+        const roleTokens = collectRoleTokens(parsedUser);
+        const hasHosting = roleTokens.has('hosting') || roleTokens.has('host');
 
         setCanPublishBotAd(hasAdmin || hasBots);
         const formattedRole = formatRoleLabel(parsedUser) || (typeof profile?.role === 'string' ? profile.role : '');
         setBotRoleLabel(formattedRole);
+        setCanPublishHostingAd(hasAdmin || hasHosting);
+        setHostingRoleLabel(formattedRole);
 
         const identityCandidate = [
           typeof (parsedUser as { name?: unknown })?.name === 'string' ? (parsedUser as { name?: string }).name : undefined,
@@ -350,6 +463,8 @@ const Profile = () => {
         setCanPublishBotAd(false);
         setBotRoleLabel('');
         setBotIdentity(null);
+        setCanPublishHostingAd(false);
+        setHostingRoleLabel('');
       }
     };
 
@@ -368,6 +483,12 @@ const Profile = () => {
     return () => window.clearTimeout(timeout);
   }, [botStatusMessage]);
 
+  useEffect(() => {
+    if (!hostingStatusMessage) return;
+    const timeout = window.setTimeout(() => setHostingStatusMessage(null), 3500);
+    return () => window.clearTimeout(timeout);
+  }, [hostingStatusMessage]);
+
   const identityKeys = useMemo(() => {
     const candidates = [
       botIdentity,
@@ -385,6 +506,22 @@ const Profile = () => {
 
     return Array.from(keys);
   }, [botIdentity, profile]);
+
+  const refreshHostingAds = useCallback(() => {
+    setHostingAds(hostingAdsFromStorage());
+  }, []);
+
+  useEffect(() => {
+    refreshHostingAds();
+    if (typeof window === 'undefined') return;
+    const handler = () => refreshHostingAds();
+    window.addEventListener('hostingAdsUpdated', handler);
+    return () => window.removeEventListener('hostingAdsUpdated', handler);
+  }, [refreshHostingAds]);
+
+  const sortedHostingAds = useMemo(() => {
+    return [...hostingAds].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+  }, [hostingAds]);
 
   const isBotAdOwner = useCallback(
     (ad: BotAd) => {
@@ -676,6 +813,138 @@ const Profile = () => {
 
     setBotStatusMessage(ad.isSpotlight ? 'Spotlight removed.' : 'Spotlight enabled.');
     refreshUserBotAds();
+  };
+
+  const handleHostingAdSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canPublishHostingAd || typeof window === 'undefined') return;
+
+    const features = hostingForm.featuresText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (!hostingForm.planName.trim()) {
+      setHostingStatusMessage('Plan name is required.');
+      return;
+    }
+
+    if (!hostingForm.ctaLabel.trim() || !hostingForm.ctaUrl.trim()) {
+      setHostingStatusMessage('CTA label and URL are required.');
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    const managedBy = resolveHostingManager();
+
+    const existing = hostingAdsFromStorage();
+    let updatedAds: HostingAd[] = existing;
+
+    if (editingHostingAdId) {
+      const target = existing.find((ad) => ad.id === editingHostingAdId);
+      if (!target) {
+        setHostingStatusMessage('Unable to find advertisement to update.');
+        return;
+      }
+
+      updatedAds = existing.map((ad) =>
+        ad.id === editingHostingAdId
+          ? {
+              ...ad,
+              planName: hostingForm.planName.trim(),
+              shortDescription: hostingForm.shortDescription.trim(),
+              pricePerMonth: hostingForm.pricePerMonth.trim() || 'Custom quote',
+              features,
+              badge: hostingForm.badge.trim() || undefined,
+              targetAudience: hostingForm.targetAudience.trim() || undefined,
+              ctaLabel: hostingForm.ctaLabel.trim(),
+              ctaUrl: hostingForm.ctaUrl.trim(),
+              contactEmail: hostingForm.contactEmail.trim() || undefined,
+              updatedAt: timestamp,
+              managedBy,
+            }
+          : ad,
+      );
+      setHostingStatusMessage('Hosting advertisement updated.');
+    } else {
+      const newAd: HostingAd = {
+        id: generateHostingAdId(),
+        planName: hostingForm.planName.trim(),
+        shortDescription: hostingForm.shortDescription.trim(),
+        pricePerMonth: hostingForm.pricePerMonth.trim() || 'Custom quote',
+        features,
+        badge: hostingForm.badge.trim() || undefined,
+        targetAudience: hostingForm.targetAudience.trim() || undefined,
+        ctaLabel: hostingForm.ctaLabel.trim(),
+        ctaUrl: hostingForm.ctaUrl.trim(),
+        contactEmail: hostingForm.contactEmail.trim() || undefined,
+        isFeatured: false,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        managedBy,
+      };
+
+      updatedAds = [newAd, ...existing];
+      setHostingStatusMessage('New hosting advertisement published.');
+    }
+
+    try {
+      setHostingAdsInStorage(updatedAds);
+      setHostingAds(updatedAds);
+      resetHostingForm();
+    } catch {
+      setHostingStatusMessage('Failed to save hosting advertisement.');
+    }
+  };
+
+  const handleHostingAdEdit = (ad: HostingAd) => {
+    if (!canPublishHostingAd) return;
+    setEditingHostingAdId(ad.id);
+    setHostingForm({
+      planName: ad.planName,
+      shortDescription: ad.shortDescription,
+      pricePerMonth: ad.pricePerMonth,
+      featuresText: ad.features.join('\n'),
+      badge: ad.badge ?? '',
+      targetAudience: ad.targetAudience ?? '',
+      ctaLabel: ad.ctaLabel,
+      ctaUrl: ad.ctaUrl,
+      contactEmail: ad.contactEmail ?? '',
+    });
+    setHostingStatusMessage('Editing hosting advertisement.');
+  };
+
+  const handleHostingAdDelete = (id: string) => {
+    if (!canPublishHostingAd || typeof window === 'undefined') return;
+    if (!window.confirm('Remove this hosting advertisement?')) return;
+
+    const remaining = hostingAdsFromStorage().filter((ad) => ad.id !== id);
+    setHostingAdsInStorage(remaining);
+    setHostingAds(remaining);
+
+    if (editingHostingAdId === id) {
+      resetHostingForm();
+    }
+
+    setHostingStatusMessage('Hosting advertisement removed.');
+  };
+
+  const handleHostingAdToggleFeatured = (id: string) => {
+    if (!canPublishHostingAd || typeof window === 'undefined') return;
+
+    const updated = hostingAdsFromStorage().map((ad) =>
+      ad.id === id
+        ? { ...ad, isFeatured: !ad.isFeatured, updatedAt: new Date().toISOString() }
+        : ad,
+    );
+
+    setHostingAdsInStorage(updated);
+    setHostingAds(updated);
+
+    const target = updated.find((ad) => ad.id === id);
+    if (target) {
+      setHostingStatusMessage(target.isFeatured ? 'Marked as featured.' : 'Highlight removed.');
+    }
   };
   const handleSave = async () => {
     if (!formData.name.trim()) {
@@ -1636,6 +1905,232 @@ const Profile = () => {
           </>
         )}
       </section>
+
+        <div className="h-12" aria-hidden="true" />
+
+      <section className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm dark:border-emerald-800 dark:bg-emerald-900/20">
+        <h2 className="text-2xl font-semibold text-emerald-900 dark:text-emerald-100">Hosting marketplace spotlight</h2>
+        <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
+          Surface premium plans and curated bundles before managing the full hosting catalogue below.
+        </p>
+      </section>
+
+      <section className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Manage hosting advertisements</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Publish new offers, highlight seasonal promos, or keep pricing aligned with your go-to-market moves.
+            </p>
+          </div>
+          <div className="rounded-full bg-emerald-100 px-4 py-1 text-sm font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+            Role: {hostingRoleLabel || 'Unknown'}
+          </div>
+        </header>
+
+        {!canPublishHostingAd && (
+          <div className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-400/60 dark:bg-emerald-900/20 dark:text-emerald-200">
+            You need the Admin or Hosting role to publish hosting advertisements. Browse live offers from the Hosting page instead.
+          </div>
+        )}
+
+        <form onSubmit={handleHostingAdSubmit} className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:col-span-2 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Plan name</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.planName}
+                onChange={(event) => handleHostingFormChange('planName', event.target.value)}
+                placeholder="e.g. HyperScale Pro"
+                disabled={!canPublishHostingAd}
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price per month</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.pricePerMonth}
+                onChange={(event) => handleHostingFormChange('pricePerMonth', event.target.value)}
+                placeholder="$79/mo"
+                disabled={!canPublishHostingAd}
+              />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Short description</label>
+              <textarea
+                className="min-h-[80px] w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.shortDescription}
+                onChange={(event) => handleHostingFormChange('shortDescription', event.target.value)}
+                placeholder="Explain who this plan delights and the outcome it delivers."
+                disabled={!canPublishHostingAd}
+              />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Feature bullet points</label>
+              <textarea
+                className="min-h-[120px] w-full rounded-lg border border-gray-200 px-4 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.featuresText}
+                onChange={(event) => handleHostingFormChange('featuresText', event.target.value)}
+                placeholder={'One feature per line\nAutoscaling across three regions\nManaged backups and snapshots'}
+                disabled={!canPublishHostingAd}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400">One feature per line. Markdown not required.</p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Badge / promo tag</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.badge}
+                onChange={(event) => handleHostingFormChange('badge', event.target.value)}
+                placeholder="Most popular"
+                disabled={!canPublishHostingAd}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target audience</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.targetAudience}
+                onChange={(event) => handleHostingFormChange('targetAudience', event.target.value)}
+                placeholder="Agencies, SaaS teams"
+                disabled={!canPublishHostingAd}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">CTA label</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.ctaLabel}
+                onChange={(event) => handleHostingFormChange('ctaLabel', event.target.value)}
+                placeholder="Launch in 5 minutes"
+                disabled={!canPublishHostingAd}
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">CTA URL</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.ctaUrl}
+                onChange={(event) => handleHostingFormChange('ctaUrl', event.target.value)}
+                placeholder="https://"
+                disabled={!canPublishHostingAd}
+                required
+                type="url"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact email (optional)</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={hostingForm.contactEmail}
+                onChange={(event) => handleHostingFormChange('contactEmail', event.target.value)}
+                placeholder="team@example.com"
+                disabled={!canPublishHostingAd}
+                type="email"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 lg:col-span-2">
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              disabled={!canPublishHostingAd}
+            >
+              {editingHostingAdId ? 'Update advertisement' : 'Publish advertisement'}
+            </button>
+            {editingHostingAdId && (
+              <button
+                type="button"
+                onClick={resetHostingForm}
+                className="text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline dark:text-gray-300"
+                disabled={!canPublishHostingAd}
+              >
+                Cancel edit
+              </button>
+            )}
+            {!editingHostingAdId && (
+              <button
+                type="button"
+                onClick={resetHostingForm}
+                className="text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline dark:text-gray-300"
+                disabled={!canPublishHostingAd && !hostingForm.planName && !hostingForm.ctaLabel && !hostingForm.ctaUrl}
+              >
+                Clear form
+              </button>
+            )}
+          </div>
+        </form>
+
+        {hostingStatusMessage && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
+            {hostingStatusMessage}
+          </div>
+        )}
+
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Published ads immediately sync to the Hosting marketplace page for prospects to explore.
+        </p>
+      </section>
+
+        <div className="h-12" aria-hidden="true" />
+
+      {canPublishHostingAd && (
+        <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+          <header className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Administrative actions</h2>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{hostingAds.length} ads under management</span>
+          </header>
+          {hostingAds.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-sm text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
+              Publish a hosting advertisement above to populate your management list.
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200 text-sm dark:divide-gray-700">
+              {sortedHostingAds.map((ad) => (
+                <div key={ad.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{ad.planName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {ad.pricePerMonth} · {ad.features.length} features · {ad.isFeatured ? 'Featured' : 'Standard'} placement
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleHostingAdToggleFeatured(ad.id)}
+                      className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                        ad.isFeatured
+                          ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-200'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200'
+                      }`}
+                    >
+                      {ad.isFeatured ? 'Remove highlight' : 'Mark as featured'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleHostingAdEdit(ad)}
+                      className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-200"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleHostingAdDelete(ad.id)}
+                      className="rounded-lg bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-200 dark:bg-red-900/40 dark:text-red-200"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 };

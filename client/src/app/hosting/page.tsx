@@ -19,18 +19,6 @@ interface HostingAd {
         managedBy?: string;
       }
 
-    interface HostingAdForm {
-        planName: string;
-        shortDescription: string;
-        pricePerMonth: string;
-        featuresText: string;
-        badge: string;
-        targetAudience: string;
-        ctaLabel: string;
-        ctaUrl: string;
-        contactEmail: string;
-      }
-
     const STORAGE_KEY = 'hosting_ads';
 
     const extractRoleTokens = (user: any): string[] => {
@@ -51,23 +39,6 @@ interface HostingAd {
         addToken(user?.role);
 
         return Array.from(tokens);
-      };
-
-    const formatRoleLabel = (user: any, tokens: string[]): string => {
-        if (Array.isArray(user?.roles) && user.roles.length) {
-          return user.roles
-            .filter((role) => typeof role === 'string' && role.trim().length)
-            .join(', ');
-        }
-        if (typeof user?.role === 'string' && user.role.trim().length) {
-          return user.role;
-        }
-        if (tokens.length) {
-          return tokens
-            .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
-            .join(', ');
-        }
-        return '';
       };
 
     const DEFAULT_ADS: HostingAd[] = [
@@ -136,25 +107,6 @@ interface HostingAd {
         },
       ];
 
-    const emptyForm: HostingAdForm = {
-        planName: '',
-        shortDescription: '',
-        pricePerMonth: '',
-        featuresText: '',
-        badge: '',
-        targetAudience: '',
-        ctaLabel: '',
-        ctaUrl: '',
-        contactEmail: '',
-      };
-
-    const generateId = () => {
-        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-          return crypto.randomUUID();
-        }
-        return `ad-${Math.random().toString(36).slice(2, 10)}`;
-      };
-
     const formatTimestamp = (iso: string) => {
         try {
           return new Date(iso).toLocaleString();
@@ -176,10 +128,6 @@ interface HostingAd {
             return DEFAULT_ADS;
           }
         });
-        const [form, setForm] = useState<HostingAdForm>(emptyForm);
-        const [editingId, setEditingId] = useState<string | null>(null);
-        const [statusMessage, setStatusMessage] = useState<string | null>(null);
-        const [role, setRole] = useState<string>('');
         const [canManage, setCanManage] = useState(false);
 
   useEffect(() => {
@@ -196,7 +144,6 @@ interface HostingAd {
           try {
             const raw = window.localStorage.getItem('currentUser');
             if (!raw) {
-              setRole('');
               setCanManage(false);
               return;
             }
@@ -204,122 +151,20 @@ interface HostingAd {
             const roleTokens = extractRoleTokens(parsed);
             const hasAdmin = roleTokens.includes('admin');
             const hasHosting = roleTokens.includes('hosting');
-            setRole(formatRoleLabel(parsed, roleTokens));
             setCanManage(hasHosting || hasAdmin);
           } catch {
-            setRole('');
             setCanManage(false);
           }
         }, []);
-
-  useEffect(() => {
-          if (!statusMessage) return;
-          const timeout = setTimeout(() => setStatusMessage(null), 3500);
-          return () => clearTimeout(timeout);
-        }, [statusMessage]);
 
   const sortedAds = useMemo(() => {
           return [...ads].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         }, [ads]);
 
-  const resetForm = () => {
-          setForm(emptyForm);
-          setEditingId(null);
-        };
-
-  const handleChange = (field: keyof HostingAdForm, value: string) => {
-          setForm((prev) => ({ ...prev, [field]: value }));
-        };
-
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (event) => {
-          event.preventDefault();
-          if (!canManage) return;
-
-          const features = form.featuresText
-            .split('\n')
-            .map((line) => line.trim())
-            .filter(Boolean);
-
-          if (!form.planName.trim()) {
-            setStatusMessage('Plan name is required.');
-            return;
-          }
-          if (!form.ctaLabel.trim() || !form.ctaUrl.trim()) {
-            setStatusMessage('CTA label and URL are required.');
-            return;
-          }
-
-          const timestamp = new Date().toISOString();
-
-          if (editingId) {
-            setAds((prev) =>
-              prev.map((ad) => {
-                if (ad.id !== editingId) return ad;
-                return {
-                  ...ad,
-                  planName: form.planName.trim(),
-                  shortDescription: form.shortDescription.trim(),
-                  pricePerMonth: form.pricePerMonth.trim() || 'Custom quote',
-                  features,
-                  badge: form.badge.trim() || undefined,
-                  targetAudience: form.targetAudience.trim() || undefined,
-                  ctaLabel: form.ctaLabel.trim(),
-                  ctaUrl: form.ctaUrl.trim(),
-                  contactEmail: form.contactEmail.trim() || undefined,
-                  updatedAt: timestamp,
-                  managedBy: role || 'Hosting Manager',
-                };
-              })
-            );
-            setStatusMessage('Hosting advertisement updated.');
-          } else {
-            const newAd: HostingAd = {
-              id: generateId(),
-              planName: form.planName.trim(),
-              shortDescription: form.shortDescription.trim(),
-              pricePerMonth: form.pricePerMonth.trim() || 'Custom quote',
-              features,
-              badge: form.badge.trim() || undefined,
-              targetAudience: form.targetAudience.trim() || undefined,
-              ctaLabel: form.ctaLabel.trim(),
-              ctaUrl: form.ctaUrl.trim(),
-              contactEmail: form.contactEmail.trim() || undefined,
-              isFeatured: false,
-              createdAt: timestamp,
-              updatedAt: timestamp,
-              managedBy: role || 'Hosting Manager',
-            };
-            setAds((prev) => [newAd, ...prev]);
-            setStatusMessage('New hosting advertisement published.');
-          }
-
-          resetForm();
-        };
-
-  const handleEdit = (ad: HostingAd) => {
-          if (!canManage) return;
-          setEditingId(ad.id);
-          setForm({
-            planName: ad.planName,
-            shortDescription: ad.shortDescription,
-            pricePerMonth: ad.pricePerMonth,
-            featuresText: ad.features.join('\n'),
-            badge: ad.badge ?? '',
-            targetAudience: ad.targetAudience ?? '',
-            ctaLabel: ad.ctaLabel,
-            ctaUrl: ad.ctaUrl,
-            contactEmail: ad.contactEmail ?? '',
-          });
-        };
-
   const handleDelete = (id: string) => {
           if (!canManage) return;
           if (!confirm('Remove this hosting advertisement?')) return;
           setAds((prev) => prev.filter((ad) => ad.id !== id));
-          setStatusMessage('Advertisement removed.');
-          if (editingId === id) {
-            resetForm();
-          }
         };
 
   const toggleFeatured = (id: string) => {
@@ -383,136 +228,7 @@ interface HostingAd {
               </div>
             </div>
 
-          {canManage ? (
-              <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                <header className="mb-6 flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Manage hosting advertisements</h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Publish new offers, highlight seasonal promos, or keep pricing aligned with your go-to-market moves.
-                    </p>
-                  </div>
-                  <div className="rounded-full bg-emerald-100 px-4 py-1 text-sm font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                    Role: {role || 'Unknown'}
-                  </div>
-                </header>
-
-                {statusMessage && (
-                  <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
-                    {statusMessage}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-2">
-                  <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Plan name</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.planName}
-                        onChange={(e) => handleChange('planName', e.target.value)}
-                        placeholder="e.g. HyperScale Pro"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price per month</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.pricePerMonth}
-                        onChange={(e) => handleChange('pricePerMonth', e.target.value)}
-                        placeholder="$79/mo"
-                      />
-                    </div>
-                    <div className="space-y-1 sm:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Short description</label>
-                      <textarea
-                        className="min-h-[80px] w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.shortDescription}
-                        onChange={(e) => handleChange('shortDescription', e.target.value)}
-                        placeholder="Explain who this plan delights and the outcome it delivers."
-                      />
-                    </div>
-                    <div className="space-y-1 sm:col-span-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Feature bullet points</label>
-                      <textarea
-                        className="min-h-[120px] w-full rounded-lg border border-gray-200 px-4 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800"
-                        value={form.featuresText}
-                        onChange={(e) => handleChange('featuresText', e.target.value)}
-                        placeholder={'One feature per line\nAutoscaling across three regions\nManaged backups and snapshots'}
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400">One feature per line. Markdown not required.</p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Badge / promo tag</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.badge}
-                        onChange={(e) => handleChange('badge', e.target.value)}
-                        placeholder="Most popular"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target audience</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.targetAudience}
-                        onChange={(e) => handleChange('targetAudience', e.target.value)}
-                        placeholder="Agencies, SaaS teams"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">CTA label</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.ctaLabel}
-                        onChange={(e) => handleChange('ctaLabel', e.target.value)}
-                        placeholder="Launch in 5 minutes"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">CTA URL</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.ctaUrl}
-                        onChange={(e) => handleChange('ctaUrl', e.target.value)}
-                        placeholder="https://"
-                        required
-                        type="url"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact email (optional)</label>
-                      <input
-                        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
-                        value={form.contactEmail}
-                        onChange={(e) => handleChange('contactEmail', e.target.value)}
-                        placeholder="team@example.com"
-                        type="email"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 lg:col-span-2">
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700"
-                    >
-                      {editingId ? 'Update advertisement' : 'Publish advertisement'}
-                    </button>
-                    {editingId && (
-                      <button
-                        type="button"
-                        onClick={resetForm}
-                        className="text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline dark:text-gray-300"
-                      >
-                        Cancel edit
-                      </button>
-                    )}
-                  </div>
-                </form>
-              </section>
-            ) : (
+          {!canManage && (
               <section className="rounded-2xl border border-blue-200 bg-blue-50 px-6 py-5 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
                 You have viewer access. Only users with either an Admin or Hosting role can publish new advertisements. Browse the
                 offers below or contact the hosting team for changes.
@@ -588,51 +304,6 @@ interface HostingAd {
                 ))}
               </div>
             </section>
-
-            {canManage && (
-              <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                <header className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Administrative actions</h2>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{ads.length} ads under management</span>
-                </header>
-                <div className="divide-y divide-gray-200 text-sm dark:divide-gray-700">
-                {sortedAds.map((ad) => (
-                  <div key={ad.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{ad.planName}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {ad.pricePerMonth} · {ad.features.length} features · {ad.isFeatured ? 'Featured' : 'Standard'} placement
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          onClick={() => toggleFeatured(ad.id)}
-                          className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                            ad.isFeatured
-                              ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-200'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200'
-                          }`}
-                        >
-                          {ad.isFeatured ? 'Remove highlight' : 'Mark as featured'}
-                        </button>
-                        <button
-                          onClick={() => handleEdit(ad)}
-                          className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-200"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(ad.id)}
-                          className="rounded-lg bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-200 dark:bg-red-900/40 dark:text-red-200"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
     </div>
   );
 };
