@@ -54,54 +54,92 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
   const appliedSidebarOffset = isSidebarCollapsed ? 64 : clampedSidebarWidth;
 
-  // Centralized list of routes that require authentication
-  const protectedRoutes = [
-    '/administrator',
-    '/dashboard',
-    '/profile',
-    '/inventory',
-    '/products',
-    '/expenses',
-    '/bots',
-    '/servers',
-    '/hosting',
-    '/users'
-  ];
+  const normalizeRoute = React.useCallback((route: string | null | undefined) => {
+    if (!route) return '/';
+    const trimmed = route.trim();
+    if (trimmed === '') return '/';
+    const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    const withoutTrailing = normalized.replace(/\/+$/, '');
+    return withoutTrailing === '' ? '/' : withoutTrailing;
+  }, []);
 
-  // Redirect to home when accessing protected routes without a logged-in user
-  useEffect(() => {
+  const PROTECTED_ROUTE_PREFIXES = React.useMemo(
+    () => [
+      '/plugins',
+      '/themes',
+      '/ide',
+      '/uploads',
+      '/dashboard',
+      '/inventory',
+      '/products',
+      '/profile',
+      '/expenses',
+      '/bots',
+      '/servers',
+      '/hosting',
+      '/users',
+      '/administrator',
+    ],
+    []
+  );
+
+  const routeRequiresAuth = React.useCallback(
+    (targetPath: string | null | undefined) => {
+      const normalizedTarget = normalizeRoute(targetPath);
+      return PROTECTED_ROUTE_PREFIXES.some(
+        (prefix) =>
+          normalizedTarget === prefix || normalizedTarget.startsWith(`${prefix}/`)
+      );
+    },
+    [PROTECTED_ROUTE_PREFIXES, normalizeRoute]
+  );
+
+  const hasRouteAccess = React.useCallback(
+    (user: any, targetPath: string) => {
+      const normalizedTarget = normalizeRoute(targetPath);
+      const role = typeof user?.role === 'string' ? user.role.trim().toLowerCase() : '';
+      if (role === 'admin') return true;
+      const allowed = Array.isArray(user?.allowedRoutes)
+        ? user.allowedRoutes
+            .map((route: any) => (typeof route === 'string' ? normalizeRoute(route) : null))
+            .filter(Boolean) as string[]
+        : [];
+      if (allowed.includes('*')) return true;
+      return allowed.some((allowedRoute) =>
+        normalizedTarget === allowedRoute || normalizedTarget.startsWith(`${allowedRoute}/`)
+      );
+    },
+    [normalizeRoute]
+  );
+
+  const enforceRouteGuards = React.useCallback(() => {
+    const normalizedPath = normalizeRoute(pathname);
+    if (!routeRequiresAuth(normalizedPath)) return;
+
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem('currentUser') : null;
       const user = raw ? JSON.parse(raw) : null;
-      const isProtected = protectedRoutes.some((p) => pathname?.startsWith(p));
-      if (isProtected && !user) {
-        // Use replace to avoid back button returning to protected page
+      if (!user) {
+        router.replace('/home');
+        return;
+      }
+      if (!hasRouteAccess(user, normalizedPath)) {
         router.replace('/home');
       }
-      // Enforce Admin-only access for administrator route
-      if (pathname?.startsWith('/administrator') && user && user.role !== 'Admin') {
-        router.replace('/home');
-      }
-    } catch (e) {
-      // Fail-safe: if parsing fails, redirect off protected routes
-      const isProtected = protectedRoutes.some((p) => pathname?.startsWith(p));
-      if (isProtected) router.replace('/home');
+    } catch {
+      router.replace('/home');
     }
-  }, [pathname, router]);
+  }, [hasRouteAccess, normalizeRoute, pathname, routeRequiresAuth, router]);
+
+  // Redirect to home when accessing protected routes without permission
+  useEffect(() => {
+    enforceRouteGuards();
+  }, [enforceRouteGuards]);
 
   // React to auth changes (login/logout) and re-evaluate guards
   useEffect(() => {
     const onAuthUpdate = () => {
-      try {
-        const raw = localStorage.getItem('currentUser');
-        const user = raw ? JSON.parse(raw) : null;
-        const isProtected = protectedRoutes.some((p) => pathname?.startsWith(p));
-        if (isProtected && !user) router.replace('/home');
-        // Enforce Admin-only access for administrator route
-        if (pathname?.startsWith('/administrator') && user && user.role !== 'Admin') {
-          router.replace('/home');
-        }
-      } catch {}
+      enforceRouteGuards();
     };
     window.addEventListener('userUpdated', onAuthUpdate);
     window.addEventListener('storage', onAuthUpdate);
@@ -113,7 +151,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       window.removeEventListener('sessionCreated', onAuthUpdate);
       window.removeEventListener('logout', onAuthUpdate);
     };
-  }, [pathname, router]);
+  }, [enforceRouteGuards]);
 
   return (
     <div

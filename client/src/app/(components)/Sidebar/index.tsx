@@ -14,14 +14,43 @@ interface SidebarLinkProps {
   label: string;
   isCollapsed: boolean;
   currentUserRole?: string | null;
+  allowedRoutes?: string[] | null;
 }
+
+const normalizeRoute = (route: string): string => {
+  if (!route) return '/';
+  const trimmed = route.trim();
+  if (trimmed === '') return '/';
+  const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  const withoutTrailing = normalized.replace(/\/+$/, '');
+  return withoutTrailing === '' ? '/' : withoutTrailing;
+};
+
+const canAccessRoute = (
+  allowedRoutes: string[] | null | undefined,
+  targetRoute: string,
+  role?: string | null,
+) => {
+  if (!targetRoute) return true;
+  const normalizedTarget = normalizeRoute(targetRoute);
+  const normalizedRole = role?.trim().toLowerCase();
+  if (normalizedRole === 'admin') return true;
+  const routes = Array.isArray(allowedRoutes) ? allowedRoutes : [];
+  if (routes.includes('*')) return true;
+  return routes.some((route) => {
+    const normalized = normalizeRoute(route);
+    if (normalized === normalizedTarget) return true;
+    return normalizedTarget.startsWith(`${normalized}/`);
+  });
+};
 
 const SidebarLink = ({
   href,
   icon: Icon,
   label,
   isCollapsed,
-  currentUserRole
+  currentUserRole,
+  allowedRoutes,
 }: SidebarLinkProps) => {
   const pathname = usePathname();
   const rootActivePaths = [
@@ -45,10 +74,7 @@ const SidebarLink = ({
   ];
   const isActive = pathname === href || (pathname === "/" && rootActivePaths.includes(href));
 
-  // Hide uploads, products, and expenses for user/viewer roles
-  const restrictedLinks = ['/uploads', '/products', '/expenses'];
-  const role = currentUserRole?.toLowerCase();
-  if ((role === 'user' || role === 'viewer') && restrictedLinks.includes(href)) {
+  if (!canAccessRoute(allowedRoutes, href, currentUserRole)) {
     return null;
   }
 
@@ -133,6 +159,7 @@ const Sidebar = () => {
 
   const [currentUserRole, setCurrentUserRole] = React.useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
+  const [allowedRoutes, setAllowedRoutes] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     try {
@@ -142,9 +169,11 @@ const Sidebar = () => {
         console.log('Sidebar: User loaded from localStorage:', user);
         console.log('Sidebar: User role:', user.role);
         setCurrentUserRole(user.role || null);
+        setAllowedRoutes(Array.isArray(user.allowedRoutes) ? user.allowedRoutes.map(normalizeRoute) : []);
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
+        setAllowedRoutes([]);
       }
     } catch {
       setIsLoggedIn(false);
@@ -158,10 +187,12 @@ const Sidebar = () => {
           console.log('Sidebar: User updated:', user);
           console.log('Sidebar: Updated role:', user.role);
           setCurrentUserRole(user.role || null);
+          setAllowedRoutes(Array.isArray(user.allowedRoutes) ? user.allowedRoutes.map(normalizeRoute) : []);
           setIsLoggedIn(true);
         } else {
           setCurrentUserRole(null);
           setIsLoggedIn(false);
+          setAllowedRoutes([]);
         }
       } catch {
         setIsLoggedIn(false);
@@ -293,7 +324,8 @@ const Sidebar = () => {
         icon={Menu}
         label="Home" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+      currentUserRole={currentUserRole}
+      allowedRoutes={allowedRoutes}
       />
       <SectionLabel text="Download" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
@@ -301,28 +333,32 @@ const Sidebar = () => {
         icon={PlugIcon}
         label="Plugins" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/themes" 
         icon={FileQuestionIcon}
         label="Themes" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
               <SidebarLink 
               href="/ide" 
               icon={FileQuestionIcon}
               label="Code IDE"
               isCollapsed={isSidebarCollapsed}
-              currentUserRole={currentUserRole} 
+              currentUserRole={currentUserRole}
+              allowedRoutes={allowedRoutes}
             />
         <SidebarLink 
         href="/uploads" 
         icon={DrumstickIcon}
         label="Uploads" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
       <SectionLabel text="My Stuff" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
@@ -330,35 +366,40 @@ const Sidebar = () => {
         icon={Layout}
         label="My Dashboard" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/inventory" 
         icon={Archive}
         label="My Downloads" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/products" 
         icon={Clipboard}
         label="My Products" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/profile" 
         icon={Settings}
         label="My Profile" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/expenses" 
         icon={CircleDollarSignIcon}
         label="My Contracts" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
     <SectionLabel text="Adverts" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
@@ -366,14 +407,16 @@ const Sidebar = () => {
         icon={BotIcon}
         label="Bots/Apps" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/servers" 
         icon={ServerCogIcon}
         label="Servers" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/hosting" 
@@ -387,7 +430,8 @@ const Sidebar = () => {
         icon={User}
         label="Ask a Dev" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
       <SectionLabel text="Contacts" isCollapsed={isSidebarCollapsed} />
         <SidebarLink 
@@ -395,27 +439,30 @@ const Sidebar = () => {
         icon={WebhookIcon}
         label="Support" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
         <SidebarLink 
         href="/team" 
         icon={Users2Icon}
         label="Our Team" 
         isCollapsed={isSidebarCollapsed}
-        currentUserRole={currentUserRole} 
+        currentUserRole={currentUserRole}
+        allowedRoutes={allowedRoutes}
       />
       </div>
 
       {/* Debug: Show current role */}
       {console.log('Sidebar: currentUserRole =', currentUserRole, 'Should show admin?', currentUserRole === 'Admin')}
-      {currentUserRole === 'Admin' && (
+      {canAccessRoute(allowedRoutes, '/administrator', currentUserRole) && (
         <div className="px-2 mb-4">
           <SidebarLink 
             href="/administrator" 
             icon={StarsIcon}
             label="Admin" 
             isCollapsed={isSidebarCollapsed}
-            currentUserRole={currentUserRole} 
+            currentUserRole={currentUserRole}
+            allowedRoutes={allowedRoutes}
           />
           <hr className="mt-2 border-gray-300 dark:border-gray-600" />
         </div>

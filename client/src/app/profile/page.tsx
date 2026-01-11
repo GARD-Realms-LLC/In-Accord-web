@@ -266,8 +266,11 @@ const Profile = () => {
         setMessage('Profile updated successfully!');
         setTimeout(() => setMessage(''), 3000);
 
-        // Update localStorage
+        // Update localStorage while preserving permission metadata
+        const existingUserRaw = window.localStorage.getItem('currentUser');
+        const existingUser = existingUserRaw ? JSON.parse(existingUserRaw) : {};
         const updatedUser = {
+          ...existingUser,
           id: userId,
           userId: userId,
           name: formData.name,
@@ -275,6 +278,7 @@ const Profile = () => {
           username: formData.username,
           role: formData.role,
           avatar: avatarToUse,
+          avatarUrl: avatarToUse,
         };
         console.log('Profile: Saving updatedUser to localStorage:', updatedUser);
         window.localStorage.setItem('currentUser', JSON.stringify(updatedUser));

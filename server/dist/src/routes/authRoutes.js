@@ -7,6 +7,7 @@ const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const crypto_1 = __importDefault(require("crypto"));
+const accessControl_1 = require("../config/accessControl");
 const router = (0, express_1.Router)();
 function readLocalUsers() {
     try {
@@ -109,7 +110,20 @@ router.post('/login', (req, res) => {
         // no stored password - deny login
         return res.status(403).json({ ok: false, error: 'user has no password set' });
     }
-    const user = { id: found.userId || found.id || found.id, userId: found.userId || found.id, name: found.name || found.fullName || '', email: found.email || '', username: (found.username || (found.email ? found.email.split('@')[0] : '')), role: found.role || 'User', avatarUrl: found.avatarUrl || found.avatar };
+    const normalizedRole = (0, accessControl_1.normalizeRole)(found.role || (0, accessControl_1.getDefaultRole)());
+    const allowedRoutes = (0, accessControl_1.getAllowedRoutesForRole)(normalizedRole);
+    const permissions = (0, accessControl_1.getRouteAccessMap)(normalizedRole);
+    const user = {
+        id: found.userId || found.id || found.id,
+        userId: found.userId || found.id,
+        name: found.name || found.fullName || '',
+        email: found.email || '',
+        username: found.username || (found.email ? found.email.split('@')[0] : ''),
+        role: normalizedRole,
+        avatarUrl: found.avatarUrl || found.avatar,
+        allowedRoutes,
+        permissions,
+    };
     return res.json({ ok: true, user });
 });
 // POST /logout { sessionId }
@@ -142,5 +156,12 @@ router.get('/whois', (req, res) => {
     });
     if (!found)
         return res.status(404).json({ ok: false, error: 'user not found' });
-    return res.json({ ok: true, user: found });
+    const normalizedRole = (0, accessControl_1.normalizeRole)(found.role || (0, accessControl_1.getDefaultRole)());
+    const allowedRoutes = (0, accessControl_1.getAllowedRoutesForRole)(normalizedRole);
+    const permissions = (0, accessControl_1.getRouteAccessMap)(normalizedRole);
+    return res.json({
+        ok: true,
+        user: Object.assign(Object.assign({}, found), { role: normalizedRole, allowedRoutes,
+            permissions }),
+    });
 });

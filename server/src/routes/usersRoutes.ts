@@ -2,6 +2,12 @@ import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import {
+  getAllowedRoutesForRole,
+  getRouteAccessMap,
+  normalizeRole,
+  getDefaultRole,
+} from '../config/accessControl';
 
 const router = Router();
 const dataFile = path.resolve(__dirname, '..', '..', 'data', 'users.json');
@@ -39,9 +45,18 @@ function writeUsersFile(obj: any) {
 }
 
 // GET all users (read-only)
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   const data = readUsersFile();
-  return res.json({ ok: true, users: data.users || [] });
+  const users = (Array.isArray(data.users) ? data.users : []).map((user: any) => {
+    const normalizedRole = normalizeRole(user?.role || getDefaultRole());
+    return {
+      ...user,
+      role: normalizedRole,
+      allowedRoutes: getAllowedRoutesForRole(normalizedRole),
+      permissions: getRouteAccessMap(normalizedRole),
+    };
+  });
+  return res.json({ ok: true, users });
 });
 
 // POST update password for a user: { id, passwordHash } OR { id, passwordPlain }
@@ -124,7 +139,16 @@ router.post('/upsert', (req: Request, res: Response) => {
     }
     const ok = writeUsersFile({ users });
     if (!ok) return res.status(500).json({ ok: false, error: 'failed to write' });
-    return res.json({ ok: true, user: toStore });
+
+    const normalizedRole = normalizeRole(toStore.role || getDefaultRole());
+    const responseUser = {
+      ...toStore,
+      role: normalizedRole,
+      allowedRoutes: getAllowedRoutesForRole(normalizedRole),
+      permissions: getRouteAccessMap(normalizedRole),
+    };
+
+    return res.json({ ok: true, user: responseUser });
   } catch (e) {
     console.error('[UsersRoute] upsert error', e);
     return res.status(500).json({ ok: false, error: 'internal' });

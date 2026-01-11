@@ -2,6 +2,12 @@ import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import {
+  getAllowedRoutesForRole,
+  getRouteAccessMap,
+  normalizeRole,
+  getDefaultRole,
+} from '../config/accessControl';
 
 const router = Router();
 
@@ -89,7 +95,21 @@ router.post('/login', (req: Request, res: Response) => {
     return res.status(403).json({ ok: false, error: 'user has no password set' });
   }
 
-  const user = { id: found.userId || found.id || found.id, userId: found.userId || found.id, name: found.name || found.fullName || '', email: found.email || '', username: (found.username || (found.email ? found.email.split('@')[0] : '') ), role: found.role || 'User', avatarUrl: found.avatarUrl || found.avatar };
+  const normalizedRole = normalizeRole(found.role || getDefaultRole());
+  const allowedRoutes = getAllowedRoutesForRole(normalizedRole);
+  const permissions = getRouteAccessMap(normalizedRole);
+
+  const user = {
+    id: found.userId || found.id || found.id,
+    userId: found.userId || found.id,
+    name: found.name || found.fullName || '',
+    email: found.email || '',
+    username: found.username || (found.email ? found.email.split('@')[0] : ''),
+    role: normalizedRole,
+    avatarUrl: found.avatarUrl || found.avatar,
+    allowedRoutes,
+    permissions,
+  };
   return res.json({ ok: true, user });
 });
 
@@ -118,5 +138,16 @@ router.get('/whois', (req: Request, res: Response) => {
     return false;
   });
   if (!found) return res.status(404).json({ ok: false, error: 'user not found' });
-  return res.json({ ok: true, user: found });
+  const normalizedRole = normalizeRole(found.role || getDefaultRole());
+  const allowedRoutes = getAllowedRoutesForRole(normalizedRole);
+  const permissions = getRouteAccessMap(normalizedRole);
+  return res.json({
+    ok: true,
+    user: {
+      ...found,
+      role: normalizedRole,
+      allowedRoutes,
+      permissions,
+    },
+  });
 });

@@ -7,6 +7,7 @@ const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const crypto_1 = __importDefault(require("crypto"));
+const accessControl_1 = require("../config/accessControl");
 const router = (0, express_1.Router)();
 const dataFile = path_1.default.resolve(__dirname, '..', '..', 'data', 'users.json');
 function ensureDataFile() {
@@ -44,9 +45,13 @@ function writeUsersFile(obj) {
     }
 }
 // GET all users (read-only)
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
     const data = readUsersFile();
-    return res.json({ ok: true, users: data.users || [] });
+    const users = (Array.isArray(data.users) ? data.users : []).map((user) => {
+        const normalizedRole = (0, accessControl_1.normalizeRole)((user === null || user === void 0 ? void 0 : user.role) || (0, accessControl_1.getDefaultRole)());
+        return Object.assign(Object.assign({}, user), { role: normalizedRole, allowedRoutes: (0, accessControl_1.getAllowedRoutesForRole)(normalizedRole), permissions: (0, accessControl_1.getRouteAccessMap)(normalizedRole) });
+    });
+    return res.json({ ok: true, users });
 });
 // POST update password for a user: { id, passwordHash } OR { id, passwordPlain }
 router.post('/password', (req, res) => {
@@ -128,7 +133,9 @@ router.post('/upsert', (req, res) => {
         const ok = writeUsersFile({ users });
         if (!ok)
             return res.status(500).json({ ok: false, error: 'failed to write' });
-        return res.json({ ok: true, user: toStore });
+        const normalizedRole = (0, accessControl_1.normalizeRole)(toStore.role || (0, accessControl_1.getDefaultRole)());
+        const responseUser = Object.assign(Object.assign({}, toStore), { role: normalizedRole, allowedRoutes: (0, accessControl_1.getAllowedRoutesForRole)(normalizedRole), permissions: (0, accessControl_1.getRouteAccessMap)(normalizedRole) });
+        return res.json({ ok: true, user: responseUser });
     }
     catch (e) {
         console.error('[UsersRoute] upsert error', e);

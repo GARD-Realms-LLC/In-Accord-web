@@ -322,6 +322,52 @@ interface TeamMember {
   discord?: string;
 }
 
+interface PermissionOption {
+  value: string;
+  label: string;
+}
+
+const ROUTE_PERMISSION_LABELS: Record<string, string> = {
+  '/': 'Landing Page',
+  '/home': 'Home',
+  '/plugins': 'Plugins',
+  '/themes': 'Themes',
+  '/ide': 'Code IDE',
+  '/uploads': 'Uploads',
+  '/dashboard': 'Dashboard',
+  '/inventory': 'Inventory',
+  '/products': 'Products',
+  '/profile': 'Profile',
+  '/expenses': 'Expenses',
+  '/bots': 'Bots & Apps',
+  '/servers': 'Servers',
+  '/hosting': 'Hosting',
+  '/users': 'Users',
+  '/support': 'Support',
+  '/team': 'Team',
+  '/administrator': 'Administrator',
+};
+
+const LEGACY_PERMISSION_LABELS: Record<string, string> = {
+  view_dashboard: 'View Dashboard (Legacy)',
+  manage_users: 'Manage Users (Legacy)',
+  edit_products: 'Edit Products (Legacy)',
+  view_reports: 'View Reports (Legacy)',
+  manage_backups: 'Manage Backups (Legacy)',
+  admin_settings: 'Admin Settings (Legacy)',
+};
+
+const formatPermissionLabel = (permission: string): string => {
+  if (ROUTE_PERMISSION_LABELS[permission]) {
+    return `Access ${ROUTE_PERMISSION_LABELS[permission]} (${permission})`;
+  }
+  if (LEGACY_PERMISSION_LABELS[permission]) {
+    return LEGACY_PERMISSION_LABELS[permission];
+  }
+  const cleaned = permission.replace(/[_-]+/g, ' ');
+  return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 const initialUsers: User[] = [
   { id: 'u1', name: 'Doc Cowles', username: 'doc', password: 'password', avatarUrl: '', email: 'doc@example.com', role: 'Admin', status: 'Active', createdAt: '2024-01-10', passwordExpiresAt: '2025-01-10' },
   { id: 'u2', name: 'Alice Johnson', username: 'alice', password: 'password', avatarUrl: '', email: 'alice@example.com', role: 'Manager', status: 'Active', createdAt: '2025-05-02', passwordExpiresAt: '2026-05-02' },
@@ -1101,15 +1147,23 @@ const Administrator = (props: Props) => {
       } catch { return []; }
     });
 
-    // Permissions options (example set)
-    const allPermissions = [
-      'view_dashboard',
-      'manage_users',
-      'edit_products',
-      'view_reports',
-      'manage_backups',
-      'admin_settings',
-    ];
+    // Permissions options (legacy + route-based access controls)
+    const permissionOptions = useMemo<PermissionOption[]>(() => {
+      const legacyValues = Object.keys(LEGACY_PERMISSION_LABELS);
+      const routeValues = Object.keys(ROUTE_PERMISSION_LABELS);
+      const existingValues = groups.flatMap((group) => group.permissions ?? []);
+      const combined = [...legacyValues, ...routeValues, ...existingValues];
+      const seen = new Set<string>();
+      const options: PermissionOption[] = [];
+
+      for (const value of combined) {
+        if (typeof value !== 'string' || seen.has(value)) continue;
+        seen.add(value);
+        options.push({ value, label: formatPermissionLabel(value) });
+      }
+
+      return options.sort((a, b) => a.label.localeCompare(b.label));
+    }, [groups]);
 
     useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('user_groups', JSON.stringify(groups)); } catch {} }, [groups]);
 
@@ -2391,11 +2445,21 @@ const Administrator = (props: Props) => {
                     </div>
 
                     <div className="text-sm font-medium mt-3">Permissions</div>
-                    <div className="mt-2 max-h-32 overflow-auto grid grid-cols-1 gap-2">
-                      {allPermissions.map(p => (
-                        <label key={p} className="flex items-center gap-2 text-sm">
-                          <input type="checkbox" checked={newGroupPermissions.includes(p)} onChange={() => setNewGroupPermissions(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])} />
-                          <span>{p}</span>
+                    <div className="mt-2 max-h-[10.4rem] overflow-auto grid grid-cols-1 gap-2">
+                      {permissionOptions.map((option) => (
+                        <label key={option.value} className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={newGroupPermissions.includes(option.value)}
+                            onChange={() =>
+                              setNewGroupPermissions((prev) =>
+                                prev.includes(option.value)
+                                  ? prev.filter((value) => value !== option.value)
+                                  : [...prev, option.value]
+                              )
+                            }
+                          />
+                          <span>{option.label}</span>
                         </label>
                       ))}
                     </div>
@@ -2434,7 +2498,7 @@ const Administrator = (props: Props) => {
                               <input value={editingGroupDraft?.description ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, description: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" placeholder="Description" />
                             </td>
                             <td className="px-3 py-2">
-                              <div className="max-h-24 overflow-auto flex flex-col gap-1">
+                              <div className="max-h-[7.8rem] overflow-auto flex flex-col gap-1">
                                 {users.map(u => (
                                   <label key={u.id} className="flex items-center gap-2 text-xs">
                                     <input type="checkbox" checked={editingGroupDraft?.members.includes(u.id) ?? false} onChange={() => setEditingGroupDraft(prev => prev ? { ...prev, members: prev.members.includes(u.id) ? prev.members.filter(x => x !== u.id) : [...prev.members, u.id] } : prev)} />
@@ -2445,10 +2509,25 @@ const Administrator = (props: Props) => {
                             </td>
                             <td className="px-3 py-2">
                               <div className="max-h-24 overflow-auto flex flex-col gap-1">
-                                {allPermissions.map(p => (
-                                  <label key={p} className="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" checked={editingGroupDraft?.permissions?.includes(p) ?? false} onChange={() => setEditingGroupDraft(prev => prev ? { ...prev, permissions: prev.permissions?.includes(p) ? prev.permissions.filter(x => x !== p) : [...(prev.permissions || []), p] } : prev)} />
-                                    <span>{p}</span>
+                                {permissionOptions.map((option) => (
+                                  <label key={option.value} className="flex items-center gap-2 text-xs">
+                                    <input
+                                      type="checkbox"
+                                      checked={editingGroupDraft?.permissions?.includes(option.value) ?? false}
+                                      onChange={() =>
+                                        setEditingGroupDraft((prev) =>
+                                          prev
+                                            ? {
+                                                ...prev,
+                                                permissions: prev.permissions?.includes(option.value)
+                                                  ? prev.permissions.filter((value) => value !== option.value)
+                                                  : [...(prev.permissions || []), option.value],
+                                              }
+                                            : prev
+                                        )
+                                      }
+                                    />
+                                    <span>{option.label}</span>
                                   </label>
                                 ))}
                               </div>
@@ -2471,7 +2550,13 @@ const Administrator = (props: Props) => {
                             </td>
                             <td className="px-3 py-2">
                               <div className="flex flex-wrap gap-1">
-                                {g.permissions && g.permissions.length > 0 ? g.permissions.map(p => <span key={p} className="px-2 py-1 bg-blue-50 dark:bg-blue-900 border rounded text-xs">{p}</span>) : <span className="italic text-gray-400">None</span>}
+                                {g.permissions && g.permissions.length > 0
+                                  ? g.permissions.map((value) => (
+                                      <span key={value} className="px-2 py-1 bg-blue-50 dark:bg-blue-900 border rounded text-xs">
+                                        {formatPermissionLabel(value)}
+                                      </span>
+                                    ))
+                                  : <span className="italic text-gray-400">None</span>}
                               </div>
                             </td>
                             <td className="px-3 py-2">

@@ -9,6 +9,28 @@ import LoginModal from './LoginModal';
 import { useRouter } from 'next/navigation';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+type CurrentUserState = {
+  id?: string;
+  userId?: string;
+  name?: string;
+  email?: string;
+  username?: string;
+  role?: string;
+  avatar?: string;
+  avatarUrl?: string;
+  allowedRoutes?: string[];
+  permissions?: Record<string, boolean>;
+};
+
+const normalizeRoute = (route: string): string => {
+  if (!route) return '/';
+  const trimmed = route.trim();
+  if (trimmed === '') return '/';
+  const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  const withoutTrailing = normalized.replace(/\/+$/, '');
+  return withoutTrailing === '' ? '/' : withoutTrailing;
+};
+
   const Navbar = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
@@ -19,11 +41,18 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
     const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
 
   // Simple local auth state for UI (persisted to localStorage)
-  const [currentUser, setCurrentUser] = useState<{ id?: string; userId?: string; name?: string; email?: string; username?: string; role?: string; avatar?: string } | null>(() => {
+  const [currentUser, setCurrentUser] = useState<CurrentUserState | null>(() => {
     try {
       if (typeof window === 'undefined') return null;
       const raw = localStorage.getItem('currentUser');
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.allowedRoutes)) {
+        parsed.allowedRoutes = parsed.allowedRoutes.map((route: any) =>
+          typeof route === 'string' ? normalizeRoute(route) : route
+        );
+      }
+      return parsed;
     } catch {
       return null;
     }
@@ -35,7 +64,17 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
       try {
         const raw = localStorage.getItem('currentUser');
         const updated = raw ? JSON.parse(raw) : null;
-        setCurrentUser(updated);
+        const sanitized = updated
+          ? {
+              ...updated,
+              allowedRoutes: Array.isArray(updated.allowedRoutes)
+                ? updated.allowedRoutes.map((route: any) =>
+                    typeof route === 'string' ? normalizeRoute(route) : route
+                  )
+                : updated.allowedRoutes,
+            }
+          : null;
+        setCurrentUser(sanitized);
         console.log('Navbar: userUpdated event received, updated user:', updated);
       } catch (e) {
         console.error('Navbar: Error parsing currentUser from localStorage:', e);
@@ -108,14 +147,26 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
         }
       } catch (e) { console.warn('Failed to create session', e); }
       
-      const fullUser = { 
+      const safeAllowedRoutes = Array.isArray(user.allowedRoutes)
+        ? user.allowedRoutes.map((route: any) => (typeof route === 'string' ? normalizeRoute(route) : ''))
+        : [];
+      const safePermissions = (user.permissions && typeof user.permissions === 'object')
+        ? Object.fromEntries(
+            Object.entries(user.permissions as Record<string, unknown>).map(([key, value]) => [key, Boolean(value)])
+          ) as Record<string, boolean>
+        : {};
+
+      const fullUser: CurrentUserState = { 
         id: user.id || user.userId, 
         userId: user.id || user.userId, 
         name: user.name || name, 
         username: user.username || name, 
         email: user.email, 
         role: user.role || 'User', 
-        avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}` 
+        avatar: user.avatar || user.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || name)}`,
+        avatarUrl: user.avatarUrl,
+        allowedRoutes: safeAllowedRoutes.filter(Boolean),
+        permissions: safePermissions,
       };
       
       console.log('Setting currentUser:', fullUser);
