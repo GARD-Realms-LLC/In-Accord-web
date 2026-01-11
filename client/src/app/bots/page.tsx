@@ -197,6 +197,18 @@ const BotsPage = () => {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [roleLabel, setRoleLabel] = useState<string>("");
   const [canManage, setCanManage] = useState(false);
+  const [currentUserIdentity, setCurrentUserIdentity] = useState<string | null>(null);
+  const [currentUserIdentityKey, setCurrentUserIdentityKey] = useState<string | null>(null);
+
+  const normalizeIdentity = (value?: string | null) =>
+    typeof value === "string" ? value.trim().toLowerCase() : "";
+
+  const isAdOwner = (ad: BotAd) => {
+    if (!currentUserIdentityKey) return false;
+    return normalizeIdentity(ad.steward) === currentUserIdentityKey;
+  };
+
+  const canManageAd = (ad: BotAd) => canManage || isAdOwner(ad);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -216,6 +228,8 @@ const BotsPage = () => {
         if (!raw) {
           setRoleLabel("");
           setCanManage(false);
+          setCurrentUserIdentity(null);
+          setCurrentUserIdentityKey(null);
           return;
         }
 
@@ -226,9 +240,26 @@ const BotsPage = () => {
 
         setRoleLabel(formatRoleLabel(parsed));
         setCanManage(hasAdmin || hasBots);
+
+        const identityCandidate = [
+          typeof parsed?.name === "string" ? parsed.name : undefined,
+          typeof (parsed as { email?: unknown })?.email === "string" ? (parsed as { email?: string }).email : undefined,
+          typeof (parsed as { username?: unknown })?.username === "string" ? (parsed as { username?: string }).username : undefined,
+        ].find((value) => value && value.trim().length);
+
+        if (identityCandidate) {
+          const trimmed = identityCandidate.trim();
+          setCurrentUserIdentity(trimmed);
+          setCurrentUserIdentityKey(trimmed.toLowerCase());
+        } else {
+          setCurrentUserIdentity(null);
+          setCurrentUserIdentityKey(null);
+        }
       } catch {
         setRoleLabel("");
         setCanManage(false);
+        setCurrentUserIdentity(null);
+        setCurrentUserIdentityKey(null);
       }
     };
 
@@ -280,7 +311,16 @@ const BotsPage = () => {
 
     const timestamp = new Date().toISOString();
 
+    const stewardIdentity = currentUserIdentity || roleLabel || "Bot steward";
+
     if (editingId) {
+      const targetAd = ads.find((ad) => ad.id === editingId);
+      if (!targetAd) return;
+      if (!canManageAd(targetAd)) {
+        setStatusMessage("You can only update adverts you created.");
+        return;
+      }
+
       setAds((prev) =>
         prev.map((ad) => {
           if (ad.id !== editingId) return ad;
@@ -296,7 +336,7 @@ const BotsPage = () => {
             ctaUrl: form.ctaUrl.trim(),
             contact: form.contact.trim() || undefined,
             updatedAt: timestamp,
-            steward: roleLabel || "Bot steward",
+            steward: ad.steward ?? stewardIdentity,
           };
         })
       );
@@ -316,7 +356,7 @@ const BotsPage = () => {
         isSpotlight: false,
         createdAt: timestamp,
         updatedAt: timestamp,
-        steward: roleLabel || "Bot steward",
+        steward: stewardIdentity,
       };
       setAds((prev) => [newAd, ...prev]);
       setStatusMessage("New Discord bot/app advertisement published.");
@@ -326,7 +366,10 @@ const BotsPage = () => {
   };
 
   const handleEdit = (ad: BotAd) => {
-    if (!canManage) return;
+    if (!canManageAd(ad)) {
+      setStatusMessage("You can only manage adverts you created.");
+      return;
+    }
     setEditingId(ad.id);
     setForm({
       builderName: ad.builderName,
@@ -342,7 +385,12 @@ const BotsPage = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (!canManage) return;
+    const target = ads.find((ad) => ad.id === id);
+    if (!target) return;
+    if (!canManageAd(target)) {
+      setStatusMessage("You can only remove adverts you created.");
+      return;
+    }
     if (!confirm("Remove this Discord bot/app advertisement?")) return;
     setAds((prev) => prev.filter((ad) => ad.id !== id));
     setStatusMessage("Advertisement removed.");
@@ -350,7 +398,12 @@ const BotsPage = () => {
   };
 
   const toggleSpotlight = (id: string) => {
-    if (!canManage) return;
+    const target = ads.find((ad) => ad.id === id);
+    if (!target) return;
+    if (!canManageAd(target)) {
+      setStatusMessage("You can only update spotlight status on adverts you created.");
+      return;
+    }
     setAds((prev) =>
       prev.map((ad) => {
         if (ad.id !== id) return ad;
@@ -624,36 +677,35 @@ const BotsPage = () => {
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="text-xs text-gray-500 dark:text-gray-400">Managed by {ad.steward || "Unknown"}</div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-                    onClick={() => handleEdit(ad)}
-                    disabled={!canManage}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-500/60 dark:text-red-300 dark:hover:bg-red-950/40"
-                    onClick={() => handleDelete(ad.id)}
-                    disabled={!canManage}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    type="button"
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60 ${
-                      ad.isSpotlight
-                        ? "border border-amber-300 bg-amber-100 text-amber-700 hover:bg-amber-50 dark:border-amber-400/60 dark:bg-amber-900/20 dark:text-amber-200"
-                        : "border border-gray-300/text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
-                    }`}
-                    onClick={() => toggleSpotlight(ad.id)}
-                    disabled={!canManage}
-                  >
-                    {ad.isSpotlight ? "Remove spotlight" : "Mark spotlight"}
-                  </button>
-                </div>
+                {canManageAd(ad) && (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                      onClick={() => handleEdit(ad)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 dark:border-red-500/60 dark:text-red-300 dark:hover:bg-red-950/40"
+                      onClick={() => handleDelete(ad.id)}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      type="button"
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
+                        ad.isSpotlight
+                          ? "border border-amber-300 bg-amber-100 text-amber-700 hover:bg-amber-50 dark:border-amber-400/60 dark:bg-amber-900/20 dark:text-amber-200"
+                          : "border border-gray-300/text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                      }`}
+                      onClick={() => toggleSpotlight(ad.id)}
+                    >
+                      {ad.isSpotlight ? "Remove spotlight" : "Mark spotlight"}
+                    </button>
+                  </div>
+                )}
               </div>
             </article>
           ))}

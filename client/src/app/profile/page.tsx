@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 
 // Use API base URL from env, or fallback to localhost:8000 for development
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -35,6 +36,141 @@ interface PasswordStrength {
     hasSpecial: boolean;
   };
 }
+
+type CanonicalBotRole = 'admin' | 'bots';
+
+type UnknownUser = {
+  role?: unknown;
+  roles?: unknown;
+  [key: string]: unknown;
+};
+
+interface BotAd {
+  id: string;
+  builderName: string;
+  tagline: string;
+  price: string;
+  highlights: string[];
+  badge?: string;
+  targetAudience?: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  contact?: string;
+  isSpotlight?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  steward?: string;
+}
+
+interface BotAdForm {
+  builderName: string;
+  tagline: string;
+  price: string;
+  highlightsText: string;
+  badge: string;
+  targetAudience: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  contact: string;
+}
+
+const BOT_AD_STORAGE_KEY = 'discord_bot_ads';
+
+const BOT_ROLE_SYNONYMS: Record<string, CanonicalBotRole> = {
+  admin: 'admin',
+  administrator: 'admin',
+  admins: 'admin',
+  superadmin: 'admin',
+  sysadmin: 'admin',
+  'system admin': 'admin',
+  'system-admin': 'admin',
+  'bot admin': 'bots',
+  'bot-admin': 'bots',
+  'bots admin': 'bots',
+  bot: 'bots',
+  bots: 'bots',
+  'bot builder': 'bots',
+  'bot builders': 'bots',
+  'bot-builder': 'bots',
+  'bot dev': 'bots',
+  'bot developer': 'bots',
+  'automation lead': 'bots',
+  automation: 'bots',
+  'bot ops': 'bots',
+  'bot-ops': 'bots',
+  'automation squad': 'bots',
+};
+
+const collectCanonicalRoles = (
+  user: UnknownUser,
+  synonyms: Record<string, CanonicalBotRole>,
+): Set<CanonicalBotRole> => {
+  const canonical = new Set<CanonicalBotRole>();
+
+  const register = (value: unknown) => {
+    if (typeof value !== 'string') return;
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return;
+
+    const accept = (candidate: string) => {
+      const mapped = synonyms[candidate];
+      if (mapped) canonical.add(mapped);
+    };
+
+    accept(normalized);
+    const tokens = normalized.split(/[^a-z0-9]+/g).filter(Boolean);
+    tokens.forEach(accept);
+  };
+
+  register(user?.role);
+  if (Array.isArray(user?.roles)) {
+    user.roles.forEach(register);
+  }
+
+  return canonical;
+};
+
+const formatRoleLabel = (user: UnknownUser): string => {
+  if (Array.isArray(user?.roles) && user.roles.length) {
+    return user.roles
+      .filter((role) => typeof role === 'string' && role.trim().length)
+      .join(', ');
+  }
+  if (typeof user?.role === 'string' && user.role.trim().length) {
+    return user.role;
+  }
+  return '';
+};
+
+const normalizeIdentity = (value?: string | null) =>
+  typeof value === 'string' ? value.trim().toLowerCase() : '';
+
+const emptyBotAdForm: BotAdForm = {
+  builderName: '',
+  tagline: '',
+  price: '',
+  highlightsText: '',
+  badge: '',
+  targetAudience: '',
+  ctaLabel: '',
+  ctaUrl: '',
+  contact: '',
+};
+
+const generateBotAdId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `bot-ad-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const formatBotAdTimestamp = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleString();
+  } catch {
+    return iso;
+  }
+};
 
 const checkPasswordStrength = (pwd: string): PasswordStrength => {
   const rules = {
@@ -77,6 +213,17 @@ const Profile = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [botAdForm, setBotAdForm] = useState<BotAdForm>(emptyBotAdForm);
+  const [botStatusMessage, setBotStatusMessage] = useState<string | null>(null);
+  const [botRoleLabel, setBotRoleLabel] = useState('');
+  const [canPublishBotAd, setCanPublishBotAd] = useState(false);
+  const [botIdentity, setBotIdentity] = useState<string | null>(null);
+  const [editingBotAdId, setEditingBotAdId] = useState<string | null>(null);
+  const [userBotAds, setUserBotAds] = useState<BotAd[]>([]);
+  const resetBotAdForm = useCallback(() => {
+    setBotAdForm(emptyBotAdForm);
+    setEditingBotAdId(null);
+  }, []);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -158,6 +305,135 @@ const Profile = () => {
     loadProfile();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const evaluateAccess = () => {
+      try {
+        const raw = window.localStorage.getItem('currentUser');
+        let parsedUser: UnknownUser = raw ? JSON.parse(raw) : {};
+
+        if (!raw && profile) {
+          parsedUser = {
+            role: profile.role,
+            roles: (profile as UnknownUser)?.roles,
+            name: profile.name,
+            email: profile.email,
+            username: profile.username,
+          } as UnknownUser;
+        }
+
+        const canonical = collectCanonicalRoles(parsedUser, BOT_ROLE_SYNONYMS);
+        const hasAdmin = canonical.has('admin');
+        const hasBots = canonical.has('bots');
+
+        setCanPublishBotAd(hasAdmin || hasBots);
+        const formattedRole = formatRoleLabel(parsedUser) || (typeof profile?.role === 'string' ? profile.role : '');
+        setBotRoleLabel(formattedRole);
+
+        const identityCandidate = [
+          typeof (parsedUser as { name?: unknown })?.name === 'string' ? (parsedUser as { name?: string }).name : undefined,
+          typeof (parsedUser as { email?: unknown })?.email === 'string' ? (parsedUser as { email?: string }).email : undefined,
+          typeof (parsedUser as { username?: unknown })?.username === 'string' ? (parsedUser as { username?: string }).username : undefined,
+          typeof profile?.name === 'string' ? profile.name : undefined,
+          typeof profile?.email === 'string' ? profile.email : undefined,
+        ].find((value) => value && value.trim().length);
+
+        if (identityCandidate) {
+          const trimmed = identityCandidate.trim();
+          const normalized = normalizeIdentity(trimmed);
+          setBotIdentity(normalized ? trimmed : null);
+        } else {
+          setBotIdentity(null);
+        }
+      } catch {
+        setCanPublishBotAd(false);
+        setBotRoleLabel('');
+        setBotIdentity(null);
+      }
+    };
+
+    evaluateAccess();
+
+    const authEvents = ['userUpdated', 'storage', 'sessionCreated', 'logout'] as const;
+    authEvents.forEach((event) => window.addEventListener(event, evaluateAccess));
+    return () => {
+      authEvents.forEach((event) => window.removeEventListener(event, evaluateAccess));
+    };
+  }, [profile]);
+
+  useEffect(() => {
+    if (!botStatusMessage) return;
+    const timeout = window.setTimeout(() => setBotStatusMessage(null), 3500);
+    return () => window.clearTimeout(timeout);
+  }, [botStatusMessage]);
+
+  const identityKeys = useMemo(() => {
+    const candidates = [
+      botIdentity,
+      profile?.name,
+      profile?.email,
+      profile?.username,
+      profile?.discordLogin,
+    ];
+
+    const keys = new Set<string>();
+    candidates.forEach((value) => {
+      const normalized = normalizeIdentity(value);
+      if (normalized) keys.add(normalized);
+    });
+
+    return Array.from(keys);
+  }, [botIdentity, profile]);
+
+  const isBotAdOwner = useCallback(
+    (ad: BotAd) => {
+      const stewardKey = normalizeIdentity(ad.steward);
+      if (!stewardKey) return false;
+      return identityKeys.includes(stewardKey);
+    },
+    [identityKeys]
+  );
+
+  const refreshUserBotAds = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    if (!identityKeys.length) {
+      setUserBotAds([]);
+      return;
+    }
+
+    try {
+      const raw = window.localStorage.getItem(BOT_AD_STORAGE_KEY);
+      if (!raw) {
+        setUserBotAds([]);
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        setUserBotAds([]);
+        return;
+      }
+
+      const filtered = (parsed as BotAd[])
+        .filter(isBotAdOwner)
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+      setUserBotAds(filtered);
+    } catch {
+      setUserBotAds([]);
+    }
+  }, [identityKeys, isBotAdOwner]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    refreshUserBotAds();
+    window.addEventListener('botAdsUpdated', refreshUserBotAds);
+    return () => {
+      window.removeEventListener('botAdsUpdated', refreshUserBotAds);
+    };
+  }, [refreshUserBotAds]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -176,6 +452,231 @@ const Profile = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleBotAdSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (typeof window === 'undefined') return;
+
+    if (!canPublishBotAd) {
+      setBotStatusMessage('You need the Admin or Bots role to publish ads.');
+      return;
+    }
+
+    const highlights = botAdForm.highlightsText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (!botAdForm.builderName.trim()) {
+      setBotStatusMessage('Builder / studio name is required.');
+      return;
+    }
+
+    if (!botAdForm.ctaLabel.trim() || !botAdForm.ctaUrl.trim()) {
+      setBotStatusMessage('CTA label and URL are required.');
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    const stewardIdentity = botIdentity || profile?.name || botRoleLabel || 'Bot steward';
+
+    let existingAds: BotAd[] = [];
+    try {
+      const raw = window.localStorage.getItem(BOT_AD_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          existingAds = parsed as BotAd[];
+        }
+      }
+    } catch {
+      existingAds = [];
+    }
+
+    let updatedAds: BotAd[];
+    let successMessage = 'Discord bot/app advertisement published!';
+
+    if (editingBotAdId) {
+      const targetAd = existingAds.find((ad) => ad.id === editingBotAdId);
+      if (!targetAd) {
+        setBotStatusMessage('Unable to locate the advertisement to update.');
+        return;
+      }
+
+      if (!isBotAdOwner(targetAd)) {
+        setBotStatusMessage('You can only edit advertisements you published.');
+        return;
+      }
+
+      updatedAds = existingAds.map((ad) => {
+        if (ad.id !== editingBotAdId) return ad;
+        return {
+          ...ad,
+          builderName: botAdForm.builderName.trim(),
+          tagline: botAdForm.tagline.trim(),
+          price: botAdForm.price.trim() || 'Custom pricing',
+          highlights,
+          badge: botAdForm.badge.trim() || undefined,
+          targetAudience: botAdForm.targetAudience.trim() || undefined,
+          ctaLabel: botAdForm.ctaLabel.trim(),
+          ctaUrl: botAdForm.ctaUrl.trim(),
+          contact: botAdForm.contact.trim() || undefined,
+          updatedAt: timestamp,
+          steward: ad.steward || stewardIdentity,
+        };
+      });
+
+      successMessage = 'Discord bot/app advertisement updated!';
+    } else {
+      const newAd: BotAd = {
+        id: generateBotAdId(),
+        builderName: botAdForm.builderName.trim(),
+        tagline: botAdForm.tagline.trim(),
+        price: botAdForm.price.trim() || 'Custom pricing',
+        highlights,
+        badge: botAdForm.badge.trim() || undefined,
+        targetAudience: botAdForm.targetAudience.trim() || undefined,
+        ctaLabel: botAdForm.ctaLabel.trim(),
+        ctaUrl: botAdForm.ctaUrl.trim(),
+        contact: botAdForm.contact.trim() || undefined,
+        isSpotlight: false,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        steward: stewardIdentity,
+      };
+
+      updatedAds = [newAd, ...existingAds];
+    }
+
+    try {
+      window.localStorage.setItem(BOT_AD_STORAGE_KEY, JSON.stringify(updatedAds));
+      window.dispatchEvent(new Event('botAdsUpdated'));
+    } catch {
+      setBotStatusMessage('Unable to save advertisement locally. Please check storage permissions.');
+      return;
+    }
+
+    setBotStatusMessage(successMessage);
+    resetBotAdForm();
+    refreshUserBotAds();
+  };
+
+  const handleBotAdEdit = (ad: BotAd) => {
+    if (!canPublishBotAd) {
+      setBotStatusMessage('You need the Admin or Bots role to manage advertisements.');
+      return;
+    }
+
+    if (!isBotAdOwner(ad)) {
+      setBotStatusMessage('You can only edit advertisements you published.');
+      return;
+    }
+
+    setEditingBotAdId(ad.id);
+    setBotAdForm({
+      builderName: ad.builderName,
+      tagline: ad.tagline,
+      price: ad.price,
+      highlightsText: ad.highlights.join('\n'),
+      badge: ad.badge ?? '',
+      targetAudience: ad.targetAudience ?? '',
+      ctaLabel: ad.ctaLabel,
+      ctaUrl: ad.ctaUrl,
+      contact: ad.contact ?? '',
+    });
+  };
+
+  const handleBotAdDelete = (ad: BotAd) => {
+    if (typeof window === 'undefined') return;
+
+    if (!canPublishBotAd) {
+      setBotStatusMessage('You need the Admin or Bots role to manage advertisements.');
+      return;
+    }
+
+    if (!isBotAdOwner(ad)) {
+      setBotStatusMessage('You can only delete advertisements you published.');
+      return;
+    }
+
+    if (!confirm('Remove this Discord bot/app advertisement?')) return;
+
+    let existingAds: BotAd[] = [];
+    try {
+      const raw = window.localStorage.getItem(BOT_AD_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          existingAds = parsed as BotAd[];
+        }
+      }
+    } catch {
+      existingAds = [];
+    }
+
+    const updatedAds = existingAds.filter((current) => current.id !== ad.id);
+
+    try {
+      window.localStorage.setItem(BOT_AD_STORAGE_KEY, JSON.stringify(updatedAds));
+      window.dispatchEvent(new Event('botAdsUpdated'));
+    } catch {
+      setBotStatusMessage('Unable to update advertisements in local storage.');
+      return;
+    }
+
+    if (editingBotAdId === ad.id) {
+      resetBotAdForm();
+    }
+
+    setBotStatusMessage('Advertisement removed.');
+    refreshUserBotAds();
+  };
+
+  const handleBotAdToggleSpotlight = (ad: BotAd) => {
+    if (typeof window === 'undefined') return;
+
+    if (!canPublishBotAd) {
+      setBotStatusMessage('You need the Admin or Bots role to manage advertisements.');
+      return;
+    }
+
+    if (!isBotAdOwner(ad)) {
+      setBotStatusMessage('You can only update spotlight status on advertisements you published.');
+      return;
+    }
+
+    let existingAds: BotAd[] = [];
+    try {
+      const raw = window.localStorage.getItem(BOT_AD_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          existingAds = parsed as BotAd[];
+        }
+      }
+    } catch {
+      existingAds = [];
+    }
+
+    const updatedAds = existingAds.map((current) => {
+      if (current.id !== ad.id) return current;
+      return {
+        ...current,
+        isSpotlight: !current.isSpotlight,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+
+    try {
+      window.localStorage.setItem(BOT_AD_STORAGE_KEY, JSON.stringify(updatedAds));
+      window.dispatchEvent(new Event('botAdsUpdated'));
+    } catch {
+      setBotStatusMessage('Unable to update advertisements in local storage.');
+      return;
+    }
+
+    setBotStatusMessage(ad.isSpotlight ? 'Spotlight removed.' : 'Spotlight enabled.');
+    refreshUserBotAds();
+  };
   const handleSave = async () => {
     if (!formData.name.trim()) {
       setMessage('Name is required');
@@ -838,98 +1339,302 @@ const Profile = () => {
 
       <hr className="my-10 border-t-2 border-gray-300 dark:border-gray-700" aria-hidden="true" />
 
-      <div className="mb-4" aria-hidden="true" />
-      <div className="mb-4" aria-hidden="true" />
-      <div className="mb-4" aria-hidden="true" />
+  <div className="mb-4" aria-hidden="true" />
+  <div className="mb-4" aria-hidden="true" />
 
-      <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Published Advertisement</h2>
+      <section className="mb-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Published Advertisements</h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Highlights from the Discord Bot/App creators advertising roster.
+          Manage Discord bot and app listings that sync to the Bots marketplace experience.
         </p>
       </section>
 
-      {/* Published Advertisement */}
-      <section className="mb-6 space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <section className="mb-8 space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
         <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Discord Bot/App creators advertising</h2>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Publish new automation offers, edit live placements, and keep your roster fresh. Anyone can browse; only Admin or Bots roles can publish or adjust listings.
+              Publish new automation offers that will appear on the Bots marketplace page. Listings save locally for demos and prototypes.
             </p>
           </div>
           <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1 text-sm font-medium text-indigo-700 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-200">
-            Admin
+            {botRoleLabel || 'Role not detected'}
           </span>
         </header>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="grid gap-1 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Builder / Studio name</span>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              Automation Guild
-            </p>
+        {!canPublishBotAd && (
+          <div className="rounded-xl border border-dashed border-indigo-300 bg-indigo-50/80 p-4 text-sm text-indigo-900 dark:border-indigo-500/40 dark:bg-indigo-900/20 dark:text-indigo-200">
+            <strong className="font-semibold">Restricted actions:</strong> add adverts once you have the Admin or Bots role. Browsing remains open to everyone.
           </div>
-          <div className="grid gap-1 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Price / Packaging</span>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              $199 setup + $49/mo
-            </p>
-          </div>
-          <div className="grid gap-1 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Tagline</span>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              Ship custom command suites and dashboards in days.
-            </p>
-          </div>
-          <div className="grid gap-1 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Audience</span>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              SaaS teams, community studios
-            </p>
-          </div>
-          <div className="grid gap-1 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Badge / Flag</span>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              Launch partner
-            </p>
-          </div>
-          <div className="grid gap-1 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Contact email / handle</span>
-            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              contact@studio.dev
-            </p>
-          </div>
-        </div>
+        )}
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="grid gap-2 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Highlights</span>
-            <ul className="list-disc space-y-1 rounded-lg border border-gray-200 bg-gray-50 px-5 py-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              <li>24/7 on-call support</li>
-              <li>Cross-platform dashboard builds</li>
-              <li>Auto-provisioning across regions</li>
-            </ul>
+        <form className="grid gap-6" onSubmit={handleBotAdSubmit}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">Builder / Studio name</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.builderName}
+                onChange={(event) => handleBotAdChange('builderName', event.target.value)}
+                placeholder="Automation Guild"
+                disabled={!canPublishBotAd}
+              />
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">Price / Packaging</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.price}
+                onChange={(event) => handleBotAdChange('price', event.target.value)}
+                placeholder="$199 setup + $49/mo"
+                disabled={!canPublishBotAd}
+              />
+            </label>
           </div>
-          <div className="grid gap-2 text-sm">
-            <span className="font-medium text-gray-800 dark:text-gray-200">CTA</span>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-4 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-              <p className="font-semibold">Book a build sprint</p>
-              <a
-                href="https://example.com/book"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:ring-offset-gray-900"
+
+          <label className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Tagline</span>
+            <input
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+              value={botAdForm.tagline}
+              onChange={(event) => handleBotAdChange('tagline', event.target.value)}
+              placeholder="Ship custom command suites and dashboards in days."
+              disabled={!canPublishBotAd}
+            />
+          </label>
+
+          <label className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Highlights (one per line)</span>
+            <textarea
+              className="min-h-[140px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+              value={botAdForm.highlightsText}
+              onChange={(event) => handleBotAdChange('highlightsText', event.target.value)}
+              placeholder={'24/7 on-call support\nCross-platform dashboard builds\nAuto-provisioning across regions'}
+              disabled={!canPublishBotAd}
+            />
+          </label>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">Audience</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.targetAudience}
+                onChange={(event) => handleBotAdChange('targetAudience', event.target.value)}
+                placeholder="SaaS teams, community studios"
+                disabled={!canPublishBotAd}
+              />
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">Badge / Flag</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.badge}
+                onChange={(event) => handleBotAdChange('badge', event.target.value)}
+                placeholder="Launch partner"
+                disabled={!canPublishBotAd}
+              />
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">Contact email / handle</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.contact}
+                onChange={(event) => handleBotAdChange('contact', event.target.value)}
+                placeholder="contact@studio.dev"
+                disabled={!canPublishBotAd}
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">CTA label</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.ctaLabel}
+                onChange={(event) => handleBotAdChange('ctaLabel', event.target.value)}
+                placeholder="Book a build sprint"
+                disabled={!canPublishBotAd}
+              />
+            </label>
+            <label className="grid gap-1 text-sm">
+              <span className="font-medium text-gray-800 dark:text-gray-200">CTA URL</span>
+              <input
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+                value={botAdForm.ctaUrl}
+                onChange={(event) => handleBotAdChange('ctaUrl', event.target.value)}
+                placeholder="https://example.com/book"
+                disabled={!canPublishBotAd}
+              />
+            </label>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {editingBotAdId
+                ? 'Editing an existing advertisement. Save to update the live listing.'
+                : 'Publishing creates a new advertisement that syncs to the Bots marketplace.'}
+            </div>
+            <div className="flex gap-3">
+              {editingBotAdId ? (
+                <button
+                  type="button"
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                  onClick={resetBotAdForm}
+                  disabled={!canPublishBotAd}
+                >
+                  Cancel edit
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                  onClick={resetBotAdForm}
+                  disabled={!canPublishBotAd && !botAdForm.builderName && !botAdForm.tagline && !botAdForm.highlightsText}
+                >
+                  Clear form
+                </button>
+              )}
+              <button
+                type="submit"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                disabled={!canPublishBotAd}
               >
-                Visit booking page
-              </a>
+                {editingBotAdId ? 'Save changes' : 'Publish advertisement'}
+              </button>
             </div>
           </div>
-        </div>
+        </form>
+
+        {botStatusMessage && (
+          <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-900/20 dark:text-emerald-200">
+            {botStatusMessage}
+          </div>
+        )}
 
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Publishing creates a new advertisement. Manage automation listings from the Bots dashboard when you need to refresh details.
+          Manage your listings anytime from the Bots dashboard. Only Admin or Bots roles can edit or remove live placements.
         </p>
+      </section>
+
+      <section className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Live Discord bot/app listings</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Track and adjust the listings you published. Changes here mirror what appears on the Bots marketplace page.
+            </p>
+          </div>
+          <span className="rounded-full border border-gray-200 px-4 py-1 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300">
+            {userBotAds.length} {userBotAds.length === 1 ? 'listing' : 'listings'}
+          </span>
+        </header>
+
+        {userBotAds.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-sm text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
+            Publish an advertisement above to populate your personal roster.
+          </div>
+        ) : (
+          <>
+            {!canPublishBotAd && (
+              <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-400/60 dark:bg-amber-900/20 dark:text-amber-200">
+                Buttons stay disabled until you regain the Admin or Bots role.
+              </div>
+            )}
+            <div className="grid gap-6 lg:grid-cols-2">
+              {userBotAds.map((ad) => (
+                <article
+                  key={ad.id}
+                  className={`relative flex h-full flex-col gap-5 rounded-2xl border p-6 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-900/70 ${
+                    ad.isSpotlight
+                      ? 'border-indigo-400/70 bg-indigo-50/80 dark:border-indigo-500/50 dark:bg-indigo-900/10'
+                      : 'border-gray-200 bg-white'
+                  }`}
+                >
+                  {ad.badge && (
+                    <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-600/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:border-indigo-500/40 dark:text-indigo-200">
+                      {ad.badge}
+                    </span>
+                  )}
+
+                  <div className="space-y-2">
+                    <h4 className="text-2xl font-semibold text-gray-900 dark:text-white">{ad.builderName}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{ad.tagline}</p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                      {ad.price}
+                    </span>
+                    {ad.targetAudience && (
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                        {ad.targetAudience}
+                      </span>
+                    )}
+                    {ad.contact && <span className="truncate text-gray-500 dark:text-gray-400">{ad.contact}</span>}
+                  </div>
+
+                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    {ad.highlights.map((highlight, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="mt-1 h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                    <a
+                      href={ad.ctaUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300"
+                    >
+                      {ad.ctaLabel}
+                      <span aria-hidden>→</span>
+                    </a>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Updated {formatBotAdTimestamp(ad.updatedAt)}</span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Managed by {ad.steward || 'Unknown'}</div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                        onClick={() => handleBotAdEdit(ad)}
+                        disabled={!canPublishBotAd}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-500/60 dark:text-red-300 dark:hover:bg-red-950/40"
+                        onClick={() => handleBotAdDelete(ad)}
+                        disabled={!canPublishBotAd}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        type="button"
+                        className={`rounded-lg px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+                          ad.isSpotlight
+                            ? 'border border-amber-300 bg-amber-100 text-amber-700 hover:bg-amber-50 dark:border-amber-400/60 dark:bg-amber-900/20 dark:text-amber-200'
+                            : 'border border-gray-300/text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800'
+                        }`}
+                        onClick={() => handleBotAdToggleSpotlight(ad)}
+                        disabled={!canPublishBotAd}
+                      >
+                        {ad.isSpotlight ? 'Remove spotlight' : 'Mark spotlight'}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
       </section>
     </div>
   );
