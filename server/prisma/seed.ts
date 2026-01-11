@@ -1,16 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// __filename and __dirname are available in CommonJS
 
 const prisma = new PrismaClient();
 
 async function deleteAllData(orderedFileNames: string[]) {
   const modelNames = orderedFileNames.map((fileName) => {
-    const modelName = path.basename(fileName, path.extname(fileName));
+    let modelName = path.basename(fileName, path.extname(fileName));
+    if (modelName === "permissions") return "Permission";
     return modelName.charAt(0).toUpperCase() + modelName.slice(1);
   });
 
@@ -64,7 +63,10 @@ async function main() {
   for (const fileName of insertFileNames) {
     const filePath = path.join(dataDirectory, fileName);
     const jsonData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    const modelName = path.basename(fileName, path.extname(fileName));
+
+    let modelName = path.basename(fileName, path.extname(fileName));
+    if (modelName === "permissions") modelName = "Permission";
+    else modelName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
     const model: any = prisma[modelName as keyof typeof prisma];
 
     if (!model) {
