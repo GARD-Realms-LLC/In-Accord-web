@@ -125,11 +125,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     >
       <Sidebar />
       <main
-        className={`flex flex-col flex-1 h-full py-7 px-6 bg-gray-50 dark:bg-gray-900`}
+        className={`flex flex-col flex-1 h-full px-6 bg-gray-50 dark:bg-gray-900`}
         style={{
           backgroundColor: isDarkMode ? '#111827' : '#f9fafb',
           marginLeft: 0,
-          width: '100%'
+          width: '100%',
+          paddingTop: '68px', // Height of Navbar (py-3 + px-4 + border/shadow)
+          transition: 'padding-top 0.2s, margin-left 0.2s'
         }}
       >
         <Navbar />

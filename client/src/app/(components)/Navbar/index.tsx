@@ -12,9 +12,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
   const Navbar = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
-      const isSidebarCollapsed = useAppSelector(
-        (state) => state.global.isSidebarCollapsed
-      );
+    const isSidebarCollapsed = useAppSelector((state) => state.global.isSidebarCollapsed);
+    const sidebarWidth = useAppSelector((state) => state.global.sidebarWidth);
+    const minWidth = 120;
+    const maxWidth = 320;
+    const clampedSidebarWidth = Math.min(Math.max(sidebarWidth, minWidth), maxWidth);
 
   // Simple local auth state for UI (persisted to localStorage)
   const [currentUser, setCurrentUser] = useState<{ id?: string; userId?: string; name?: string; email?: string; username?: string; role?: string; avatar?: string } | null>(() => {
@@ -159,11 +161,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
     return (
       <>
-        <div 
-          className="flex justify-between items-center w-full mb-7 px-4 py-3 rounded-lg"
+        <div
+          className="flex justify-between items-center px-4 py-3 rounded-lg fixed top-0 z-50 shadow-md transition-all"
           style={{
             backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-            color: isDarkMode ? '#f3f4f6' : '#111827'
+            color: isDarkMode ? '#f3f4f6' : '#111827',
+            left: isSidebarCollapsed ? 64 : clampedSidebarWidth,
+            width: isSidebarCollapsed ? `calc(100vw - 64px)` : `calc(100vw - ${clampedSidebarWidth}px)`,
+            maxWidth: '100vw',
+            minWidth: 0
           }}
         >
          
