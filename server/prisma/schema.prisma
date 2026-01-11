@@ -10,7 +10,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Users {
@@ -22,6 +21,13 @@ model Users {
   discordLogin  String?
   description   String?
   lastLogin     DateTime?
+  permissions   Permission[] @relation("UserPermissions")
+}
+model Permission {
+  id          String   @id
+  name        String   @unique
+  description String?
+  users       Users[]  @relation("UserPermissions")
 }
 
 model Products {

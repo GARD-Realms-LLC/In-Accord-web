@@ -31,6 +31,7 @@ async function main() {
   const dataDirectory = path.join(__dirname, "seedData");
 
   // Delete in child-first order to avoid FK constraint errors
+
   const deleteFileNames = [
     "expenseByCategory.json",
     "sales.json",
@@ -41,10 +42,12 @@ async function main() {
     "salesSummary.json",
     "purchaseSummary.json",
     "products.json",
+    "permissions.json",
   ];
 
   // Insert in parent-first order for FK dependencies
   const insertFileNames = [
+    "permissions.json",
     "products.json",
     "users.json",
     "expenseSummary.json",
