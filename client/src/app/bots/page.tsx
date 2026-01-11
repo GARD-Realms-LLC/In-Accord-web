@@ -454,10 +454,6 @@ const BotsPage = () => {
               <div className="text-3xl font-bold">{stats.spotlight}</div>
               <div className="text-sm text-blue-100">Spotlight placements</div>
             </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <div className="text-3xl font-bold">{stats.avgPrice}</div>
-              <div className="text-sm text-blue-100">Average advertised rate</div>
-            </div>
           </div>
         </div>
       </section>
