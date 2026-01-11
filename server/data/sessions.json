@@ -13,18 +13,6 @@
       }
     },
     {
-      "id": "sess-uo0dcod2",
-      "userId": "uo0dcod2",
-      "ip": "::1",
-      "since": "2026-01-10T15:56:13.913Z",
-      "user": {
-        "id": "uo0dcod2",
-        "name": "Worlds Of Wogwarts",
-        "email": "dacowles@gmail.com",
-        "username": "WorldsOfWogwarts"
-      }
-    },
-    {
       "id": "sess-uxkgeoua",
       "userId": "uxkgeoua",
       "ip": "::1",
@@ -34,6 +22,18 @@
         "name": "Doc Cowles",
         "email": "docrst@gmail.com",
         "username": "docrst"
+      }
+    },
+    {
+      "id": "sess-uo0dcod2",
+      "userId": "uo0dcod2",
+      "ip": "::1",
+      "since": "2026-01-11T00:46:46.864Z",
+      "user": {
+        "id": "uo0dcod2",
+        "name": "Worlds Of Wogwarts",
+        "email": "dacowles@gmail.com",
+        "username": "WorldsOfWogwarts"
       }
     }
   ]

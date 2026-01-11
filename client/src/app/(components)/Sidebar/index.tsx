@@ -257,7 +257,7 @@ const Sidebar = () => {
 
   // Keep the sidebar as a full-height column so the footer can sit at the bottom on tall viewports
   // Make sidebar relative so the resize handle is positioned correctly
-  const sidebarClassNames = `relative flex flex-col h-screen bg-white dark:bg-gray-800 transition-all duration-300 overflow-hidden shadow-md z-40`;
+  const sidebarClassNames = `relative flex flex-col h-screen bg-white dark:bg-gray-800 transition-all duration-300 overflow-hidden shadow-md z-40 rounded-xl`;
 
   return (
     <Tooltip.Provider>

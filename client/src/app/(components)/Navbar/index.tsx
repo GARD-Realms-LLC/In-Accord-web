@@ -162,12 +162,17 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
     return (
       <>
         <div
-          className="flex justify-between items-center px-4 py-3 rounded-lg fixed top-0 z-50 shadow-md transition-all"
+          className="flex justify-between items-center px-4 py-3 rounded-xl fixed top-0 z-50 shadow-md transition-all"
           style={{
             backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
             color: isDarkMode ? '#f3f4f6' : '#111827',
             left: isSidebarCollapsed ? 64 : clampedSidebarWidth,
-            width: isSidebarCollapsed ? `calc(100vw - 64px)` : `calc(100vw - ${clampedSidebarWidth}px)`,
+            width: isSidebarCollapsed 
+              ? `calc((100vw - 64px) * 0.95)` 
+              : `calc((100vw - ${clampedSidebarWidth}px) * 0.95)`,
+            marginLeft: isSidebarCollapsed
+              ? `calc(((100vw - 64px) * 0.05) / 2)`
+              : `calc(((100vw - ${clampedSidebarWidth}px) * 0.05) / 2)`,
             maxWidth: '100vw',
             minWidth: 0
           }}
