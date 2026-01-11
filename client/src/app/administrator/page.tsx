@@ -308,6 +308,7 @@ interface Group {
   name: string;
   members: string[]; // user ids
   description?: string;
+  permissions?: string[]; // security permissions (optional)
 }
 
 interface TeamMember {
@@ -1100,11 +1101,22 @@ const Administrator = (props: Props) => {
       } catch { return []; }
     });
 
+    // Permissions options (example set)
+    const allPermissions = [
+      'view_dashboard',
+      'manage_users',
+      'edit_products',
+      'view_reports',
+      'manage_backups',
+      'admin_settings',
+    ];
+
     useEffect(() => { try { if (typeof window !== 'undefined') localStorage.setItem('user_groups', JSON.stringify(groups)); } catch {} }, [groups]);
 
     const [newGroupName, setNewGroupName] = useState('');
     const [newGroupDesc, setNewGroupDesc] = useState('');
     const [newGroupMembers, setNewGroupMembers] = useState<string[]>([]);
+    const [newGroupPermissions, setNewGroupPermissions] = useState<string[]>([]);
 
     const toggleNewGroupMember = (userId: string) => {
       setNewGroupMembers(prev => prev.includes(userId) ? prev.filter(x => x !== userId) : [...prev, userId]);
@@ -1113,9 +1125,9 @@ const Administrator = (props: Props) => {
     const addGroup = () => {
       const name = newGroupName.trim();
       if (!name) { alert('Group name required'); return; }
-      const g: Group = { id: 'g' + Math.random().toString(36).slice(2,9), name, description: newGroupDesc, members: newGroupMembers };
+      const g: Group = { id: 'g' + Math.random().toString(36).slice(2,9), name, description: newGroupDesc, members: newGroupMembers, permissions: newGroupPermissions };
       setGroups(prev => [g, ...prev]);
-      setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]);
+      setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]); setNewGroupPermissions([]);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created Group', details: `${name} created`, status: 'Success' }, ...prev]);
     };
 
@@ -2351,86 +2363,130 @@ const Administrator = (props: Props) => {
                 </div>
               </div>
             </div>
-          {/* User Groups */}
-          <div className="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-md font-semibold text-gray-900 dark:text-white">User Groups</h4>
-              <div className="text-sm text-gray-500">Create and manage user groups and their members.</div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Group Name</label>
-                <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Sales Team" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-3">Description</label>
-                <input value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} placeholder="Optional description" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
-
-                <div className="text-sm font-medium mt-3">Members</div>
-                <div className="mt-2 max-h-40 overflow-auto grid grid-cols-1 gap-2">
-                  {users.map(u => (
-                    <label key={u.id} className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" checked={newGroupMembers.includes(u.id)} onChange={() => toggleNewGroupMember(u.id)} />
-                      <span className="text-sm">{u.name} - <span className="text-xs text-gray-500">{u.email}</span></span>
-                    </label>
-                  ))}
-                </div>
-
-                <div className="mt-3 flex gap-2">
-                  <button onClick={addGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create Group</button>
-                  <button onClick={() => { setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]); }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Clear</button>
-                </div>
+          {/* User Security Groups */}
+          <div className="mt-6">
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-md font-semibold text-gray-900 dark:text-white">User Security Groups</h4>
+                <div className="text-sm text-gray-500">View and edit user security groups. Assign users to groups for access control and permissions.</div>
               </div>
 
-              <div className="space-y-2 p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
-                {groups.length === 0 ? (
-                  <div className="text-sm text-gray-500">No groups defined.</div>
-                ) : (
-                  groups.map(g => (
-                    <div key={g.id} className="p-2 bg-white dark:bg-gray-800 border rounded">
-                      {editingGroupId === g.id ? (
-                        <div>
-                          <input value={editingGroupDraft?.name ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, name: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" />
-                          <input value={editingGroupDraft?.description ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, description: e.target.value } : prev)} className="mt-2 px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" placeholder="Description" />
+              <div className="text-xs text-blue-700 dark:text-blue-300 mb-3">Security groups can be used to manage permissions and restrict access to features or data.</div>
 
-                          <div className="text-sm font-medium mt-2">Members</div>
-                          <div className="mt-2 max-h-40 overflow-auto grid grid-cols-1 gap-2">
-                            {users.map(u => (
-                              <label key={u.id} className="flex items-center gap-2 text-sm">
-                                <input type="checkbox" checked={editingGroupDraft?.members.includes(u.id) ?? false} onChange={() => setEditingGroupDraft(prev => prev ? { ...prev, members: prev.members.includes(u.id) ? prev.members.filter(x => x !== u.id) : [...prev.members, u.id] } : prev)} />
-                                <span>{u.name}</span>
-                              </label>
-                            ))}
-                          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Group Name</label>
+                    <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Admins, Sales Team" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mt-3">Description</label>
+                    <input value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} placeholder="Optional description" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />
 
-                          <div className="mt-3 flex gap-2">
-                            <button onClick={saveEditGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Save</button>
-                            <button onClick={cancelEditGroup} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Cancel</button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium">{g.name}</div>
-                              {g.description && <div className="text-xs text-gray-500">{g.description}</div>}
-                            </div>
-                            <div className="flex gap-2">
-                              <button onClick={() => startEditGroup(g.id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded">Edit</button>
-                              <button onClick={() => deleteGroup(g.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded">Delete</button>
-                            </div>
-                          </div>
-
-                          <div className="mt-2 text-sm">
-                            <div className="text-xs text-gray-500">Members ({g.members.length}):</div>
-                            <div className="mt-1 flex flex-wrap gap-2">
-                              {g.members.map(mid => <span key={mid} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 border rounded text-xs">{users.find(u => u.id === mid)?.name ?? mid}</span>)}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                    <div className="text-sm font-medium mt-3">Group Members</div>
+                    <div className="mt-2 max-h-40 overflow-auto grid grid-cols-1 gap-2">
+                      {users.map(u => (
+                        <label key={u.id} className="flex items-center gap-2 text-sm">
+                          <input type="checkbox" checked={newGroupMembers.includes(u.id)} onChange={() => toggleNewGroupMember(u.id)} />
+                          <span className="text-sm">{u.name} - <span className="text-xs text-gray-500">{u.email}</span></span>
+                        </label>
+                      ))}
                     </div>
-                  ))
-                )}
+
+                    <div className="text-sm font-medium mt-3">Permissions</div>
+                    <div className="mt-2 max-h-32 overflow-auto grid grid-cols-1 gap-2">
+                      {allPermissions.map(p => (
+                        <label key={p} className="flex items-center gap-2 text-sm">
+                          <input type="checkbox" checked={newGroupPermissions.includes(p)} onChange={() => setNewGroupPermissions(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])} />
+                          <span>{p}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 flex gap-2">
+                      <button onClick={addGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Create Group</button>
+                      <button onClick={() => { setNewGroupName(''); setNewGroupDesc(''); setNewGroupMembers([]); setNewGroupPermissions([]); }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded">Clear</button>
+                    </div>
+                  </div>
+
+                <div className="p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
+                  <table className="w-full text-sm">
+                  <thead className="bg-gray-100 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-900 dark:text-white">Name</th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-900 dark:text-white">Description</th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-900 dark:text-white">Members</th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-900 dark:text-white">Permissions</th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-900 dark:text-white">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groups.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="text-center text-gray-500 py-4">No security groups defined.</td>
+                      </tr>
+                    )}
+                    {groups.length > 0 && groups.map(g => (
+                      <tr key={g.id} className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                        {editingGroupId === g.id ? (
+                          <>
+                            <td className="px-3 py-2">
+                              <input value={editingGroupDraft?.name ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, name: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" />
+                            </td>
+                            <td className="px-3 py-2">
+                              <input value={editingGroupDraft?.description ?? ''} onChange={e => setEditingGroupDraft(prev => prev ? { ...prev, description: e.target.value } : prev)} className="px-2 py-1 border rounded w-full bg-white dark:bg-gray-800 text-sm" placeholder="Description" />
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="max-h-24 overflow-auto flex flex-col gap-1">
+                                {users.map(u => (
+                                  <label key={u.id} className="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" checked={editingGroupDraft?.members.includes(u.id) ?? false} onChange={() => setEditingGroupDraft(prev => prev ? { ...prev, members: prev.members.includes(u.id) ? prev.members.filter(x => x !== u.id) : [...prev.members, u.id] } : prev)} />
+                                    <span>{u.name}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="max-h-24 overflow-auto flex flex-col gap-1">
+                                {allPermissions.map(p => (
+                                  <label key={p} className="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" checked={editingGroupDraft?.permissions?.includes(p) ?? false} onChange={() => setEditingGroupDraft(prev => prev ? { ...prev, permissions: prev.permissions?.includes(p) ? prev.permissions.filter(x => x !== p) : [...(prev.permissions || []), p] } : prev)} />
+                                    <span>{p}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex gap-2">
+                                <button onClick={saveEditGroup} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded">Save</button>
+                                <button onClick={cancelEditGroup} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-xs rounded">Cancel</button>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="px-3 py-2 font-medium">{g.name}</td>
+                            <td className="px-3 py-2">{g.description || <span className="italic text-gray-400">None</span>}</td>
+                            <td className="px-3 py-2">
+                              <div className="flex flex-wrap gap-1">
+                                {g.members.length === 0 ? <span className="italic text-gray-400">None</span> : g.members.map(mid => <span key={mid} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 border rounded text-xs">{users.find(u => u.id === mid)?.name ?? mid}</span>)}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex flex-wrap gap-1">
+                                {g.permissions && g.permissions.length > 0 ? g.permissions.map(p => <span key={p} className="px-2 py-1 bg-blue-50 dark:bg-blue-900 border rounded text-xs">{p}</span>) : <span className="italic text-gray-400">None</span>}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex gap-2">
+                                <button onClick={() => startEditGroup(g.id)} className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded">Edit</button>
+                                <button onClick={() => deleteGroup(g.id)} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded">Delete</button>
+                              </div>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
