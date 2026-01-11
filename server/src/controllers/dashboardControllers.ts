@@ -38,7 +38,8 @@ export const getDashboardStats = async (
             date: "desc",
            },
         });
-        const expenseByCategorySummary = expenseByCategorySummaryRaw.map((item) => ({
+        type ExpenseByCategoryRecord = (typeof expenseByCategorySummaryRaw)[number];
+        const expenseByCategorySummary = expenseByCategorySummaryRaw.map((item: ExpenseByCategoryRecord) => ({
             ...item,
             amount: item.amount.toString(),
         }));

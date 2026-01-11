@@ -418,7 +418,7 @@ const Administrator = (props: Props) => {
             }
           }
         } catch (error) {
-          console.error('Failed to load OAuth config:', error);
+          console.warn('Failed to load OAuth config:', error);
         }
       };
       
@@ -529,7 +529,7 @@ const Administrator = (props: Props) => {
           setIntegrationMessage('Failed to save configuration');
         }
       } catch (error) {
-        console.error('Save OAuth config error:', error);
+        console.warn('Save OAuth config error:', error);
         setIntegrationMessage('Error saving configuration');
       } finally {
         setIntegrationLoading(false);
@@ -566,7 +566,7 @@ const Administrator = (props: Props) => {
           alert(`Failed to test ${provider} OAuth connection`);
         }
       } catch (error) {
-        console.error(`Test ${provider} OAuth error:`, error);
+        console.warn(`Test ${provider} OAuth error:`, error);
         alert(`Error testing ${provider} OAuth connection`);
       } finally {
         setIntegrationLoading(false);
@@ -598,7 +598,7 @@ const Administrator = (props: Props) => {
           alert(`Failed to start ${provider} OAuth flow`);
         }
       } catch (error) {
-        console.error(`Open ${provider} OAuth flow error:`, error);
+        console.warn(`Open ${provider} OAuth flow error:`, error);
         alert(`Error starting ${provider} OAuth flow`);
       }
     };
@@ -614,7 +614,7 @@ const Administrator = (props: Props) => {
           alert('Failed to fetch OAuth URL');
         }
       } catch (error) {
-        console.error('Copy OAuth URL error:', error);
+        console.warn('Copy OAuth URL error:', error);
         alert('Failed to copy OAuth URL');
       }
     };
@@ -638,7 +638,7 @@ const Administrator = (props: Props) => {
         
         alert('GitHub repository changes updated successfully!');
       } catch (error) {
-        console.error('GitHub refresh error:', error);
+        console.warn('GitHub refresh error:', error);
         alert('Failed to refresh GitHub changes');
       } finally {
         setGithubRefreshing(false);
@@ -740,7 +740,7 @@ const Administrator = (props: Props) => {
           );
           if (mounted) setOnlineUsers(deduped);
         } catch (e) {
-          console.error('Failed to load sessions:', e);
+          console.warn('Failed to load sessions:', e);
         }
       })();
       return () => { mounted = false; };
@@ -1041,7 +1041,7 @@ const Administrator = (props: Props) => {
           setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Delete User Failed', details: `${toDelete?.name} deletion failed`, status: 'Error' }, ...prev]);
         }
       } catch (error) {
-        console.error('Error deleting user:', error);
+        console.warn('Error deleting user:', error);
         alert('Error deleting user. Please try again.');
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Delete User Error', details: `${toDelete?.name} deletion error`, status: 'Error' }, ...prev]);
       }
@@ -1068,7 +1068,7 @@ const Administrator = (props: Props) => {
         setTimeout(() => setShowSavedReveal(false), 8000);
         setTimeout(() => setToastVisible(false), 3000);
       } catch (e) {
-        console.error('savePasswordOnly failed', e);
+        console.warn('savePasswordOnly failed', e);
         alert('Failed to save password.');
       }
     };
@@ -1502,7 +1502,7 @@ const Administrator = (props: Props) => {
           console.warn('Backup list API returned non-OK status');
         }
       } catch (error) {
-        console.error('Failed to load backups:', error);
+        console.warn('Failed to load backups:', error);
         // Keep the default backups in state
       } finally {
         setLoadingBackups(false);
@@ -1525,7 +1525,7 @@ const Administrator = (props: Props) => {
           }
         }
       } catch (error) {
-        console.error('Failed to refresh backup logs:', error);
+        console.warn('Failed to refresh backup logs:', error);
       }
     };
 
@@ -1541,7 +1541,7 @@ const Administrator = (props: Props) => {
           }
         }
       } catch (error) {
-        console.error('Failed to load backup settings:', error);
+        console.warn('Failed to load backup settings:', error);
       }
     };
 
@@ -1598,7 +1598,7 @@ const Administrator = (props: Props) => {
           setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Backup', action: 'DR Test', details: `Mock DR test completed: Backup settings validated using ${selectedBackup} from ${backupSource}`, status: 'Success' }, ...prev]);
         }
       } catch (error) {
-        console.error('DR test error:', error);
+        console.warn('DR test error:', error);
         const now = new Date();
         const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         const recTime = '6m 08s';
@@ -1902,7 +1902,7 @@ const Administrator = (props: Props) => {
           alert('Failed to save backup settings');
         }
       } catch (error) {
-        console.error('Error saving backup settings:', error);
+        console.warn('Error saving backup settings:', error);
         alert('Error saving backup settings');
       }
     };
@@ -1931,7 +1931,7 @@ const Administrator = (props: Props) => {
           alert('R2 connection test failed');
         }
       } catch (error) {
-        console.error('Error testing R2 connection:', error);
+        console.warn('Error testing R2 connection:', error);
         alert('Error testing R2 connection');
       }
     };
@@ -1955,7 +1955,7 @@ const Administrator = (props: Props) => {
           }));
           setTeamMembers(normalized);
         } catch (e) {
-          console.error('Error loading team members:', e);
+          console.warn('Error loading team members:', e);
         }
       }
     }, []);
