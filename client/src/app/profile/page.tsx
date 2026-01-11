@@ -391,11 +391,10 @@ const Profile = () => {
   return (
     <div className="p-4 w-3/4 mx-auto">
       {/* Header */}
-      <div className="mb-4">
+      <section className="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg pb-4">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">My Profile</h1>
         <p className="text-gray-600 dark:text-gray-400">Manage your account information and preferences</p>
-      </div>
-
+      </section>
       {/* Message */}
       {message && (
         <div className={`mb-4 p-4 rounded-lg ${message.includes('successfully') ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
@@ -836,6 +835,102 @@ const Profile = () => {
           </div>
         )}
       </div>
+
+      <hr className="my-10 border-t-2 border-gray-300 dark:border-gray-700" aria-hidden="true" />
+
+      <div className="mb-4" aria-hidden="true" />
+      <div className="mb-4" aria-hidden="true" />
+      <div className="mb-4" aria-hidden="true" />
+
+      <section className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Published Advertisement</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Highlights from the Discord Bot/App creators advertising roster.
+        </p>
+      </section>
+
+      {/* Published Advertisement */}
+      <section className="mb-6 space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Discord Bot/App creators advertising</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Publish new automation offers, edit live placements, and keep your roster fresh. Anyone can browse; only Admin or Bots roles can publish or adjust listings.
+            </p>
+          </div>
+          <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1 text-sm font-medium text-indigo-700 dark:border-indigo-500/40 dark:bg-indigo-500/10 dark:text-indigo-200">
+            Admin
+          </span>
+        </header>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Builder / Studio name</span>
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              Automation Guild
+            </p>
+          </div>
+          <div className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Price / Packaging</span>
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              $199 setup + $49/mo
+            </p>
+          </div>
+          <div className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Tagline</span>
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              Ship custom command suites and dashboards in days.
+            </p>
+          </div>
+          <div className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Audience</span>
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              SaaS teams, community studios
+            </p>
+          </div>
+          <div className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Badge / Flag</span>
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              Launch partner
+            </p>
+          </div>
+          <div className="grid gap-1 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Contact email / handle</span>
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              contact@studio.dev
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-2 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">Highlights</span>
+            <ul className="list-disc space-y-1 rounded-lg border border-gray-200 bg-gray-50 px-5 py-3 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              <li>24/7 on-call support</li>
+              <li>Cross-platform dashboard builds</li>
+              <li>Auto-provisioning across regions</li>
+            </ul>
+          </div>
+          <div className="grid gap-2 text-sm">
+            <span className="font-medium text-gray-800 dark:text-gray-200">CTA</span>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-4 text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+              <p className="font-semibold">Book a build sprint</p>
+              <a
+                href="https://example.com/book"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:ring-offset-gray-900"
+              >
+                Visit booking page
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Publishing creates a new advertisement. Manage automation listings from the Bots dashboard when you need to refresh details.
+        </p>
+      </section>
     </div>
   );
 };

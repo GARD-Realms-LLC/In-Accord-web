@@ -2150,10 +2150,15 @@ const Administrator = (props: Props) => {
         )}
         {/* Section 1 */}
         <section className="border-b pb-8">
-          <h2 className="text-3xl font-bold mb-2">User Management</h2>
-          <p className="text-gray-600 mb-4">
-            Manage system users, permissions, and access control. View user activity, reset passwords, and configure role-based access levels.
-          </p>
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">Session Watchtower</h4>
+                <p className="text-sm text-emerald-800 dark:text-emerald-200/80">Track active logins in real time, boot suspicious activity, and keep uptime visibility sharp.</p>
+              </div>
+              <div className="text-xs text-emerald-800/70 dark:text-emerald-200/70">Usage snapshot updates whenever sessions refresh.</div>
+            </div>
+          </div>
 
           {/* Online Users panel (top of users list) - always visible, shows empty state when none online */}
           <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
@@ -2200,7 +2205,27 @@ const Administrator = (props: Props) => {
             )}
           </div>
 
+          <div className="p-4 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-sky-900 dark:text-sky-100">Access Control Command Center</h4>
+                <p className="text-sm text-sky-800 dark:text-sky-200/80">Oversee identities, permissions, and policy enforcement before changes reach production.</p>
+              </div>
+              <div className="text-xs text-sky-800/70 dark:text-sky-200/70">Insights refresh after every audit or credential update.</div>
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-sm mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-100">User Directory</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-200/80">Track, update, and manage every account in your workspace.</p>
+                </div>
+                <div className="text-xs text-blue-700/70 dark:text-blue-200/70">Data syncs automatically after each save.</div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Users</h3>
               <div className="flex items-center gap-2">
@@ -2420,6 +2445,16 @@ const Administrator = (props: Props) => {
           {/* User Roles */}
           <div className="mt-6">
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg shadow-sm mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <h4 className="text-lg font-semibold text-purple-900 dark:text-purple-100">Access Control Center</h4>
+                    <p className="text-sm text-purple-800 dark:text-purple-200/80">Define roles, assign members, and align permissions with your governance rules.</p>
+                  </div>
+                  <div className="text-xs text-purple-800/70 dark:text-purple-200/70">Changes take effect instantly for signed-in users.</div>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-md font-semibold text-gray-900 dark:text-white">User Roles</h4>
                 <div className="text-sm text-gray-500">View and edit user roles. Assign users to roles for access control and permissions.</div>
@@ -2580,12 +2615,22 @@ const Administrator = (props: Props) => {
 
         {/* Section 2 */}
         <section className="border-b pb-8">
-          <h2 className="text-3xl font-bold mb-2">System Configuration</h2>
-          <p className="text-gray-600 mb-4">
-            Configure system settings, manage integrations, and monitor application health.
-          </p>
-
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg shadow-sm mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h4 className="text-lg font-semibold text-amber-900 dark:text-amber-100">Platform Controls Overview</h4>
+                  <p className="text-sm text-amber-800 dark:text-amber-200/80">Tune global behavior, integrations, and branding details for the entire application.</p>
+                </div>
+                <div className="text-xs text-amber-800/70 dark:text-amber-200/70">Remember to save after each configuration change.</div>
+              </div>
+            </div>
+
+            <h2 className="text-3xl font-bold mb-2">System Configuration</h2>
+            <p className="text-gray-600 mb-4">
+              Configure system settings, manage integrations, and monitor application health.
+            </p>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Application Name</label>
@@ -2714,11 +2759,21 @@ const Administrator = (props: Props) => {
 
         {/* Section 3 */}
         <section className="border-b pb-8">
-          <h2 className="text-3xl font-bold mb-2">Security & Permissions</h2>
-          <p className="text-gray-600 mb-4">Manage authentication, two-factor settings, password policies, and access controls.</p>
-
-          {/* Security controls UI */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg shadow-sm mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                  <h4 className="text-lg font-semibold text-teal-900 dark:text-teal-100">Security Operations Hub</h4>
+                  <p className="text-sm text-teal-800 dark:text-teal-200/80">Monitor authentication posture, enforce policies, and safeguard administrator access.</p>
+                </div>
+                <div className="text-xs text-teal-800/70 dark:text-teal-200/70">Apply updates promptly to keep protections current.</div>
+              </div>
+            </div>
+
+            <h2 className="text-3xl font-bold mb-2">Security & Permissions</h2>
+            <p className="text-gray-600 mb-4">Manage authentication, two-factor settings, password policies, and access controls.</p>
+
+            {/* Security controls UI */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Authentication</h3>
@@ -2792,6 +2847,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 5 */}
         <section className="border-b pb-8">
+          <div className="p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-teal-900 dark:text-teal-100">Data Infrastructure Hub</h4>
+                <p className="text-sm text-teal-800 dark:text-teal-200/80">Oversee health, structure, and maintenance workflows for your operational database.</p>
+              </div>
+              <div className="text-xs text-teal-800/70 dark:text-teal-200/70">Insights refresh each time statistics are fetched.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">Database Management</h2>
           <p className="text-gray-600 mb-6">
             Monitor database performance, manage schemas, and optimize queries. 
@@ -3134,6 +3199,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 6 */}
         <section className="border-b pb-8">
+          <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-orange-900 dark:text-orange-100">Continuity & Safeguards</h4>
+                <p className="text-sm text-orange-800 dark:text-orange-200/80">Orchestrate backup cadence, verify restores, and keep redundancy policies aligned with business continuity goals.</p>
+              </div>
+              <div className="text-xs text-orange-800/70 dark:text-orange-200/70">Log updates capture every backup and restore event.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">Backup & Recovery</h2>
           <p className="text-gray-600 mb-6">
             Schedule automated backups to local or cloud storage, manage backup files, and test disaster recovery procedures. 
@@ -3698,6 +3773,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 7 */}
         <section className="border-b pb-8">
+          <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-indigo-900 dark:text-indigo-100">Oversight Command Center</h4>
+                <p className="text-sm text-indigo-800 dark:text-indigo-200/80">Surface key activity patterns, validate critical updates, and maintain traceability for every change.</p>
+              </div>
+              <div className="text-xs text-indigo-800/70 dark:text-indigo-200/70">Retention aligns with your compliance window.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">Audit Logs</h2>
           <p className="text-gray-600 mb-6">
             View comprehensive audit trails of all system activities and user actions. 
@@ -3932,6 +4017,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 8 */}
         <section className="border-b pb-8">
+          <div className="p-4 bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-sky-900 dark:text-sky-100">Integration Control Tower</h4>
+                <p className="text-sm text-sky-800 dark:text-sky-200/80">Coordinate providers, validate credentials, and keep external services in sync with platform operations.</p>
+              </div>
+              <div className="text-xs text-sky-800/70 dark:text-sky-200/70">Status tiles refresh whenever connections are tested.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">Integration Management</h2>
           <p className="text-gray-600 mb-6">
             Configure third-party integrations and manage API connections. 
@@ -4054,6 +4149,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 9 */}
         <section className="border-b pb-8">
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">Operations Pulse Center</h4>
+                <p className="text-sm text-emerald-800 dark:text-emerald-200/80">Observe live metrics, calibrate alerting thresholds, and keep infrastructure wellness front and center.</p>
+              </div>
+              <div className="text-xs text-emerald-800/70 dark:text-emerald-200/70">Telemetry refreshes automatically every five seconds.</div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-3xl font-bold">System Health & Monitoring</h2>
             <button 
@@ -4196,6 +4301,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 11 - GitHub Changes */}
         <section className="pb-8">
+          <div className="p-4 bg-slate-50 dark:bg-slate-900/20 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Version Control Observatory</h4>
+                <p className="text-sm text-slate-800 dark:text-slate-200/80">Track commit cadence, surface deployment-impacting updates, and keep repository activity transparent.</p>
+              </div>
+              <div className="text-xs text-slate-800/70 dark:text-slate-200/70">Feeds rely on the latest GitHub API snapshot.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">GitHub Repository Changes</h2>
           <p className="text-gray-600 mb-6">
             Track all commits and changes made to the In-Accord-web repository on GitHub.
@@ -4319,6 +4434,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 10 - Team Member Management */}
         <section className="pb-8">
+          <div className="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-rose-900 dark:text-rose-100">People Operations Suite</h4>
+                <p className="text-sm text-rose-800 dark:text-rose-200/80">Centralize roster details, streamline updates, and keep every teammate profile polished.</p>
+              </div>
+              <div className="text-xs text-rose-800/70 dark:text-rose-200/70">Changes sync instantly with the public team page.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">Team Member Management</h2>
           <p className="text-gray-600 mb-6">
             Edit and manage team member information, profile details, and contact links for all team members.
@@ -4461,6 +4586,16 @@ const Administrator = (props: Props) => {
 
         {/* Section 10 */}
         <section className="border-b pb-8">
+          <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-indigo-900 dark:text-indigo-100">Dependency Intelligence Hub</h4>
+                <p className="text-sm text-indigo-800 dark:text-indigo-200/80">Monitor version drift, validate compatibility, and keep the stack deployment-ready.</p>
+              </div>
+              <div className="text-xs text-indigo-800/70 dark:text-indigo-200/70">Auto-generated from package manifests during the last synchronization.</div>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold mb-2">Dependencies & Versions</h2>
           <p className="text-gray-600 mb-4">View all project dependencies with their current versions and last update information.</p>
 
