@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 
 const Home = (props: Props) => {
   const currentYear = new Date().getFullYear();
-
+ 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-gray-900">
       <div className="max-w-6xl mx-auto w-full px-6">
