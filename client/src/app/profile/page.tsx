@@ -15,6 +15,7 @@ interface UserProfile {
   password?: string;
   avatarUrl?: string;
   role?: string;
+  roles?: string[];
   status?: string;
   createdAt?: string;
   passwordExpiresAt?: string;
@@ -103,8 +104,40 @@ interface HostingAdForm {
   contactEmail: string;
 }
 
+interface DiscordServerAd {
+  id: string;
+  headline: string;
+  shortDescription: string;
+  pricing: string;
+  deliverables: string[];
+  badge?: string;
+  targetCommunity?: string;
+  turnaround?: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  contactDiscord?: string;
+  isFeatured?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  craftedBy?: string;
+}
+
+interface DiscordServerAdForm {
+  headline: string;
+  shortDescription: string;
+  pricing: string;
+  deliverablesText: string;
+  badge: string;
+  targetCommunity: string;
+  turnaround: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  contactDiscord: string;
+}
+
 const BOT_AD_STORAGE_KEY = 'discord_bot_ads';
 const HOSTING_AD_STORAGE_KEY = 'hosting_ads';
+const DISCORD_SERVER_AD_STORAGE_KEY = 'discord_server_creator_ads';
 
 const BOT_ROLE_SYNONYMS: Record<string, CanonicalBotRole> = {
   admin: 'admin',
@@ -216,6 +249,19 @@ const emptyHostingAdForm: HostingAdForm = {
   contactEmail: '',
 };
 
+const emptyDiscordServerForm: DiscordServerAdForm = {
+  headline: '',
+  shortDescription: '',
+  pricing: '',
+  deliverablesText: '',
+  badge: '',
+  targetCommunity: '',
+  turnaround: '',
+  ctaLabel: '',
+  ctaUrl: '',
+  contactDiscord: '',
+};
+
 const generateBotAdId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -228,6 +274,13 @@ const generateHostingAdId = () => {
     return crypto.randomUUID();
   }
   return `hosting-ad-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const generateDiscordServerAdId = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `discord-ad-${Math.random().toString(36).slice(2, 10)}`;
 };
 
 const formatBotAdTimestamp = (iso: string) => {
@@ -292,6 +345,13 @@ const Profile = () => {
   const [canPublishHostingAd, setCanPublishHostingAd] = useState(false);
   const [editingHostingAdId, setEditingHostingAdId] = useState<string | null>(null);
   const [hostingAds, setHostingAds] = useState<HostingAd[]>([]);
+  const [discordForm, setDiscordForm] = useState<DiscordServerAdForm>(emptyDiscordServerForm);
+  const [discordStatusMessage, setDiscordStatusMessage] = useState<string | null>(null);
+  const [discordRoleLabel, setDiscordRoleLabel] = useState('');
+  const [canManageDiscordAds, setCanManageDiscordAds] = useState(false);
+  const [editingDiscordAdId, setEditingDiscordAdId] = useState<string | null>(null);
+  const [discordAds, setDiscordAds] = useState<DiscordServerAd[]>([]);
+  const currentYear = new Date().getFullYear();
   const resetBotAdForm = useCallback(() => {
     setBotAdForm(emptyBotAdForm);
     setEditingBotAdId(null);
@@ -299,6 +359,10 @@ const Profile = () => {
   const resetHostingForm = useCallback(() => {
     setHostingForm(emptyHostingAdForm);
     setEditingHostingAdId(null);
+  }, []);
+  const resetDiscordForm = useCallback(() => {
+    setDiscordForm(emptyDiscordServerForm);
+    setEditingDiscordAdId(null);
   }, []);
 
   const hostingAdsFromStorage = (): HostingAd[] => {
@@ -319,8 +383,34 @@ const Profile = () => {
     window.dispatchEvent(new Event('hostingAdsUpdated'));
   };
 
+  const discordAdsFromStorage = (): DiscordServerAd[] => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = window.localStorage.getItem(DISCORD_SERVER_AD_STORAGE_KEY);
+      if (!stored) return [];
+      const parsed = JSON.parse(stored) as DiscordServerAd[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const setDiscordAdsInStorage = (ads: DiscordServerAd[]) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(DISCORD_SERVER_AD_STORAGE_KEY, JSON.stringify(ads));
+    window.dispatchEvent(new Event('discordServerAdsUpdated'));
+  };
+
   const handleHostingFormChange = (field: keyof HostingAdForm, value: string) => {
     setHostingForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDiscordFormChange = (field: keyof DiscordServerAdForm, value: string) => {
+    setDiscordForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBotAdChange = (field: keyof BotAdForm, value: string) => {
+    setBotAdForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const resolveHostingManager = () => {
@@ -423,13 +513,14 @@ const Profile = () => {
         let parsedUser: UnknownUser = raw ? JSON.parse(raw) : {};
 
         if (!raw && profile) {
-          parsedUser = {
+          const fallbackUser: UnknownUser = {
             role: profile.role,
-            roles: (profile as UnknownUser)?.roles,
+            roles: profile.roles,
             name: profile.name,
             email: profile.email,
             username: profile.username,
-          } as UnknownUser;
+          };
+          parsedUser = fallbackUser;
         }
 
         const canonical = collectCanonicalRoles(parsedUser, BOT_ROLE_SYNONYMS);
@@ -437,12 +528,23 @@ const Profile = () => {
         const hasBots = canonical.has('bots');
         const roleTokens = collectRoleTokens(parsedUser);
         const hasHosting = roleTokens.has('hosting') || roleTokens.has('host');
+        const hasDiscord = roleTokens.has('discord');
+        const hasCreator = roleTokens.has('creator') || roleTokens.has('creators');
 
         setCanPublishBotAd(hasAdmin || hasBots);
         const formattedRole = formatRoleLabel(parsedUser) || (typeof profile?.role === 'string' ? profile.role : '');
         setBotRoleLabel(formattedRole);
         setCanPublishHostingAd(hasAdmin || hasHosting);
         setHostingRoleLabel(formattedRole);
+        const discordLabel =
+          formattedRole ||
+          (roleTokens.size
+            ? Array.from(roleTokens)
+                .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
+                .join(', ')
+            : '');
+        setCanManageDiscordAds(hasAdmin || hasDiscord || hasCreator);
+        setDiscordRoleLabel(discordLabel);
 
         const identityCandidate = [
           typeof (parsedUser as { name?: unknown })?.name === 'string' ? (parsedUser as { name?: string }).name : undefined,
@@ -465,6 +567,8 @@ const Profile = () => {
         setBotIdentity(null);
         setCanPublishHostingAd(false);
         setHostingRoleLabel('');
+        setCanManageDiscordAds(false);
+        setDiscordRoleLabel('');
       }
     };
 
@@ -489,6 +593,12 @@ const Profile = () => {
     return () => window.clearTimeout(timeout);
   }, [hostingStatusMessage]);
 
+  useEffect(() => {
+    if (!discordStatusMessage) return;
+    const timeout = window.setTimeout(() => setDiscordStatusMessage(null), 3500);
+    return () => window.clearTimeout(timeout);
+  }, [discordStatusMessage]);
+
   const identityKeys = useMemo(() => {
     const candidates = [
       botIdentity,
@@ -511,6 +621,10 @@ const Profile = () => {
     setHostingAds(hostingAdsFromStorage());
   }, []);
 
+  const refreshDiscordAds = useCallback(() => {
+    setDiscordAds(discordAdsFromStorage());
+  }, []);
+
   useEffect(() => {
     refreshHostingAds();
     if (typeof window === 'undefined') return;
@@ -519,9 +633,21 @@ const Profile = () => {
     return () => window.removeEventListener('hostingAdsUpdated', handler);
   }, [refreshHostingAds]);
 
+  useEffect(() => {
+    refreshDiscordAds();
+    if (typeof window === 'undefined') return;
+    const handler = () => refreshDiscordAds();
+    window.addEventListener('discordServerAdsUpdated', handler);
+    return () => window.removeEventListener('discordServerAdsUpdated', handler);
+  }, [refreshDiscordAds]);
+
   const sortedHostingAds = useMemo(() => {
     return [...hostingAds].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
   }, [hostingAds]);
+
+  const sortedDiscordAds = useMemo(() => {
+    return [...discordAds].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+  }, [discordAds]);
 
   const isBotAdOwner = useCallback(
     (ad: BotAd) => {
@@ -944,6 +1070,154 @@ const Profile = () => {
     const target = updated.find((ad) => ad.id === id);
     if (target) {
       setHostingStatusMessage(target.isFeatured ? 'Marked as featured.' : 'Highlight removed.');
+    }
+  };
+
+  const handleDiscordSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canManageDiscordAds || typeof window === 'undefined') {
+      setDiscordStatusMessage('You need the Admin, Discord, or Creator role to publish campaigns.');
+      return;
+    }
+
+    const deliverables = discordForm.deliverablesText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (!discordForm.headline.trim()) {
+      setDiscordStatusMessage('Headline is required.');
+      return;
+    }
+
+    if (!discordForm.ctaLabel.trim() || !discordForm.ctaUrl.trim()) {
+      setDiscordStatusMessage('CTA label and URL are required.');
+      return;
+    }
+
+    const timestamp = new Date().toISOString();
+    const craftedBy = profile?.name?.trim() || profile?.username?.trim() || discordRoleLabel || 'Discord Builder';
+
+    const existingAds = discordAdsFromStorage();
+
+    if (editingDiscordAdId) {
+      const target = existingAds.find((ad) => ad.id === editingDiscordAdId);
+      if (!target) {
+        setDiscordStatusMessage('Unable to find advertisement to update.');
+        return;
+      }
+
+      const updatedAds = existingAds.map((ad) =>
+        ad.id === editingDiscordAdId
+          ? {
+              ...ad,
+              headline: discordForm.headline.trim(),
+              shortDescription: discordForm.shortDescription.trim(),
+              pricing: discordForm.pricing.trim() || 'Custom quote',
+              deliverables,
+              badge: discordForm.badge.trim() || undefined,
+              targetCommunity: discordForm.targetCommunity.trim() || undefined,
+              turnaround: discordForm.turnaround.trim() || undefined,
+              ctaLabel: discordForm.ctaLabel.trim(),
+              ctaUrl: discordForm.ctaUrl.trim(),
+              contactDiscord: discordForm.contactDiscord.trim() || undefined,
+              updatedAt: timestamp,
+              craftedBy,
+            }
+          : ad,
+      );
+
+      setDiscordAds(updatedAds);
+      setDiscordAdsInStorage(updatedAds);
+      setDiscordStatusMessage('Discord server advertisement updated.');
+      resetDiscordForm();
+      return;
+    }
+
+    const newAd: DiscordServerAd = {
+      id: generateDiscordServerAdId(),
+      headline: discordForm.headline.trim(),
+      shortDescription: discordForm.shortDescription.trim(),
+      pricing: discordForm.pricing.trim() || 'Custom quote',
+      deliverables,
+      badge: discordForm.badge.trim() || undefined,
+      targetCommunity: discordForm.targetCommunity.trim() || undefined,
+      turnaround: discordForm.turnaround.trim() || undefined,
+      ctaLabel: discordForm.ctaLabel.trim(),
+      ctaUrl: discordForm.ctaUrl.trim(),
+      contactDiscord: discordForm.contactDiscord.trim() || undefined,
+      isFeatured: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      craftedBy,
+    };
+
+    const updatedAds = [newAd, ...existingAds];
+    setDiscordAds(updatedAds);
+    setDiscordAdsInStorage(updatedAds);
+    setDiscordStatusMessage('New Discord server advertisement published.');
+    resetDiscordForm();
+  };
+
+  const handleDiscordEdit = (ad: DiscordServerAd) => {
+    if (!canManageDiscordAds) {
+      setDiscordStatusMessage('You need the Admin, Discord, or Creator role to manage campaigns.');
+      return;
+    }
+
+    setEditingDiscordAdId(ad.id);
+    setDiscordForm({
+      headline: ad.headline,
+      shortDescription: ad.shortDescription,
+      pricing: ad.pricing,
+      deliverablesText: ad.deliverables.join('\n'),
+      badge: ad.badge ?? '',
+      targetCommunity: ad.targetCommunity ?? '',
+      turnaround: ad.turnaround ?? '',
+      ctaLabel: ad.ctaLabel,
+      ctaUrl: ad.ctaUrl,
+      contactDiscord: ad.contactDiscord ?? '',
+    });
+    setDiscordStatusMessage('Editing Discord server advertisement.');
+  };
+
+  const handleDiscordDelete = (id: string) => {
+    if (!canManageDiscordAds) {
+      setDiscordStatusMessage('You need the Admin, Discord, or Creator role to manage campaigns.');
+      return;
+    }
+    if (typeof window === 'undefined') return;
+    if (!window.confirm('Remove this Discord server advertisement?')) return;
+
+    const remaining = discordAds.filter((ad) => ad.id !== id);
+    setDiscordAds(remaining);
+    setDiscordAdsInStorage(remaining);
+
+    if (editingDiscordAdId === id) {
+      resetDiscordForm();
+    }
+
+    setDiscordStatusMessage('Discord server advertisement removed.');
+  };
+
+  const handleDiscordToggleFeatured = (id: string) => {
+    if (!canManageDiscordAds) {
+      setDiscordStatusMessage('You need the Admin, Discord, or Creator role to manage campaigns.');
+      return;
+    }
+
+    const updated = discordAds.map((ad) =>
+      ad.id === id
+        ? { ...ad, isFeatured: !ad.isFeatured, updatedAt: new Date().toISOString() }
+        : ad,
+    );
+
+    setDiscordAds(updated);
+    setDiscordAdsInStorage(updated);
+
+    const target = updated.find((ad) => ad.id === id);
+    if (target) {
+      setDiscordStatusMessage(target.isFeatured ? 'Featured placement enabled.' : 'Featured placement removed.');
     }
   };
   const handleSave = async () => {
@@ -1526,7 +1800,7 @@ const Profile = () => {
                   disabled={saving}
                   className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  Save changes
                 </button>
                 <button
                   onClick={handleCancel}
@@ -1675,7 +1949,7 @@ const Profile = () => {
           <label className="grid gap-1 text-sm">
             <span className="font-medium text-gray-800 dark:text-gray-200">Highlights (one per line)</span>
             <textarea
-              className="min-h-[140px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
+              className="min-h-35 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-indigo-400"
               value={botAdForm.highlightsText}
               onChange={(event) => handleBotAdChange('highlightsText', event.target.value)}
               placeholder={'24/7 on-call support\nCross-platform dashboard builds\nAuto-provisioning across regions'}
@@ -1960,7 +2234,7 @@ const Profile = () => {
             <div className="space-y-1 sm:col-span-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Short description</label>
               <textarea
-                className="min-h-[80px] w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                className="min-h-20 w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
                 value={hostingForm.shortDescription}
                 onChange={(event) => handleHostingFormChange('shortDescription', event.target.value)}
                 placeholder="Explain who this plan delights and the outcome it delivers."
@@ -1970,7 +2244,7 @@ const Profile = () => {
             <div className="space-y-1 sm:col-span-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Feature bullet points</label>
               <textarea
-                className="min-h-[120px] w-full rounded-lg border border-gray-200 px-4 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800"
+                className="min-h-30 w-full rounded-lg border border-gray-200 px-4 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800"
                 value={hostingForm.featuresText}
                 onChange={(event) => handleHostingFormChange('featuresText', event.target.value)}
                 placeholder={'One feature per line\nAutoscaling across three regions\nManaged backups and snapshots'}
@@ -2131,6 +2405,292 @@ const Profile = () => {
           )}
         </section>
       )}
+
+      <div className="mb-4" aria-hidden="true" />
+      <div className="mb-4" aria-hidden="true" />
+
+      <section className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm dark:border-indigo-800 dark:bg-indigo-900/30">
+        <h2 className="text-2xl font-semibold text-indigo-900 dark:text-indigo-100">Discord server campaign publisher</h2>
+        <p className="mt-2 text-sm text-indigo-800 dark:text-indigo-200">
+          Craft offers here and they sync instantly with the Discord Servers marketplace view. Use the form below to launch
+          new campaigns or refine existing ones without leaving your profile.
+        </p>
+      </section>
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <header className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">Create or edit Discord offers</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Draft fresh campaigns, update pricing, or highlight seasonal launches for server creators.
+            </p>
+          </div>
+          <div className="rounded-full bg-emerald-100 px-4 py-1 text-sm font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+            Role: {discordRoleLabel || 'Unknown'}
+          </div>
+        </header>
+
+        {discordStatusMessage && (
+          <div className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800 dark:border-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200">
+            {discordStatusMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleDiscordSubmit} className="grid gap-4 lg:grid-cols-2">
+          <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Offer headline</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.headline}
+                onChange={(event) => handleDiscordFormChange('headline', event.target.value)}
+                placeholder="e.g. Creator Guild Launch Kit"
+                required
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Pricing</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.pricing}
+                onChange={(event) => handleDiscordFormChange('pricing', event.target.value)}
+                placeholder="$499 setup + $99/mo"
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Short description</label>
+              <textarea
+                className="min-h-20 w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.shortDescription}
+                onChange={(event) => handleDiscordFormChange('shortDescription', event.target.value)}
+                placeholder="Explain who this offer supports and the transformation it delivers."
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Deliverables</label>
+              <textarea
+                className="min-h-30 w-full rounded-lg border border-gray-200 px-4 py-2 text-sm font-mono dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.deliverablesText}
+                onChange={(event) => handleDiscordFormChange('deliverablesText', event.target.value)}
+                placeholder={'One deliverable per line\nAutomated onboarding journeys\nRevenue role sync with Stripe'}
+                disabled={!canManageDiscordAds}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400">One deliverable per line. Markdown not required.</p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Badge / promo tag</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.badge}
+                onChange={(event) => handleDiscordFormChange('badge', event.target.value)}
+                placeholder="Most requested"
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target community</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.targetCommunity}
+                onChange={(event) => handleDiscordFormChange('targetCommunity', event.target.value)}
+                placeholder="SaaS founders, paid communities"
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Turnaround</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.turnaround}
+                onChange={(event) => handleDiscordFormChange('turnaround', event.target.value)}
+                placeholder="3-week build sprint"
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">CTA label</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.ctaLabel}
+                onChange={(event) => handleDiscordFormChange('ctaLabel', event.target.value)}
+                placeholder="Book an architecture session"
+                required
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">CTA URL</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.ctaUrl}
+                onChange={(event) => handleDiscordFormChange('ctaUrl', event.target.value)}
+                placeholder="https://"
+                required
+                type="url"
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Discord contact (optional)</label>
+              <input
+                className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800"
+                value={discordForm.contactDiscord}
+                onChange={(event) => handleDiscordFormChange('contactDiscord', event.target.value)}
+                placeholder="@yourhandle"
+                disabled={!canManageDiscordAds}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 lg:col-span-2">
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+              disabled={!canManageDiscordAds}
+            >
+              {editingDiscordAdId ? 'Update advertisement' : 'Publish advertisement'}
+            </button>
+            {editingDiscordAdId && (
+              <button
+                type="button"
+                onClick={resetDiscordForm}
+                className="text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline dark:text-gray-300"
+                disabled={!canManageDiscordAds}
+              >
+                Cancel edit
+              </button>
+            )}
+            {!editingDiscordAdId && (
+              <button
+                type="button"
+                onClick={resetDiscordForm}
+                className="text-sm font-medium text-gray-600 underline-offset-2 transition hover:text-gray-900 hover:underline dark:text-gray-300"
+                disabled={!canManageDiscordAds && !discordForm.headline && !discordForm.ctaLabel && !discordForm.ctaUrl}
+              >
+                Clear form
+              </button>
+            )}
+          </div>
+        </form>
+
+        {!canManageDiscordAds && (
+          <p className="mt-4 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800 dark:border-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200">
+            Viewer mode enabled. Team members with Admin, Discord, or Creator roles can craft and publish new advertisements.
+          </p>
+        )}
+      </section>
+
+      <div className="mb-4" aria-hidden="true" />
+      <div className="mb-4" aria-hidden="true" />
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <header className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Operational controls</h3>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {sortedDiscordAds.length} {sortedDiscordAds.length === 1 ? 'campaign' : 'campaigns'} live
+          </span>
+        </header>
+
+        {sortedDiscordAds.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-sm text-gray-600 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300">
+            Publish a Discord server advertisement above to populate your management list.
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200 text-sm dark:divide-gray-700">
+            {sortedDiscordAds.map((ad) => (
+              <div key={ad.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">{ad.headline}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {ad.pricing} · {ad.deliverables.length} deliverables · {ad.isFeatured ? 'Featured' : 'Standard'} placement
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDiscordToggleFeatured(ad.id)}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                      ad.isFeatured
+                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200'
+                    }`}
+                    disabled={!canManageDiscordAds}
+                  >
+                    {ad.isFeatured ? 'Remove highlight' : 'Mark as featured'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDiscordEdit(ad)}
+                    className="rounded-lg bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-200"
+                    disabled={!canManageDiscordAds}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDiscordDelete(ad.id)}
+                    className="rounded-lg bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-200 dark:bg-red-900/40 dark:text-red-200"
+                    disabled={!canManageDiscordAds}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <footer className="mt-16 border-t border-gray-200 bg-gray-50/80 px-6 py-10 text-sm text-gray-600 shadow-inner dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-400">
+        <div className="mx-auto flex max-w-5xl flex-col gap-8 md:flex-row md:justify-between">
+          <div className="space-y-3 text-center md:text-left">
+            <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">In-Accord Member Experience</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Building collaborative worlds for makers, operators, and community leaders.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">© {currentYear} In-Accord · Powered by GARD Realms LLC.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 text-center text-sm md:grid-cols-3 md:text-left">
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Navigate</h4>
+              <nav className="flex flex-col gap-1">
+                <a href="/dashboard" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Dashboard</a>
+                <a href="/profile" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Profile</a>
+                <a href="/support" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Support</a>
+              </nav>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Resources</h4>
+              <nav className="flex flex-col gap-1">
+                <a href="/themes" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Themes</a>
+                <a href="/plugins" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Plugins</a>
+                <a href="/uploads" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Media Library</a>
+              </nav>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Get in touch</h4>
+              <nav className="flex flex-col gap-1">
+                <a href="mailto:hello@in-accord.app" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">hello@in-accord.app</a>
+                <a href="https://discord.gg" target="_blank" rel="noreferrer" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">Join our Discord</a>
+                <a href="https://github.com" target="_blank" rel="noreferrer" className="transition hover:text-indigo-600 dark:hover:text-indigo-300">GitHub</a>
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div className="mx-auto mt-10 max-w-5xl text-center text-xs text-gray-500 dark:text-gray-500">
+          <p>
+            Need a hand? Visit the{' '}
+            <a
+              href="/support"
+              className="font-medium text-indigo-600 underline-offset-2 hover:text-indigo-500 hover:underline dark:text-indigo-300 dark:hover:text-indigo-200"
+            >
+              support center
+            </a>
+            . Your success keeps the realm thriving.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
