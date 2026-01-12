@@ -5,9 +5,9 @@ const Home = (props: Props) => {
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
       <main className="flex flex-1 flex-col items-center px-6 pb-16">
         <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-          <h1 className="text-5xl font-black tracking-tight text-gray-900 dark:text-white sm:text-6xl">In-Accord</h1>
+
           <h2 className="max-w-3xl text-2xl font-semibold text-gray-700 dark:text-gray-200">
-            The Premier Discord customization and management suite for thriving communities.
+            In-Accord is the The Premier Discord customization and management suite for thriving communities.
           </h2>
           <p className="max-w-3xl text-base font-medium text-gray-600 dark:text-gray-300">
             A standalone program that automates installation, removal, and maintenance for In-Accord — the Discord client customization experience. Launch curated extensions, keep plugins patched, and streamline operations with zero guesswork.
@@ -19,7 +19,7 @@ const Home = (props: Props) => {
           <img
             src="https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/In-Accord%20working.png"
             alt="In-Accord application preview"
-            className="h-[13.5rem] w-auto rounded-2xl border border-gray-200 bg-white shadow-lg transition hover:shadow-xl dark:border-gray-700 dark:bg-gray-900"
+            className="h-[8rem] w-auto rounded-1xl border border-gray-200 bg-white shadow-lg transition hover:shadow-xl dark:border-gray-700 dark:bg-gray-900"
           />
         </div>
       </main>
