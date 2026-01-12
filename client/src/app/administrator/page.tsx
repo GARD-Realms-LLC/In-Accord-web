@@ -124,6 +124,7 @@ async function hashPassword(password: string) {
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     return `sha256$${hashHex}`;
   } catch (e) {
+
     // fallback: simple JS hash (not cryptographically secure)
     let h = 0;
     for (let i = 0; i < password.length; i++) h = ((h << 5) - h) + password.charCodeAt(i);
@@ -152,7 +153,6 @@ function PasswordStrength({ password }: { password: string }) {
     </div>
   );
 }
-
 
 interface AuditLogEntry {
   timestamp: string;
@@ -421,9 +421,9 @@ const Administrator = (props: Props) => {
         jobTitle: "Founder & Manager",
         description: "Founder and Manager of In-Accord",
         imageUrl: "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/dic-irish-bear.jpeg",
-        email: "member1@example.com",
-        website: "https://example.com",
-        github: "https://github.com",
+        email: "docrst@gmail.com",
+        website: "https://www.ppaesrt.com",
+        github: "https://github.com/GARD-Realms-LLC/In-Accord-web",
         discord: "https://discord.com"
       },
       ...Array.from({ length: 8 }, (_, i) => ({
@@ -523,6 +523,7 @@ const Administrator = (props: Props) => {
 
     // Update system health metrics
     const updateMetrics = () => {
+
       // Simulate realtime metric updates with slight variations
       setResponseTime(Math.floor(Math.random() * 30) + 35); // 35-65ms
       setUptime(99.95 + Math.random() * 0.05); // 99.95-100%
@@ -789,6 +790,7 @@ const Administrator = (props: Props) => {
     const refreshGitHubChanges = async () => {
       setGithubRefreshing(true);
       try {
+
         // This would fetch the latest commits from GitHub API
         // For now, we'll simulate a refresh
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -851,11 +853,13 @@ const Administrator = (props: Props) => {
           const j = await res.json();
           if (!j || !Array.isArray(j.users)) return;
           if (mounted) {
+
             // Replace local users with server users (show all roles)
             setUsers(j.users as User[]);
             try { if (typeof window !== 'undefined') window.localStorage.setItem('users', JSON.stringify(j.users)); } catch {}
           }
         } catch (e) {
+
           // ignore - keep local users
         }
       })();
@@ -900,6 +904,7 @@ const Administrator = (props: Props) => {
             since: s.since || s.createdAt || new Date().toISOString(),
             avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
           }));
+
           // Deduplicate by userId
           const deduped = mapped.filter((user, idx, arr) =>
             arr.findIndex(u => u.userId === user.userId) === idx
@@ -915,6 +920,7 @@ const Administrator = (props: Props) => {
     // listen for session creation events (dispatched by Navbar on login)
     useEffect(() => {
       function handler() {
+
         // best-effort refresh
         (async () => {
           try {
@@ -931,6 +937,7 @@ const Administrator = (props: Props) => {
               since: s.since || s.createdAt || new Date().toISOString(),
               avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
             }));
+
             // Deduplicate by userId
             const deduped = mapped.filter((user, idx, arr) =>
               arr.findIndex(u => u.userId === user.userId) === idx
@@ -1017,11 +1024,13 @@ const Administrator = (props: Props) => {
     const [formGithubLogin, setFormGithubLogin] = useState('');
     const [formDiscordLogin, setFormDiscordLogin] = useState('');
     const [formDescription, setFormDescription] = useState('');
+
     // UI for save-toast and temporary reveal of saved password
     const [toastVisible, setToastVisible] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [lastSavedPlain, setLastSavedPlain] = useState<string | null>(null);
     const [showSavedReveal, setShowSavedReveal] = useState(false);
+
     // Bulk password migration state
     const [showBulkPasswords, setShowBulkPasswords] = useState(false);
     const [bulkPasswords, setBulkPasswords] = useState<Record<string,string>>({});
@@ -1063,6 +1072,7 @@ const Administrator = (props: Props) => {
     const applyBulkPasswords = async () => {
       const entries = Object.entries(bulkPasswords).filter(([_, v]) => !!v);
       if (entries.length === 0) { alert('No bulk passwords set'); return; }
+
       // capture plaintext export data
       const exportRows: Array<{ id: string; username: string; password: string }> = [];
       const updated = await Promise.all(users.map(async u => {
@@ -1070,6 +1080,7 @@ const Administrator = (props: Props) => {
         if (plain) {
           exportRows.push({ id: u.id, username: u.username ?? u.email ?? '', password: plain });
           const hashed = await hashPassword(plain);
+
           // try sending to server (best-effort)
           try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: u.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
           return { ...u, password: hashed } as User;
@@ -1077,6 +1088,7 @@ const Administrator = (props: Props) => {
         return u;
       }));
       setUsers(updated as User[]);
+
       // offer export of plaintexts
       try {
         const payload = exportRows.map(r => `${r.id},"${r.username}","${r.password}"`).join('\n');
@@ -1169,6 +1181,7 @@ const Administrator = (props: Props) => {
         if (hashed) {
           try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
         }
+
         // Always upsert full user metadata to server (not just when password changes)
         try { await fetch(`${API_BASE}/api/admin/users/upsert`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: updated.find(u => u.id === editingUser.id) }) }); } catch (e) { console.warn('Failed to upsert user to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated User', details: `${formName} updated`, status: 'Success' }, ...prev]);
@@ -1180,6 +1193,7 @@ const Administrator = (props: Props) => {
         const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, status: formStatus, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt, website: formWebsite || undefined, githubLogin: formGithubLogin || undefined, discordLogin: formDiscordLogin || undefined, description: formDescription || undefined };
         setUsers([newUser, ...users] as User[]);
         try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
+
         // also send full user metadata to server so login by username/email works
         try { await fetch(`${API_BASE}/api/admin/users/upsert`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: newUser }) }); } catch (e) { console.warn('Failed to upsert new user to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Created User', details: `${formName} created`, status: 'Success' }, ...prev]);
@@ -1224,12 +1238,15 @@ const Administrator = (props: Props) => {
         setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, password: hashed } : u));
         try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST password to server', e); }
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated Password', details: `${editingUser.name} password updated`, status: 'Success' }, ...prev]);
+
         // show transient reveal and toast
         setLastSavedPlain(plain);
         setShowSavedReveal(true);
         setToastMessage('Password saved');
         setToastVisible(true);
         setFormPassword('');
+
+
         // hide reveal after 8s and toast after 3s
         setTimeout(() => setShowSavedReveal(false), 8000);
         setTimeout(() => setToastVisible(false), 3000);
@@ -1340,6 +1357,7 @@ const Administrator = (props: Props) => {
 
     const refreshTablesFromServer = async () => {
       try {
+
         // Refresh users from server
         const userRes = await fetch(`${API_BASE}/api/admin/users`);
         if (userRes.ok) {
@@ -1349,6 +1367,7 @@ const Administrator = (props: Props) => {
             try { if (typeof window !== 'undefined') window.localStorage.setItem('users', JSON.stringify(userdata.users)); } catch {}
           }
         }
+
         // Also try to refresh schema from server
         const res = await fetch('/api/schemas');
         if (!res.ok) return;
@@ -1423,7 +1442,6 @@ const Administrator = (props: Props) => {
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Deleted Custom Table', details: `${t?.name} deleted`, status: 'Success' }, ...prev]);
     };
 
-
     // --- System Configuration state & handlers ---
     const defaultSystemConfig = {
       appName: 'In-Accord',
@@ -1437,6 +1455,7 @@ const Administrator = (props: Props) => {
       },
       backupSchedule: 'daily',
       apiKeys: [] as { id: string; name: string; key: string; createdAt: string }[],
+
       // Provide sensible defaults so fields & preview aren't blank
       sidebarLogo: 'https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg',
       sidebarUrl: '/home',
@@ -1472,6 +1491,7 @@ const Administrator = (props: Props) => {
       try {
         if (typeof window !== 'undefined') {
           localStorage.setItem('system_config', JSON.stringify(systemConfig));
+
           // Dispatch custom event for live update in same tab
           window.dispatchEvent(new Event('systemConfigUpdated'));
         }
@@ -1502,6 +1522,7 @@ const Administrator = (props: Props) => {
         setIntegrationSaveStatus('error');
         setIntegrationSaveMessage('Network or server error');
       }
+
       // Dispatch custom event for live update in same tab
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('systemConfigUpdated'));
       alert('System configuration saved.');
@@ -1512,6 +1533,7 @@ const Administrator = (props: Props) => {
       if (!confirm('Reset system configuration to defaults?')) return;
       setSystemConfig(defaultSystemConfig as SystemConfig);
       setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'System Configuration', action: 'Reset Defaults', details: `Configuration reset to defaults`, status: 'Success' }, ...prev]);
+
       // Dispatch custom event for live update in same tab
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('systemConfigUpdated'));
       alert('System configuration reset to defaults.');
@@ -1599,9 +1621,9 @@ const Administrator = (props: Props) => {
 
     const [backupSettings, setBackupSettings] = useState({
       localBackupPath: 'E:\\In-Accord-web\\backups',
-      r2AccountId: '',
-      r2ApiToken: '',
-      r2Bucket: '',
+      r2AccountId: 'e6170abf1613b7f0d6f016cda0f7fcf4',
+      r2ApiToken: '0MC6NW4qlPfgAp_MwdkeOPVNYzHhEuFJjCWMOYUV',
+      r2Bucket: 'inaccord',
       r2Prefix: 'In-Accord Backups',
     });
 
@@ -1655,6 +1677,7 @@ const Administrator = (props: Props) => {
           const data = await response.json();
           if (data.ok && data.backups && data.backups.length > 0) {
             const backupNames = data.backups.map((b: any) => b.name);
+
             // Merge local backups from API with R2 backups (simulated)
             const r2Backups = [
               'backup-20260110153022-r2',
@@ -1667,16 +1690,19 @@ const Administrator = (props: Props) => {
               setSelectedBackup(allBackups[0]);
             }
           }
+
           // Also update backup logs if present
           if (data.logs && Array.isArray(data.logs)) {
             setBackupLogs(data.logs);
           }
         } else {
+
           // API call failed, keep default backups
           console.warn('Backup list API returned non-OK status');
         }
       } catch (error) {
         console.warn('Failed to load backups:', error);
+
         // Keep the default backups in state
       } finally {
         setLoadingBackups(false);
@@ -1758,6 +1784,7 @@ const Administrator = (props: Props) => {
           setDrTestHistory(prev => [{ date: dateStr, result: 'Passed', recoveryTime: recTime, backup: selectedBackup, source: backupSource }, ...prev]);
           setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Backup', action: 'DR Test', details: `Disaster recovery test completed successfully using ${selectedBackup} from ${backupSource}`, status: 'Success' }, ...prev]);
         } else {
+
           // Backend endpoint doesn't exist or failed, do mock test instead
           const now = new Date();
           const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -1956,12 +1983,12 @@ const Administrator = (props: Props) => {
         }
         const data = await res.json();
 
-        // Wait for progress bar to reach or exceed 95% before showing success
+        // Wait for progress bar to reach or exceed 98% before showing success
         // This ensures a smooth visual experience
         await new Promise<void>(resolve => {
           const checkProgress = setInterval(() => {
             setBackupProgress(prev => {
-              if (prev.percent >= 95) {
+              if (prev.percent >= 98) {
                 clearInterval(checkProgress);
                 resolve();
                 return prev;
@@ -2031,6 +2058,7 @@ const Administrator = (props: Props) => {
         setTimeout(() => setBackupProgress(prev => ({ ...prev, visible: false })), 3200);
         alert(data?.detail ? `Backup completed: ${data.detail}` : `Backup completed successfully!`);
       } catch (err: any) {
+
         // Clear the timeout on error too
         clearTimeout(timeoutId);
         console.warn('Backup failed', err);
@@ -2163,6 +2191,7 @@ const Administrator = (props: Props) => {
         next[index] = { ...next[index], [field]: value } as TeamMember;
         return next;
       });
+
       // Clear error for this field if present
       setErrors((prev) => {
         const next = { ...prev };
@@ -2227,6 +2256,7 @@ const Administrator = (props: Props) => {
 
     return (
       <div className="space-y-8 p-8">
+        
         {/* Prominent Admin Header */}
         <h1 className="text-4xl font-extrabold text-center text-blue-700 dark:text-blue-300 mb-10 mt-2">
           Administration Area for In-Accord
@@ -2268,6 +2298,7 @@ const Administrator = (props: Props) => {
             </div>
           </div>
         )}
+
         {/* Section 1 */}
         <section className="border-b pb-8">
           <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg shadow-sm mb-4">
@@ -2302,6 +2333,7 @@ const Administrator = (props: Props) => {
             {onlineUsers.length === 0 ? (
               <div className="text-sm text-gray-600">No users are currently online.</div>
             ) : (
+
               // Render online users in a responsive grid: 4 per row, unlimited rows, fixed height with custom scrollbar
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 h-56 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-green-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
                 {onlineUsers.map((s, idx) => (
@@ -2507,6 +2539,7 @@ const Administrator = (props: Props) => {
               </table>
               </div>
             </div>
+
               {/* All User Fields & Custom Tables */}
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-3">
@@ -2562,6 +2595,7 @@ const Administrator = (props: Props) => {
                 </div>
               </div>
             </div>
+
           {/* User Roles */}
           <div className="mt-6">
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
