@@ -66,6 +66,8 @@ import backupRoutes from './routes/backupRoutes';
 app.use('/api/backup', backupRoutes);
 import path from 'path';
 app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
+import npmRoutes from './routes/npmRoutes';
+app.use('/api/npm', npmRoutes);
 
 
 

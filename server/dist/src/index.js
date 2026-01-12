@@ -65,6 +65,8 @@ const backupRoutes_1 = __importDefault(require("./routes/backupRoutes"));
 app.use('/api/backup', backupRoutes_1.default);
 const path_1 = __importDefault(require("path"));
 app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..', 'data')));
+const npmRoutes_1 = __importDefault(require("./routes/npmRoutes"));
+app.use('/api/npm', npmRoutes_1.default);
 /* SERVER */
 const port = process.env.PORT || 8000;
 httpServer.listen(port, () => {

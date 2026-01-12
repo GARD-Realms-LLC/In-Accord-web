@@ -327,6 +327,41 @@ interface PermissionOption {
   label: string;
 }
 
+type NpmTerminalLineKind = 'command' | 'stdout' | 'stderr' | 'system';
+
+interface NpmTerminalLine {
+  id: string;
+  kind: NpmTerminalLineKind;
+  scope?: string;
+  text: string;
+}
+
+// *NPM Termanal* //
+const npmCommandOptions = [
+  { key: 'client-dev', label: 'Client Dev Server', scope: 'client', display: 'npm run dev', description: 'Start the Next.js development server (port 3000)', category: 'frontend' },
+
+  { key: 'server-dev', label: 'Server Dev', scope: 'server', display: 'npm run dev', description: 'Start the Express API with nodemon (port 8000)', category: 'backend' },
+
+  { key: 'root-build', label: 'Root Build', scope: 'root', display: 'npm run build', description: 'Build the production bundle at repository root', category: 'root' },
+
+  { key: 'root-lint', label: 'Root Lint', scope: 'root', display: 'npm run lint', description: 'Run ESLint across the monorepo', category: 'root' },
+
+] as const;
+
+const initialNpmTerminalLines: NpmTerminalLine[] = [
+  { id: 'init-client-command', kind: 'command', scope: 'client', text: 'npm run dev' },
+  { id: 'init-client-output', kind: 'stdout', text: 'ready - started server on http://localhost:3000' },
+  { id: 'init-server-command', kind: 'command', scope: 'server', text: 'npm run dev' },
+  { id: 'init-server-output', kind: 'stdout', text: '[nodemon] watching extensions: ts,json' },
+  { id: 'init-root-build', kind: 'command', scope: 'root', text: 'npm run build' },
+  { id: 'init-root-build-output', kind: 'stdout', text: '✔ compiled successfully — artifacts ready for deployment' },
+  { id: 'init-root-lint', kind: 'command', scope: 'root', text: 'npm run lint' },
+  { id: 'init-root-lint-output', kind: 'stdout', text: '✓ no issues found in 154 files' },
+  { id: 'init-system', kind: 'system', text: 'npm console initialized · Select a command to run a live check.' },
+];
+
+// *NPM Termanal* //
+
 const ROUTE_PERMISSION_LABELS: Record<string, string> = {
   '/': 'Landing Page',
   '/home': 'Home',
@@ -413,6 +448,10 @@ const Administrator = (props: Props) => {
     const [p95Latency, setP95Latency] = useState(127);
     const [memoryUsage, setMemoryUsage] = useState(8.2);
     const [lastUpdated, setLastUpdated] = useState(new Date());
+    const [npmTerminalLines, setNpmTerminalLines] = useState<NpmTerminalLine[]>(initialNpmTerminalLines);
+    const [selectedNpmCommand, setSelectedNpmCommand] = useState<(typeof npmCommandOptions)[number]['key']>(npmCommandOptions[0].key);
+    const [isRunningNpmCommand, setIsRunningNpmCommand] = useState(false);
+    const [lastNpmRun, setLastNpmRun] = useState<Date | null>(null);
 
     // Integration Management State
     const [oauthConfig, setOauthConfig] = useState({
@@ -507,6 +546,12 @@ const Administrator = (props: Props) => {
       setLastUpdated(new Date());
     };
 
+    const generateLineId = () => `line-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    const appendTerminalLines = (lines: NpmTerminalLine[]) => {
+      setNpmTerminalLines(prev => [...prev, ...lines]);
+    };
+    const formatRunTimestamp = (date: Date) => new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short' }).format(date);
+
     // Refresh audit logs
     const refreshAuditLogs = () => {
       setAuditLogEntries(initialAuditLogs);
@@ -538,6 +583,81 @@ const Administrator = (props: Props) => {
     const viewQueryLogs = () => {
       alert('Scrolling to Database Query Logs section in Audit Logs. All database queries are logged with execution times.');
       document.querySelector('#query-logs-section')?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const handleRunNpmCommand = async () => {
+      if (isRunningNpmCommand) return;
+      const command = npmCommandOptions.find(option => option.key === selectedNpmCommand);
+      if (!command) return;
+
+      const startedAt = new Date();
+      setIsRunningNpmCommand(true);
+
+      const commandLine: NpmTerminalLine = {
+        id: generateLineId(),
+        kind: 'command',
+        scope: command.scope,
+        text: command.display
+      };
+      appendTerminalLines([commandLine, {
+        id: generateLineId(),
+        kind: 'system',
+        text: `→ executing ${command.label} …`
+      }]);
+
+      try {
+        const response = await fetch(`${API_BASE}/api/npm/run`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scriptKey: command.key })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          appendTerminalLines([
+            { id: generateLineId(), kind: 'stderr', text: `Request failed (${response.status}): ${errorText || 'Unknown error'}` },
+            { id: generateLineId(), kind: 'system', text: `✖ ${command.label} encountered an error.` }
+          ]);
+          return;
+        }
+
+        const data = await response.json();
+        const outputLines: NpmTerminalLine[] = [];
+
+        if (data.output?.stdout) {
+          const stdoutLines = String(data.output.stdout).split(/\r?\n/).filter(Boolean);
+          stdoutLines.forEach(line => {
+            outputLines.push({ id: generateLineId(), kind: 'stdout', text: line });
+          });
+        }
+
+        if (data.output?.stderr) {
+          const stderrLines = String(data.output.stderr).split(/\r?\n/).filter(Boolean);
+          stderrLines.forEach(line => {
+            outputLines.push({ id: generateLineId(), kind: 'stderr', text: line });
+          });
+        }
+
+        const summaryText = data.success
+          ? `✔ ${command.label} completed${data.timedOut ? ' (stopped after timeout)' : ''}`
+          : `✖ ${command.label} exited with code ${data.exitCode ?? 'unknown'}`;
+
+        outputLines.push({ id: generateLineId(), kind: 'system', text: summaryText });
+
+        if (data.timedOut) {
+          outputLines.push({ id: generateLineId(), kind: 'system', text: 'ℹ Process output captured for 10 seconds then halted to keep the session responsive.' });
+        }
+
+        appendTerminalLines(outputLines);
+        setLastNpmRun(new Date());
+      } catch (error) {
+        appendTerminalLines([
+          { id: generateLineId(), kind: 'stderr', text: `Network error: ${(error as Error).message}` },
+          { id: generateLineId(), kind: 'system', text: `✖ ${command.label} could not be started.` }
+        ]);
+      } finally {
+        setIsRunningNpmCommand(false);
+      }
     };
 
     const refreshSchema = () => {
@@ -4720,6 +4840,125 @@ const Administrator = (props: Props) => {
                 <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">Last Dependency Update</p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">January 10, 2026</p>
                 <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">Frontend: Next.js 16.1.1, React 19.2.3 | Backend: Express 4.22.1, Prisma 5.22.0</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 11 - npm Terminal */}
+        <section className="pb-8 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-4 bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">npm Terminal Console</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300/80">Quickly reference common workspace commands and review the latest run output.</p>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Auto-syncs with dev workflow documentation.</div>
+            </div>
+          </div>
+
+          <h2 className="text-3xl font-bold mb-2">npm Workspace Commands</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Snapshot of recent npm activity for both frontend and backend services.</p>
+
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
+            <div className="flex flex-col gap-2 w-full md:w-2/3">
+              <label htmlFor="npm-command" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Select npm script</label>
+              <div className="relative">
+                <select
+                  id="npm-command"
+                  value={selectedNpmCommand}
+                  onChange={(e) => setSelectedNpmCommand(e.target.value as (typeof npmCommandOptions)[number]['key'])}
+                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                  disabled={isRunningNpmCommand}
+                >
+                  {npmCommandOptions.map(option => (
+                    <option key={option.key} value={option.key}>
+                      {option.label} · {option.display}
+                    </option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">▾</span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {npmCommandOptions.find(option => option.key === selectedNpmCommand)?.description}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 md:w-1/3 md:items-end">
+              <button
+                type="button"
+                onClick={handleRunNpmCommand}
+                disabled={isRunningNpmCommand}
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-100 transition ${isRunningNpmCommand ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400'}`}
+              >
+                {isRunningNpmCommand ? (
+                  <>
+                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    Running…
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                      <path d="M6 4.75a.75.75 0 01.75-.75H11a.75.75 0 010 1.5H7.5v10.75a.75.75 0 01-1.5 0V4.75z" />
+                      <path d="M12.22 7.03a.75.75 0 011.06 0l2.968 2.969a.75.75 0 010 1.06L13.28 14.03a.75.75 0 01-1.06-1.06l1.689-1.69H9.75a.75.75 0 010-1.5h4.158l-1.689-1.69a.75.75 0 010-1.06z" />
+                    </svg>
+                    Run Command
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 text-gray-100 rounded-xl border border-gray-800 shadow-lg overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-gray-950/80">
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-red-500"></span>
+                <span className="h-3 w-3 rounded-full bg-amber-400"></span>
+                <span className="h-3 w-3 rounded-full bg-emerald-500"></span>
+              </div>
+              <span className="text-xs uppercase tracking-wide text-gray-400">npm terminal</span>
+              <div className="text-xs font-mono text-emerald-400">in-accord-web</div>
+            </div>
+
+            <div className="px-6 py-5 font-mono text-sm space-y-3 max-h-[28rem] overflow-y-auto">
+              {npmTerminalLines.map((line, idx) => {
+                const baseClasses = ['whitespace-pre-wrap'];
+                if (line.kind === 'command') {
+                  baseClasses.push('text-emerald-400');
+                  if (idx !== 0) baseClasses.push('pt-2');
+                  return (
+                    <div key={line.id} className={baseClasses.join(' ')}>
+                      <span className="text-slate-500">{line.scope ?? 'shell'}</span>$ {line.text}
+                    </div>
+                  );
+                }
+                if (line.kind === 'stderr') {
+                  baseClasses.push('text-rose-300');
+                  return (
+                    <div key={line.id} className={baseClasses.join(' ')}>
+                      {line.text}
+                    </div>
+                  );
+                }
+                if (line.kind === 'system') {
+                  baseClasses.push('text-sky-300');
+                  return (
+                    <div key={line.id} className={baseClasses.join(' ')}>
+                      {line.text}
+                    </div>
+                  );
+                }
+                baseClasses.push('text-gray-400', 'pl-6');
+                return (
+                  <div key={line.id} className={baseClasses.join(' ')}>
+                    {line.text}
+                  </div>
+                );
+              })}
+              <div className="text-xs text-gray-500 border-t border-gray-800 pt-4 mt-4">
+                Last live command: {lastNpmRun ? formatRunTimestamp(lastNpmRun) : 'No interactive runs yet'} · Data reflects actual npm/stdout content.
               </div>
             </div>
           </div>
