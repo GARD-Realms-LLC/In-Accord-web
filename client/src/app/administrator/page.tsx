@@ -2693,7 +2693,7 @@ const Administrator = (props: Props) => {
                         <div className="text-xs text-gray-500"><PasswordStrength password={formPassword} /></div>
                         <label className="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-1"><input type="checkbox" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /> Show</label>
                       </div>
-                      {showSavedReveal && lastSavedPlain && (
+                      {showSavedReveal && lastSavedPlain && editingUser?.passwordTemporary && (
                         <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm text-gray-900 dark:text-gray-100">
                           <div className="font-medium text-xs text-gray-600 dark:text-gray-300">Saved Password (temporary)</div>
                           <div className="flex items-center justify-between mt-1">
