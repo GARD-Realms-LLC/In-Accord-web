@@ -85,11 +85,26 @@ router.post('/restart', (_req, res) => __awaiter(void 0, void 0, void 0, functio
 }));
 router.get('/logs', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { stdout } = yield pm2Cmd(`logs ${BACKEND_PROCESS_NAME} --lines 100 --nostream`);
-        res.json({ success: true, logs: stdout });
+        const { stdout, stderr } = yield pm2Cmd(`logs ${BACKEND_PROCESS_NAME} --lines 100 --nostream`);
+        // Remove ANSI escape codes for clean logs
+        const ansiRegex = /\u001b\[[0-9;]*m|\x1b\[[0-9;]*m|\u001b\(B/g;
+        const cleanOut = stdout.replace(ansiRegex, '');
+        // Split logs into lines, filter out empty lines
+        const logLines = cleanOut.split(/\r?\n/).filter(line => line.trim().length > 0);
+        res.json({
+            success: true,
+            logs: logLines,
+            raw: cleanOut,
+            stderr,
+            debug: {
+                lineCount: logLines.length,
+                firstLine: logLines[0] || null,
+                lastLine: logLines[logLines.length - 1] || null
+            }
+        });
     }
     catch (e) {
-        res.status(500).json({ success: false, error: e.stderr || e.message });
+        res.status(500).json({ success: false, error: e.stderr || e.message, debug: e });
     }
 }));
 exports.default = router;

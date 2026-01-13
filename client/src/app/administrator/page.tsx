@@ -186,26 +186,8 @@ async function hashPassword(password: string) {
 
 // Password strength helper component
 function PasswordStrength({ password }: { password: string }) {
-  // =========================
-  // Section: Types & Interfaces
-  // =========================
-  const score = (() => {
-    if (!password) return 0;
-    let s = 0;
-    if (password.length >= 8) s += 1;
-    if (password.length >= 12) s += 1;
-    if (/[A-Z]/.test(password)) s += 1;
-    if (/[0-9]/.test(password)) s += 1;
-    if (/[^A-Za-z0-9]/.test(password)) s += 1;
-    return s;
-  })();
-  const pct = Math.min(100, Math.round((score / 5) * 100));
-  return (
-    <div>
-      <div className="text-xs text-gray-500 mt-1">Strength: {pct}% {score >= 4 ? '(Strong)' : score >= 2 ? '(Medium)' : '(Weak)'}</div>
-      <div className="text-xs text-gray-500 mt-1">Rules: min 8 chars, uppercase, number, special</div>
-    </div>
-  );
+  // TODO: Implement password strength UI here.
+  return null;
 }
 
 interface AuditLogEntry {
@@ -533,7 +515,7 @@ const Administrator = (props: Props) => {
         setPm2Loading(true);
         setPm2Error(null);
         try {
-          const res = await fetch('/api/pm2/status');
+          const res = await fetch('http://localhost:8000/api/pm2/status');
           const data = await res.json();
           if (res.ok && data && data.success !== false && (data.status === 'online' || data.status === 'stopped')) {
             setPm2Status(data.status);
@@ -556,7 +538,7 @@ const Administrator = (props: Props) => {
         setPm2Action('start');
         setPm2Error(null);
         try {
-          await fetch('/api/pm2/start', { method: 'POST' });
+          await fetch('http://localhost:8000/api/pm2/start', { method: 'POST' });
           await fetchPm2Status();
         } catch (err: any) {
           setPm2Error('Failed to start process');
@@ -570,7 +552,7 @@ const Administrator = (props: Props) => {
         setPm2Action('stop');
         setPm2Error(null);
         try {
-          await fetch('/api/pm2/stop', { method: 'POST' });
+          await fetch('http://localhost:8000/api/pm2/stop', { method: 'POST' });
           await fetchPm2Status();
         } catch (err: any) {
           setPm2Error('Failed to stop process');
@@ -584,7 +566,7 @@ const Administrator = (props: Props) => {
         setPm2Action('restart');
         setPm2Error(null);
         try {
-          await fetch('/api/pm2/restart', { method: 'POST' });
+          await fetch('http://localhost:8000/api/pm2/restart', { method: 'POST' });
           await fetchPm2Status();
         } catch (err: any) {
           setPm2Error('Failed to restart process');
@@ -593,21 +575,53 @@ const Administrator = (props: Props) => {
         setPm2Action(null);
       };
 
+      // Extra debug state for logs
+      const [pm2LogsDebug, setPm2LogsDebug] = useState<any>(null);
       const fetchPm2Logs = async () => {
         setPm2Loading(true);
         setPm2Error(null);
+        setPm2LogsDebug(null);
         try {
-          const res = await fetch('/api/pm2/logs');
-          const data = await res.json();
-          if (res.ok && data && data.success !== false && typeof data.logs === 'string') {
-            setPm2Logs(data.logs.split('\n'));
+          const res = await fetch('http://localhost:8000/api/pm2/logs');
+          let data: any = null;
+          let logs: string[] = [];
+          let rawText = '';
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            data = await res.json();
           } else {
-            setPm2Error(data && data.error ? data.error : 'Unknown logs error');
+            rawText = await res.text();
+            try { data = JSON.parse(rawText); } catch { data = null; }
+          }
+          setPm2LogsDebug({
+            ok: res.ok,
+            status: res.status,
+            contentType,
+            data,
+            rawText: rawText || undefined
+          });
+          if (res.ok && data && data.success !== false) {
+            if (typeof data.logs === 'string') {
+              logs = data.logs.split('\n');
+            } else if (Array.isArray(data.logs)) {
+              logs = data.logs;
+            } else if (rawText && typeof rawText === 'string') {
+              logs = rawText.split('\n');
+            }
+            if (logs.length === 0 || (logs.length === 1 && logs[0].trim() === '')) {
+              setPm2Error('No logs available');
+              setPm2Logs([]);
+            } else {
+              setPm2Logs(logs);
+            }
+          } else {
+            setPm2Error((data && data.error) ? data.error : (rawText ? rawText.substring(0, 200) : 'Unknown logs error'));
             setPm2Logs([]);
           }
         } catch (err: any) {
-          setPm2Error('Failed to fetch logs');
+          setPm2Error('Failed to fetch logs: ' + (err?.message || String(err)));
           setPm2Logs([]);
+          setPm2LogsDebug({ error: err });
         }
         setPm2Loading(false);
       };
@@ -795,6 +809,27 @@ const Administrator = (props: Props) => {
           }
         };
 
+    // Gate rendering for authorization
+    if (isAuthorized === null) {
+      return (
+        <div style={{ padding: 40, textAlign: 'center', color: '#aaa' }}>
+          <h2>Checking admin authorization...</h2>
+        </div>
+      );
+    }
+    if (isAuthorized === false) {
+      return null;
+    }
+
+    // Main admin page content
+    return (
+      <div style={{ padding: 32, maxWidth: 1400, margin: '0 auto' }}>
+        {renderPm2Controls()}
+        {/* Add other real admin page sections/components here as needed */}
+      </div>
+    );
+}
+
       useEffect(() => {
         if (!isAuthorized) return;
         let cancelled = false;
@@ -887,6 +922,43 @@ const Administrator = (props: Props) => {
     }, [isAuthorized]);
 
     // Note: Do not early-return before hooks; we gate rendering right before the main return
+
+    // --- PM2 Controls UI helpers ---
+    const renderPm2Controls = () => (
+      <section style={{ margin: '2rem 0', padding: '1.5rem', background: '#181c24', borderRadius: 12, boxShadow: '0 2px 8px #0002' }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>Backend PM2 Process Controls</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+          <span>Status: <b style={{ color: pm2Status === 'online' ? '#4caf50' : pm2Status === 'stopped' ? '#f44336' : '#ff9800' }}>{pm2StatusDisplay}</b></span>
+          <button onClick={fetchPm2Status} disabled={pm2Loading} style={{ padding: '6px 16px', borderRadius: 6, background: '#222', color: '#fff', border: '1px solid #444', cursor: pm2Loading ? 'not-allowed' : 'pointer' }}>Check Status</button>
+          <button onClick={handlePm2Start} disabled={pm2Loading || pm2Status === 'online'} style={{ padding: '6px 16px', borderRadius: 6, background: '#388e3c', color: '#fff', border: 'none', cursor: pm2Loading || pm2Status === 'online' ? 'not-allowed' : 'pointer' }}>Start</button>
+          <button onClick={handlePm2Stop} disabled={pm2Loading || pm2Status === 'stopped'} style={{ padding: '6px 16px', borderRadius: 6, background: '#d32f2f',
+             color: '#fff', border: 'none', cursor: pm2Loading || pm2Status === 'stopped' ? 'not-allowed' : 'pointer' }}>Stop</button>
+          <button onClick={handlePm2Restart} disabled={pm2Loading} style={{ padding: '6px 16px', borderRadius: 6, background: '#1976d2', color: '#fff', border: 'none', cursor: pm2Loading ? 'not-allowed' : 'pointer' }}>Restart</button>
+        </div>
+        {pm2Error && <div style={{ color: '#f44336', marginBottom: 8 }}>{pm2Error}</div>}
+        <div style={{ margin: '1.5rem 0 0.5rem 0' }}>
+          <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>PM2 Logs</h3>
+          <div style={{ border: '1px solid #333', borderRadius: 6, background: '#111', padding: 10, minHeight: 120, maxHeight: 320, overflow: 'auto', fontFamily: 'monospace', fontSize: 14, color: '#eee' }}>
+            {pm2Loading ? (
+              <div>Loading logs...</div>
+            ) : pm2Logs.length > 0 ? (
+              pm2Logs.map((line, i) => <div key={i}>{line}</div>)
+            ) : pm2Error ? (
+              <div style={{ color: '#f44336' }}>{pm2Error}</div>
+            ) : (
+              <div style={{ color: '#888' }}>No logs available.</div>
+            )}
+          </div>
+          <button onClick={fetchPm2Logs} disabled={pm2Loading} style={{ marginTop: 8, padding: '4px 12px', borderRadius: 5, background: '#222', color: '#fff', border: '1px solid #444', cursor: pm2Loading ? 'not-allowed' : 'pointer' }}>Refresh Logs</button>
+        </div>
+        {pm2LogsDebug && (
+          <details style={{ marginTop: 8, color: '#aaa' }}>
+            <summary>Debug Info</summary>
+            <pre style={{ fontSize: 12, color: '#aaa', background: '#222', padding: 8, borderRadius: 4 }}>{JSON.stringify(pm2LogsDebug, null, 2)}</pre>
+          </details>
+        )}
+      </section>
+    );
 
 
     const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -1327,6 +1399,39 @@ const Administrator = (props: Props) => {
             const deduped = mapped.filter((user, idx, arr) =>
               arr.findIndex(u => u.userId === user.userId) === idx
             );
+
+        {/* Developer/Debug Section */}
+        <section className="border-t pt-8 mt-8">
+          <div className="p-4 bg-gray-100 dark:bg-gray-900/40 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold text-gray-700 dark:text-gray-200">Developer / Debug Tools</div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-yellow-600 hover:bg-yellow-700 shadow focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('http://localhost:8000/api/npm/run', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ scriptKey: 'server-dev', action: 'stop' })
+                    });
+                    const data = await res.json();
+                    setToastMessage('Raw POST: ' + JSON.stringify(data));
+                    setToastVisible(true);
+                  } catch (err) {
+                    console.error('Raw POST error:', err);
+                    setToastMessage('Raw POST error: ' + String(err));
+                    setToastVisible(true);
+                  }
+                }}
+              >
+                Test Raw POST
+              </button>
+            </div>
+          </div>
+        </section>
             setOnlineUsers(deduped);
           } catch (e) {}
         })();
@@ -2700,29 +2805,6 @@ const Administrator = (props: Props) => {
               <div className="flex items-center justify-between mb-3">
               <div className="font-semibold">Online Users ({onlineUsers.length})</div>
               <div className="flex gap-2">
-                              <button
-                                type="button"
-                                className="px-4 py-2 rounded-lg font-semibold text-white bg-yellow-600 hover:bg-yellow-700 shadow focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                                onClick={async () => {
-                                  try {
-                                    const res = await fetch('http://localhost:8000/api/npm/run', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({ scriptKey: 'server-dev', action: 'stop' })
-                                    });
-                                    const data = await res.json();
-                                    // ...existing code...
-                                    setToastMessage('Raw POST: ' + JSON.stringify(data));
-                                    setToastVisible(true);
-                                  } catch (err) {
-                                    console.error('Raw POST error:', err);
-                                    setToastMessage('Raw POST error: ' + String(err));
-                                    setToastVisible(true);
-                                  }
-                                }}
-                              >
-                                Test Raw POST
-                              </button>
                 <button onClick={refreshOnlineUsers} disabled={refreshingOnline} className={refreshingOnline ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
                   {refreshingOnline ? 'Refreshing...' : 'Refresh'}
                 </button>
