@@ -56,7 +56,12 @@ helmet_1.default.contentSecurityPolicy({
     },
 }));
 app.use((0, morgan_1.default)("common"));
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+    credentials: true
+}));
 /* ROUTES */
 app.use("/dashboard", dashboardRoutes_1.default);
 const supportRoutes_1 = __importDefault(require("./routes/supportRoutes"));
@@ -78,6 +83,9 @@ app.use('/api/backup', backupRoutes_1.default);
 app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..', 'data')));
 const npmRoutes_1 = __importDefault(require("./routes/npmRoutes"));
 app.use('/api/npm', npmRoutes_1.default);
+// PM2 backend process control API
+const pm2Routes_1 = __importDefault(require("./routes/pm2Routes"));
+app.use('/api/pm2', pm2Routes_1.default);
 app.use((err, req, res, next) => {
     const isJsonSyntaxError = err instanceof SyntaxError && err.status === 400 && 'body' in err;
     if (isJsonSyntaxError) {

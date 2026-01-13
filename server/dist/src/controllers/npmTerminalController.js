@@ -257,87 +257,89 @@ const forceKillPortListeners = (port) => {
     const listeners = listPortListeners(port);
     if (!listeners.length)
         return [];
-    return killProcessesByPid(listeners);
+    // Filter out the current process PID to avoid self-termination
+    const filtered = listeners.filter(pid => pid !== process.pid);
+    return killProcessesByPid(filtered);
 };
 const runNpmScript = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { scriptKey, action } = req.body;
-    if (!scriptKey || !COMMANDS[scriptKey]) {
-        res.status(400).json({ success: false, error: 'Invalid or unsupported npm script.' });
-        return;
-    }
-    const config = COMMANDS[scriptKey];
-    const normalizedAction = action !== null && action !== void 0 ? action : (config.mode === 'persistent' ? 'start' : 'run');
-    if (config.mode === 'persistent') {
-        let pendingPortCleanupPids = [];
-        if (!['start', 'stop', 'restart', 'status'].includes(normalizedAction)) {
-            res.status(400).json({ success: false, error: `Unsupported action "${normalizedAction}" for persistent script.` });
+    try {
+        const { scriptKey, action } = req.body;
+        if (!scriptKey || !COMMANDS[scriptKey]) {
+            res.status(400).json({ success: false, error: 'Invalid or unsupported npm script.' });
             return;
         }
-        if (normalizedAction === 'status') {
-            respondWithSnapshot(res, scriptKey, { message: `${config.description} status fetched.` });
-            return;
-        }
-        if (normalizedAction === 'stop' || normalizedAction === 'restart') {
-            const managed = activeProcesses[scriptKey];
-            if (!managed) {
-                ensureSnapshot(scriptKey).status = 'stopped';
-                if (normalizedAction === 'stop') {
-                    const orphaned = forceKillPortListeners(config.port);
-                    const message = orphaned.length
-                        ? `${config.description} listeners cleared on port ${config.port}.`
-                        : `${config.description} is already stopped.`;
-                    const extras = { message };
-                    if (orphaned.length)
-                        extras.forcedPids = orphaned;
-                    respondWithSnapshot(res, scriptKey, extras);
-                    return;
-                }
-                pendingPortCleanupPids = forceKillPortListeners(config.port);
-            }
-            else {
-                yield terminateChild(managed.child);
-            }
-        }
-        if (normalizedAction === 'start' || normalizedAction === 'restart') {
-            if (normalizedAction === 'start' && activeProcesses[scriptKey]) {
-                respondWithSnapshot(res, scriptKey, { message: `${config.description} is already running.`, alreadyRunning: true });
+        const config = COMMANDS[scriptKey];
+        const normalizedAction = action !== null && action !== void 0 ? action : (config.mode === 'persistent' ? 'start' : 'run');
+        if (config.mode === 'persistent') {
+            let pendingPortCleanupPids = [];
+            if (!['start', 'stop', 'restart', 'status'].includes(normalizedAction)) {
+                res.status(400).json({ success: false, error: `Unsupported action "${normalizedAction}" for persistent script.` });
                 return;
             }
-            const portCleanupBeforeStart = forceKillPortListeners(config.port);
-            if (portCleanupBeforeStart.length) {
-                pendingPortCleanupPids = [...pendingPortCleanupPids, ...portCleanupBeforeStart];
+            if (normalizedAction === 'status') {
+                respondWithSnapshot(res, scriptKey, { message: `${config.description} status fetched.` });
+                return;
             }
-            startPersistentProcess(config);
-            yield wait(PROCESS_SETTLE_DELAY_MS);
-            const snapshot = ensureSnapshot(scriptKey);
-            const isRunning = snapshot.status === 'running';
-            const forcedNote = pendingPortCleanupPids.length && config.port
-                ? ` Freed port ${config.port} by stopping ${pendingPortCleanupPids.length} process(es).`
-                : '';
-            const message = isRunning
-                ? `${config.description} ${normalizedAction === 'restart' ? 'restarted' : 'started'}.${forcedNote}`
-                : `${config.description} failed to ${normalizedAction === 'restart' ? 'restart' : 'start'}. Check output for details.${forcedNote}`;
-            const extras = { success: isRunning, message };
-            if (pendingPortCleanupPids.length) {
-                extras.forcedPids = Array.from(new Set(pendingPortCleanupPids));
+            if (normalizedAction === 'stop' || normalizedAction === 'restart') {
+                const managed = activeProcesses[scriptKey];
+                if (!managed) {
+                    ensureSnapshot(scriptKey).status = 'stopped';
+                    if (normalizedAction === 'stop') {
+                        const orphaned = forceKillPortListeners(config.port);
+                        const message = orphaned.length
+                            ? `${config.description} listeners cleared on port ${config.port}.`
+                            : `No server process found to stop.`;
+                        const extras = { message };
+                        if (orphaned.length)
+                            extras.forcedPids = orphaned;
+                        respondWithSnapshot(res, scriptKey, extras);
+                        return;
+                    }
+                    pendingPortCleanupPids = forceKillPortListeners(config.port);
+                }
+                else {
+                    yield terminateChild(managed.child);
+                }
             }
-            respondWithSnapshot(res, scriptKey, extras);
-            return;
+            if (normalizedAction === 'start' || normalizedAction === 'restart') {
+                if (normalizedAction === 'start' && activeProcesses[scriptKey]) {
+                    respondWithSnapshot(res, scriptKey, { message: `${config.description} is already running.`, alreadyRunning: true });
+                    return;
+                }
+                const portCleanupBeforeStart = forceKillPortListeners(config.port);
+                if (portCleanupBeforeStart.length) {
+                    pendingPortCleanupPids = [...pendingPortCleanupPids, ...portCleanupBeforeStart];
+                }
+                startPersistentProcess(config);
+                yield wait(PROCESS_SETTLE_DELAY_MS);
+                const snapshot = ensureSnapshot(scriptKey);
+                const isRunning = snapshot.status === 'running';
+                const forcedNote = pendingPortCleanupPids.length && config.port
+                    ? ` Freed port ${config.port} by stopping ${pendingPortCleanupPids.length} process(es).`
+                    : '';
+                const message = isRunning
+                    ? `${config.description} ${normalizedAction === 'restart' ? 'restarted' : 'started'}.${forcedNote}`
+                    : `${config.description} failed to ${normalizedAction === 'restart' ? 'restart' : 'start'}. Check output for details.${forcedNote}`;
+                const extras = { success: isRunning, message };
+                if (pendingPortCleanupPids.length) {
+                    extras.forcedPids = Array.from(new Set(pendingPortCleanupPids));
+                }
+                respondWithSnapshot(res, scriptKey, extras);
+                return;
+            }
+            if (normalizedAction === 'stop') {
+                const orphaned = forceKillPortListeners(config.port);
+                const extras = { message: `${config.description} stopped.` };
+                if (orphaned.length)
+                    extras.forcedPids = orphaned;
+                respondWithSnapshot(res, scriptKey, extras);
+                return;
+            }
         }
-        if (normalizedAction === 'stop') {
-            const orphaned = forceKillPortListeners(config.port);
-            const extras = { message: `${config.description} stopped.` };
-            if (orphaned.length)
-                extras.forcedPids = orphaned;
-            respondWithSnapshot(res, scriptKey, extras);
-            return;
-        }
-        return;
     }
-    if (normalizedAction !== 'run') {
-        res.status(400).json({ success: false, error: `Unsupported action "${normalizedAction}" for script ${scriptKey}.` });
-        return;
+    catch (err) {
+        console.error('runNpmScript error:', err);
+        res.status(500).json({ success: false, error: 'Internal Server Error', details: String(err) });
     }
-    runOneShotCommand(config, res);
 });
 exports.runNpmScript = runNpmScript;

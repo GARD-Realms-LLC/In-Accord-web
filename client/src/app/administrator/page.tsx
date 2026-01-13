@@ -1,6 +1,95 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+
+import { useRouter } from 'next/navigation';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// PM2 backend process control API base
+const PM2_API = `${API_BASE}/api/pm2`;
+
+// --- PM2 Backend Process Controls ---
+function BackendProcessControls() {
+  const [status, setStatus] = useState<string>('unknown');
+  const [logs, setLogs] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [logLoading, setLogLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  const fetchStatus = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const resp = await fetch(`${PM2_API}/status`);
+      const data = await resp.json();
+      if (data.success) {
+        // Try to parse status from PM2 output
+        const match = data.status.match(/status\s*:\s*(\w+)/i);
+        setStatus(match ? match[1].toLowerCase() : 'unknown');
+      } else {
+        setStatus('unknown');
+        setError(data.error || 'Failed to fetch status');
+      }
+    } catch (e: any) {
+      setStatus('unknown');
+      setError(e.message || 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAction = async (action: 'start' | 'stop' | 'restart') => {
+    setLoading(true);
+    setError('');
+    try {
+      const resp = await fetch(`${PM2_API}/${action}`, { method: 'POST' });
+      const data = await resp.json();
+      if (!data.success) setError(data.error || 'Action failed');
+      await fetchStatus();
+    } catch (e: any) {
+      setError(e.message || 'Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchLogs = async () => {
+    setLogLoading(true);
+    setError('');
+    try {
+      const resp = await fetch(`${PM2_API}/logs`);
+      const data = await resp.json();
+      if (data.success) setLogs(data.logs);
+      else setError(data.error || 'Failed to fetch logs');
+    } catch (e: any) {
+      setError(e.message || 'Network error');
+    } finally {
+      setLogLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchStatus(); }, []);
+
+  return (
+    <div className="my-8 p-4 border rounded bg-gray-50">
+      <h2 className="text-lg font-bold mb-2">Backend Process (PM2)</h2>
+      <div className="flex gap-2 mb-2">
+        <button className="px-3 py-1 bg-green-600 text-white rounded disabled:opacity-50" onClick={() => handleAction('start')} disabled={loading}>Start</button>
+        <button className="px-3 py-1 bg-yellow-600 text-white rounded disabled:opacity-50" onClick={() => handleAction('restart')} disabled={loading}>Restart</button>
+        <button className="px-3 py-1 bg-red-600 text-white rounded disabled:opacity-50" onClick={() => handleAction('stop')} disabled={loading}>Stop</button>
+        <button className="px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-50" onClick={fetchStatus} disabled={loading}>Status</button>
+        <button className="px-3 py-1 bg-gray-700 text-white rounded disabled:opacity-50" onClick={fetchLogs} disabled={logLoading}>Logs</button>
+      </div>
+      <div className="mb-2">
+        <span className="font-semibold">Status:</span> <span className={status === 'online' ? 'text-green-700' : status === 'stopped' ? 'text-red-700' : 'text-gray-700'}>{status}</span>
+        {loading && <span className="ml-2 text-xs text-gray-500">Loading...</span>}
+      </div>
+      {error && <div className="text-red-600 text-xs mb-2">{error}</div>}
+      <div>
+        <span className="font-semibold">Logs:</span>
+        <pre className="bg-black text-green-200 p-2 rounded max-h-64 overflow-auto text-xs mt-1">{logs || (logLoading ? 'Loading logs...' : 'No logs loaded.')}</pre>
+      </div>
+    </div>
+  );
+}
 import { useRouter } from 'next/navigation';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -548,12 +637,19 @@ const Administrator = (props: Props) => {
           logProcessOutput(scope, snapshot, `${actionLabel} status`, { skipEmptyAck: true, suppressStatusMessage: true });
         }
       };
+    // Real-time loading state for NPM actions
+    const [clientActionLoading, setClientActionLoading] = useState(false);
+    const [serverActionLoading, setServerActionLoading] = useState(false);
+    const [toastVisible, setToastVisible] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
       // Handler for client control buttons
       const handleClientControl = async (action: 'start' | 'stop' | 'restart') => {
         const scriptKey: PersistentScriptKey = 'client-dev';
         const actionLabel = action === 'restart' ? 'Restarting' : `${action.charAt(0).toUpperCase() + action.slice(1)}`;
         setClientStatus('unknown');
+        setClientActionLoading(true);
+        setNpmTerminalLines([]);
         appendTerminalLines([
           { id: generateLineId(), kind: 'command', scope: 'client', text: `${actionLabel} Client` },
           { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} client...` }
@@ -561,9 +657,9 @@ const Administrator = (props: Props) => {
 
         const clientEndpointReachable = await ensureNpmEndpointReachable();
         if (!clientEndpointReachable) {
-          appendTerminalLines([
-            { id: generateLineId(), kind: 'stderr', text: `⚠ Cannot reach admin server at ${API_BASE}. Start the backend before using Client Controls.` }
-          ]);
+          setClientActionLoading(false);
+          setToastMessage(`Cannot reach admin server at ${API_BASE}. Start the backend before using Client Controls.`);
+          setToastVisible(true);
           setClientStatus('unknown');
           return;
         }
@@ -576,10 +672,13 @@ const Administrator = (props: Props) => {
           });
           if (!response.ok) {
             setClientStatus('stopped');
+            setToastMessage(`Client ${action} failed (${response.status})`);
+            setToastVisible(true);
             appendTerminalLines([
               { id: generateLineId(), kind: 'stderr', text: `Client ${action} failed (${response.status})` },
               { id: generateLineId(), kind: 'system', text: `✖ Client ${action} error.` }
             ]);
+            setClientActionLoading(false);
             return;
           }
           const data: NpmProcessResponse = await response.json();
@@ -587,67 +686,100 @@ const Administrator = (props: Props) => {
           setClientStatus(mapProcessStatus(data.status));
           logProcessOutput('client', data, actionLabel);
           if (!succeeded) {
+            setToastMessage(`Client ${action} did not succeed.`);
+            setToastVisible(true);
+            setClientActionLoading(false);
             return;
           }
           await captureStatusAfterAction({ scriptKey, scope: 'client', actionLabel, setStatus: setClientStatus });
         } catch (err) {
           setClientStatus('stopped');
+          setToastMessage(`Network error: ${String((err as Error).message)}`);
+          setToastVisible(true);
           appendTerminalLines([
             { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
             { id: generateLineId(), kind: 'system', text: `✖ Client ${action} network error.` }
           ]);
+        } finally {
+          setClientActionLoading(false);
         }
       };
 
       // Handler for server control buttons
-      const handleServerControl = async (action: 'start' | 'stop' | 'restart') => {
-        const scriptKey: PersistentScriptKey = 'server-dev';
-        const actionLabel = action === 'restart' ? 'Restarting' : `${action.charAt(0).toUpperCase() + action.slice(1)}`;
-        setServerStatus('unknown');
-        appendTerminalLines([
-          { id: generateLineId(), kind: 'command', scope: 'server', text: `${actionLabel} Server` },
-          { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} server...` }
-        ]);
-
-        const serverEndpointReachable = await ensureNpmEndpointReachable();
-        if (!serverEndpointReachable) {
-          appendTerminalLines([
-            { id: generateLineId(), kind: 'stderr', text: `⚠ Cannot reach admin server at ${API_BASE}. Start the backend before using Server Controls.` }
-          ]);
+        const handleServerControl = async (action: 'start' | 'stop' | 'restart') => {
+          const scriptKey: PersistentScriptKey = 'server-dev';
+          const actionLabel = action === 'restart' ? 'Restarting' : `${action.charAt(0).toUpperCase() + action.slice(1)}`;
           setServerStatus('unknown');
-          return;
-        }
-
-        try {
-          const response = await fetch(`${API_BASE}/api/npm/run`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ scriptKey, action })
-          });
-          if (!response.ok) {
-            setServerStatus('stopped');
-            appendTerminalLines([
-              { id: generateLineId(), kind: 'stderr', text: `Server ${action} failed (${response.status})` },
-              { id: generateLineId(), kind: 'system', text: `✖ Server ${action} error.` }
-            ]);
-            return;
-          }
-          const data: NpmProcessResponse = await response.json();
-          const succeeded = data.success !== false;
-          setServerStatus(mapProcessStatus(data.status));
-          logProcessOutput('server', data, actionLabel);
-          if (!succeeded) {
-            return;
-          }
-          await captureStatusAfterAction({ scriptKey, scope: 'server', actionLabel, setStatus: setServerStatus });
-        } catch (err) {
-          setServerStatus('stopped');
+          setServerActionLoading(true);
+          setNpmTerminalLines([]);
           appendTerminalLines([
-            { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
-            { id: generateLineId(), kind: 'system', text: `✖ Server ${action} network error.` }
+            { id: generateLineId(), kind: 'command', scope: 'server', text: `${actionLabel} Server` },
+            { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} server...` }
           ]);
-        }
-      };
+
+          const serverEndpointReachable = await ensureNpmEndpointReachable();
+          if (!serverEndpointReachable) {
+            setServerActionLoading(false);
+            setToastMessage(`Cannot reach admin server at ${API_BASE}. Start the backend before using Server Controls.`);
+            setToastVisible(true);
+            setServerStatus('unknown');
+            return;
+          }
+
+          try {
+            console.log('Sending POST to /api/npm/run', { scriptKey, action });
+            const response = await fetch(`${API_BASE}/api/npm/run`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ scriptKey, action })
+            });
+            if (!response || typeof response.status !== 'number') {
+              setServerStatus('unknown');
+              setToastMessage(`No response from backend. Possible CORS or network error.`);
+              setToastVisible(true);
+              appendTerminalLines([
+                { id: generateLineId(), kind: 'stderr', text: `No response from backend. Possible CORS or network error.` }
+              ]);
+              setServerActionLoading(false);
+              return;
+            }
+            if (!response.ok) {
+              setServerStatus('stopped');
+              setToastMessage(`Server ${action} failed (${response.status})`);
+              setToastVisible(true);
+              appendTerminalLines([
+                { id: generateLineId(), kind: 'stderr', text: `Server ${action} failed (${response.status})` },
+                { id: generateLineId(), kind: 'system', text: `✖ Server ${action} error.` }
+              ]);
+              setServerActionLoading(false);
+              return;
+            }
+            const data: NpmProcessResponse = await response.json();
+            const succeeded = data.success !== false;
+            setServerStatus(mapProcessStatus(data.status));
+            logProcessOutput('server', data, actionLabel);
+            if (!succeeded) {
+              setToastMessage(data.message ? `Server ${action} failed: ${data.message}` : `Server ${action} did not succeed.`);
+              setToastVisible(true);
+              setServerActionLoading(false);
+              appendTerminalLines([
+                { id: generateLineId(), kind: 'stderr', text: `Server ${action} failed: ${data.message || 'No process found to stop.'}` }
+              ]);
+              return;
+            }
+            await captureStatusAfterAction({ scriptKey, scope: 'server', actionLabel, setStatus: setServerStatus });
+          } catch (err) {
+            setServerStatus('stopped');
+            setToastMessage(`Network error: ${String((err as Error).message)}`);
+            setToastVisible(true);
+            appendTerminalLines([
+              { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
+              { id: generateLineId(), kind: 'system', text: `✖ Server ${action} network error.` }
+            ]);
+          } finally {
+            setServerActionLoading(false);
+          }
+        };
 
       useEffect(() => {
         if (!isAuthorized) return;
@@ -822,6 +954,7 @@ const Administrator = (props: Props) => {
 
       const startedAt = new Date();
       setIsRunningNpmCommand(true);
+        setNpmTerminalLines([]);
 
       const commandLine: NpmTerminalLine = {
         id: generateLineId(),
@@ -843,6 +976,8 @@ const Administrator = (props: Props) => {
         });
 
         if (!response.ok) {
+            setToastMessage(`${command.label} failed (${response.status})`);
+            setToastVisible(true);
           const errorText = await response.text();
           appendTerminalLines([
             { id: generateLineId(), kind: 'stderr', text: `Request failed (${response.status}): ${errorText || 'Unknown error'}` },
@@ -881,6 +1016,8 @@ const Administrator = (props: Props) => {
         appendTerminalLines(outputLines);
         setLastNpmRun(new Date());
       } catch (error) {
+          setToastMessage(`Network error: ${(error as Error).message}`);
+          setToastVisible(true);
         appendTerminalLines([
           { id: generateLineId(), kind: 'stderr', text: `Network error: ${(error as Error).message}` },
           { id: generateLineId(), kind: 'system', text: `✖ ${command.label} could not be started.` }
@@ -1260,8 +1397,7 @@ const Administrator = (props: Props) => {
     const [formDescription, setFormDescription] = useState('');
 
     // UI for save-toast and temporary reveal of saved password
-    const [toastVisible, setToastVisible] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
+    // ...existing code...
     const [lastSavedPlain, setLastSavedPlain] = useState<string | null>(null);
     const [showSavedReveal, setShowSavedReveal] = useState(false);
 
@@ -2550,6 +2686,29 @@ const Administrator = (props: Props) => {
               <div className="flex items-center justify-between mb-3">
               <div className="font-semibold">Online Users ({onlineUsers.length})</div>
               <div className="flex gap-2">
+                              <button
+                                type="button"
+                                className="px-4 py-2 rounded-lg font-semibold text-white bg-yellow-600 hover:bg-yellow-700 shadow focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                onClick={async () => {
+                                  try {
+                                    const res = await fetch('http://localhost:8000/api/npm/run', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ scriptKey: 'server-dev', action: 'stop' })
+                                    });
+                                    const data = await res.json();
+                                    console.log('Raw POST result:', data);
+                                    setToastMessage('Raw POST: ' + JSON.stringify(data));
+                                    setToastVisible(true);
+                                  } catch (err) {
+                                    console.error('Raw POST error:', err);
+                                    setToastMessage('Raw POST error: ' + String(err));
+                                    setToastVisible(true);
+                                  }
+                                }}
+                              >
+                                Test Raw POST
+                              </button>
                 <button onClick={refreshOnlineUsers} disabled={refreshingOnline} className={refreshingOnline ? 'px-3 py-1 bg-green-300 text-white text-sm rounded cursor-not-allowed' : 'px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded'}>
                   {refreshingOnline ? 'Refreshing...' : 'Refresh'}
                 </button>
@@ -5113,6 +5272,8 @@ const Administrator = (props: Props) => {
           </div>
         </section>
 
+        {/* PM2 Backend Process Controls */}
+        <BackendProcessControls />
         {/* Section 11 - npm Terminal */}
         <section className="pb-8 border-b border-gray-200 dark:border-gray-700">
           {/* Client Control Buttons */}
@@ -5163,9 +5324,37 @@ const Administrator = (props: Props) => {
               <button
                 type="button"
                 className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
-                onClick={() => handleServerControl('stop')}
+                onClick={async () => {
+                  console.log('Stop Server button pressed: sending POST to /api/npm/run');
+                  setToastMessage('Attempting Stop Server POST...');
+                  setToastVisible(true);
+                  try {
+                    const res = await fetch('/api/npm/run', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ scriptKey: 'server-dev', action: 'stop' })
+                    });
+                    console.log('Stop Server fetch response:', res);
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                      const data = await res.json();
+                      console.log('Stop Server POST result:', data);
+                      setToastMessage('Stop Server: ' + JSON.stringify(data));
+                      setToastVisible(true);
+                    } else {
+                      const text = await res.text();
+                      console.error('Stop Server non-JSON response:', text);
+                      setToastMessage('Stop Server error: Non-JSON response received.');
+                      setToastVisible(true);
+                    }
+                  } catch (err) {
+                    console.error('Stop Server POST error:', err);
+                    setToastMessage('Stop Server error: ' + String(err));
+                    setToastVisible(true);
+                  }
+                }}
               >
-                Stop Server
+                Stop Server NOW
               </button>
               <span className={`ml-4 px-3 py-1 rounded-full text-xs font-bold ${serverStatus === 'started' ? 'bg-green-100 text-green-800' : serverStatus === 'stopped' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}`}>
                 {serverStatus === 'started' ? 'Started' : serverStatus === 'stopped' ? 'Stopped' : 'Unknown'}

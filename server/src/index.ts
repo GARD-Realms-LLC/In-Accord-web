@@ -59,7 +59,12 @@ app.use(
     })
 );
 app.use(morgan("common"));
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+    credentials: true
+}));
 
 /* ROUTES */
 app.use("/dashboard", dashboardRoutes);
@@ -80,8 +85,13 @@ app.use('/api/admin/auth', authRoutes);
 import backupRoutes from './routes/backupRoutes';
 app.use('/api/backup', backupRoutes);
 app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
+
 import npmRoutes from './routes/npmRoutes';
 app.use('/api/npm', npmRoutes);
+
+// PM2 backend process control API
+import pm2Routes from './routes/pm2Routes';
+app.use('/api/pm2', pm2Routes);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     const isJsonSyntaxError = err instanceof SyntaxError && (err as any).status === 400 && 'body' in err;
