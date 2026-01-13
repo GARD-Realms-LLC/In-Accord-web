@@ -28,7 +28,7 @@ import { setIsSidebarCollapsed, setSidebarWidth } from '@/state';
 
 const FALLBACK_LOGO = 'https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/splash.jpg';
 
-type AllowedRoutes = string[] | null | undefined;
+type AllowedRoutes = string[] | undefined;
 
 const normalizeRoute = (route: string): string => {
   if (!route) return '/';
@@ -40,19 +40,15 @@ const normalizeRoute = (route: string): string => {
 };
 
 const canAccessRoute = (allowedRoutes: AllowedRoutes, targetRoute: string, role?: string | null): boolean => {
-  if (!targetRoute) return true;
+  if (!targetRoute) return false;
   const normalizedRole = role?.trim().toLowerCase();
   if (normalizedRole === 'admin') return true;
 
-  if (!allowedRoutes) {
-    return true;
-  }
-
-  if (allowedRoutes.length === 0) {
+  const normalizedTarget = normalizeRoute(targetRoute);
+  if (!allowedRoutes || allowedRoutes.length === 0) {
     return false;
   }
 
-  const normalizedTarget = normalizeRoute(targetRoute);
   if (allowedRoutes.includes('*')) {
     return true;
   }
@@ -63,6 +59,38 @@ const canAccessRoute = (allowedRoutes: AllowedRoutes, targetRoute: string, role?
     if (normalized === normalizedTarget) return true;
     return normalizedTarget.startsWith(`${normalized}/`);
   });
+};
+
+const deriveAllowedRoutes = (user: {
+  allowedRoutes?: unknown;
+  permissions?: Record<string, unknown>;
+} | null): string[] => {
+  if (!user || typeof user !== 'object') {
+    return [];
+  }
+
+  const routeList = Array.isArray(user.allowedRoutes)
+    ? user.allowedRoutes
+        .map((route) => (typeof route === 'string' ? normalizeRoute(route) : ''))
+        .filter(Boolean)
+    : [];
+
+  if (routeList.length > 0) {
+    return Array.from(new Set(routeList));
+  }
+
+  if (user.permissions && typeof user.permissions === 'object') {
+    const fromPermissions = Object.entries(user.permissions)
+      .filter(([, value]) => value === true || value === 'true')
+      .map(([route]) => normalizeRoute(route))
+      .filter(Boolean);
+
+    if (fromPermissions.length > 0) {
+      return Array.from(new Set(fromPermissions));
+    }
+  }
+
+  return [];
 };
 
 interface SidebarLinkProps {
@@ -150,7 +178,7 @@ const Sidebar = () => {
   const [sidebarLogoSrc, setSidebarLogoSrc] = useState<string | null>(null);
   const [sidebarLink, setSidebarLink] = useState<string>('/home');
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [allowedRoutes, setAllowedRoutes] = useState<string[] | null>(null);
+  const [allowedRoutes, setAllowedRoutes] = useState<string[] | undefined>(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const autoCollapsedRef = useRef(false);
 
@@ -177,7 +205,7 @@ const Sidebar = () => {
         const raw = localStorage.getItem('currentUser');
         if (!raw) {
           setCurrentUserRole(null);
-          setAllowedRoutes(null);
+          setAllowedRoutes([]);
           setIsLoggedIn(false);
           return;
         }
@@ -185,20 +213,17 @@ const Sidebar = () => {
         const parsed = JSON.parse(raw) as {
           role?: string;
           allowedRoutes?: unknown;
+          permissions?: Record<string, unknown>;
         };
 
-        const sanitizedRoutes = Array.isArray(parsed.allowedRoutes)
-          ? parsed.allowedRoutes
-              .map((route) => (typeof route === 'string' ? normalizeRoute(route) : ''))
-              .filter(Boolean)
-          : null;
+        const sanitizedRoutes = deriveAllowedRoutes(parsed);
 
         setCurrentUserRole(parsed.role ?? null);
         setAllowedRoutes(sanitizedRoutes);
         setIsLoggedIn(true);
       } catch {
         setCurrentUserRole(null);
-        setAllowedRoutes(null);
+        setAllowedRoutes([]);
         setIsLoggedIn(false);
       }
     };

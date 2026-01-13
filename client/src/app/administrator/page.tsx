@@ -336,6 +336,20 @@ interface NpmTerminalLine {
   text: string;
 }
 
+type PersistentScriptKey = 'client-dev' | 'server-dev';
+
+interface NpmProcessResponse {
+  success?: boolean;
+  status?: string;
+  message?: string;
+  output?: {
+    stdout?: string;
+    stderr?: string;
+  };
+  meta?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 // *NPM Termanal* //
 const npmCommandOptions = [
   { key: 'client-dev', label: 'Client Dev Server', scope: 'client', display: 'npm run dev', description: 'Start the Next.js development server (port 3000)', category: 'frontend' },
@@ -437,6 +451,220 @@ const Administrator = (props: Props) => {
         discord: "https://discord.com"
       }))
     ]);
+
+      // Client/server status state
+      const [clientStatus, setClientStatus] = useState<'started' | 'stopped' | 'unknown'>('unknown');
+      const [serverStatus, setServerStatus] = useState<'started' | 'stopped' | 'unknown'>('unknown');
+
+      const mapProcessStatus = (incoming?: string | null): 'started' | 'stopped' | 'unknown' => {
+        if (!incoming) return 'unknown';
+        if (incoming === 'running') return 'started';
+        if (incoming === 'stopped') return 'stopped';
+        return 'unknown';
+      };
+
+      const logProcessOutput = (
+        scope: 'client' | 'server',
+        data: any,
+        actionLabel: string,
+        options?: { skipEmptyAck?: boolean; suppressStatusMessage?: boolean }
+      ) => {
+        const lines: NpmTerminalLine[] = [];
+        const messageText = typeof data?.message === 'string' ? data.message : '';
+        const isStatusFetchMessage = messageText.toLowerCase?.().includes('status fetched');
+        if (messageText && !(options?.suppressStatusMessage && isStatusFetchMessage)) {
+          lines.push({ id: generateLineId(), kind: 'system', text: messageText });
+        }
+        if (data?.output?.stdout) {
+          data.output.stdout.split(/\r?\n/).filter(Boolean).forEach((line: string) => {
+            lines.push({ id: generateLineId(), kind: 'stdout', scope, text: line });
+          });
+        }
+        if (data?.output?.stderr) {
+          data.output.stderr.split(/\r?\n/).filter(Boolean).forEach((line: string) => {
+            lines.push({ id: generateLineId(), kind: 'stderr', scope, text: line });
+          });
+        }
+        if (lines.length === 0) {
+          if (options?.skipEmptyAck) {
+            return;
+          }
+          lines.push({ id: generateLineId(), kind: 'system', text: `${actionLabel} command acknowledged.` });
+        }
+        appendTerminalLines(lines);
+      };
+
+      const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      const hasProcessLogs = (data: NpmProcessResponse | null) => {
+        if (!data?.output) return false;
+        const stdout = typeof data.output.stdout === 'string' ? data.output.stdout.trim() : '';
+        const stderr = typeof data.output.stderr === 'string' ? data.output.stderr.trim() : '';
+        return Boolean(stdout || stderr);
+      };
+
+      const fetchProcessSnapshot = async (scriptKey: PersistentScriptKey): Promise<NpmProcessResponse | null> => {
+        try {
+          const resp = await fetch(`${API_BASE}/api/npm/run`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scriptKey, action: 'status' })
+          });
+          if (!resp.ok) return null;
+          return await resp.json();
+        } catch {
+          return null;
+        }
+      };
+
+      const ensureNpmEndpointReachable = async () => {
+        try {
+          const resp = await fetch(`${API_BASE}/api/npm/run`, {
+            method: 'OPTIONS',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          return resp.ok;
+        } catch {
+          return false;
+        }
+      };
+
+      const captureStatusAfterAction = async ({
+        scriptKey,
+        scope,
+        actionLabel,
+        setStatus
+      }: {
+        scriptKey: PersistentScriptKey;
+        scope: 'client' | 'server';
+        actionLabel: string;
+        setStatus: (status: 'started' | 'stopped' | 'unknown') => void;
+      }) => {
+        await wait(1200);
+        const snapshot = await fetchProcessSnapshot(scriptKey);
+        if (!snapshot) return;
+        setStatus(mapProcessStatus(snapshot.status));
+        if (hasProcessLogs(snapshot)) {
+          logProcessOutput(scope, snapshot, `${actionLabel} status`, { skipEmptyAck: true, suppressStatusMessage: true });
+        }
+      };
+
+      // Handler for client control buttons
+      const handleClientControl = async (action: 'start' | 'stop' | 'restart') => {
+        const scriptKey: PersistentScriptKey = 'client-dev';
+        const actionLabel = action === 'restart' ? 'Restarting' : `${action.charAt(0).toUpperCase() + action.slice(1)}`;
+        setClientStatus('unknown');
+        appendTerminalLines([
+          { id: generateLineId(), kind: 'command', scope: 'client', text: `${actionLabel} Client` },
+          { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} client...` }
+        ]);
+
+        const clientEndpointReachable = await ensureNpmEndpointReachable();
+        if (!clientEndpointReachable) {
+          appendTerminalLines([
+            { id: generateLineId(), kind: 'stderr', text: `⚠ Cannot reach admin server at ${API_BASE}. Start the backend before using Client Controls.` }
+          ]);
+          setClientStatus('unknown');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/api/npm/run`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scriptKey, action })
+          });
+          if (!response.ok) {
+            setClientStatus('stopped');
+            appendTerminalLines([
+              { id: generateLineId(), kind: 'stderr', text: `Client ${action} failed (${response.status})` },
+              { id: generateLineId(), kind: 'system', text: `✖ Client ${action} error.` }
+            ]);
+            return;
+          }
+          const data: NpmProcessResponse = await response.json();
+          const succeeded = data.success !== false;
+          setClientStatus(mapProcessStatus(data.status));
+          logProcessOutput('client', data, actionLabel);
+          if (!succeeded) {
+            return;
+          }
+          await captureStatusAfterAction({ scriptKey, scope: 'client', actionLabel, setStatus: setClientStatus });
+        } catch (err) {
+          setClientStatus('stopped');
+          appendTerminalLines([
+            { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
+            { id: generateLineId(), kind: 'system', text: `✖ Client ${action} network error.` }
+          ]);
+        }
+      };
+
+      // Handler for server control buttons
+      const handleServerControl = async (action: 'start' | 'stop' | 'restart') => {
+        const scriptKey: PersistentScriptKey = 'server-dev';
+        const actionLabel = action === 'restart' ? 'Restarting' : `${action.charAt(0).toUpperCase() + action.slice(1)}`;
+        setServerStatus('unknown');
+        appendTerminalLines([
+          { id: generateLineId(), kind: 'command', scope: 'server', text: `${actionLabel} Server` },
+          { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} server...` }
+        ]);
+
+        const serverEndpointReachable = await ensureNpmEndpointReachable();
+        if (!serverEndpointReachable) {
+          appendTerminalLines([
+            { id: generateLineId(), kind: 'stderr', text: `⚠ Cannot reach admin server at ${API_BASE}. Start the backend before using Server Controls.` }
+          ]);
+          setServerStatus('unknown');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/api/npm/run`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scriptKey, action })
+          });
+          if (!response.ok) {
+            setServerStatus('stopped');
+            appendTerminalLines([
+              { id: generateLineId(), kind: 'stderr', text: `Server ${action} failed (${response.status})` },
+              { id: generateLineId(), kind: 'system', text: `✖ Server ${action} error.` }
+            ]);
+            return;
+          }
+          const data: NpmProcessResponse = await response.json();
+          const succeeded = data.success !== false;
+          setServerStatus(mapProcessStatus(data.status));
+          logProcessOutput('server', data, actionLabel);
+          if (!succeeded) {
+            return;
+          }
+          await captureStatusAfterAction({ scriptKey, scope: 'server', actionLabel, setStatus: setServerStatus });
+        } catch (err) {
+          setServerStatus('stopped');
+          appendTerminalLines([
+            { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
+            { id: generateLineId(), kind: 'system', text: `✖ Server ${action} network error.` }
+          ]);
+        }
+      };
+
+      useEffect(() => {
+        if (!isAuthorized) return;
+        let cancelled = false;
+
+        (async () => {
+          const [clientData, serverData] = await Promise.all([
+            fetchProcessSnapshot('client-dev'),
+            fetchProcessSnapshot('server-dev')
+          ]);
+          if (cancelled) return;
+          if (clientData) setClientStatus(mapProcessStatus(clientData.status));
+          if (serverData) setServerStatus(mapProcessStatus(serverData.status));
+        })();
+
+        return () => { cancelled = true; };
+      }, [isAuthorized]);
 
     const [errors, setErrors] = useState<{ [key: number]: Partial<Record<keyof TeamMember, string>> }>({});
     const [auditLogEntries, setAuditLogEntries] = useState<AuditLogEntry[]>(initialAuditLogs);
@@ -551,6 +779,7 @@ const Administrator = (props: Props) => {
     const appendTerminalLines = (lines: NpmTerminalLine[]) => {
       setNpmTerminalLines(prev => [...prev, ...lines]);
     };
+
     const formatRunTimestamp = (date: Date) => new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short' }).format(date);
 
     // Refresh audit logs
@@ -659,6 +888,11 @@ const Administrator = (props: Props) => {
       } finally {
         setIsRunningNpmCommand(false);
       }
+    };
+
+    const handleClearNpmTerminal = () => {
+      setNpmTerminalLines([]);
+      setLastNpmRun(null);
     };
 
     const refreshSchema = () => {
@@ -4881,6 +5115,64 @@ const Administrator = (props: Props) => {
 
         {/* Section 11 - npm Terminal */}
         <section className="pb-8 border-b border-gray-200 dark:border-gray-700">
+          {/* Client Control Buttons */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div className="flex gap-2">
+              {/* Client Controls */}
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 shadow focus:outline-none focus:ring-2 focus:ring-green-400"
+                onClick={() => handleClientControl('start')}
+              >
+                Start Client
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onClick={() => handleClientControl('restart')}
+              >
+                Restart Client
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+                onClick={() => handleClientControl('stop')}
+              >
+                Stop Client
+              </button>
+              <span className={`ml-4 px-3 py-1 rounded-full text-xs font-bold ${clientStatus === 'started' ? 'bg-green-100 text-green-800' : clientStatus === 'stopped' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}`}>
+                {clientStatus === 'started' ? 'Started' : clientStatus === 'stopped' ? 'Stopped' : 'Unknown'}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              {/* Server Controls */}
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 shadow focus:outline-none focus:ring-2 focus:ring-green-400"
+                onClick={() => handleServerControl('start')}
+              >
+                Start Server
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onClick={() => handleServerControl('restart')}
+              >
+                Restart Server
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+                onClick={() => handleServerControl('stop')}
+              >
+                Stop Server
+              </button>
+              <span className={`ml-4 px-3 py-1 rounded-full text-xs font-bold ${serverStatus === 'started' ? 'bg-green-100 text-green-800' : serverStatus === 'stopped' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'}`}>
+                {serverStatus === 'started' ? 'Started' : serverStatus === 'stopped' ? 'Stopped' : 'Unknown'}
+              </span>
+            </div>
+          </div>
+
           <div className="p-4 bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div>
@@ -4891,58 +5183,17 @@ const Administrator = (props: Props) => {
             </div>
           </div>
 
-          <h2 className="text-3xl font-bold mb-2">npm Workspace Commands</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">Snapshot of recent npm activity for both frontend and backend services.</p>
-
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
-            <div className="flex flex-col gap-2 w-full md:w-2/3">
-              <label htmlFor="npm-command" className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Select npm script</label>
-              <div className="relative">
-                <select
-                  id="npm-command"
-                  value={selectedNpmCommand}
-                  onChange={(e) => setSelectedNpmCommand(e.target.value as (typeof npmCommandOptions)[number]['key'])}
-                  className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                  disabled={isRunningNpmCommand}
-                >
-                  {npmCommandOptions.map(option => (
-                    <option key={option.key} value={option.key}>
-                      {option.label} · {option.display}
-                    </option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">▾</span>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {npmCommandOptions.find(option => option.key === selectedNpmCommand)?.description}
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 md:w-1/3 md:items-end">
-              <button
-                type="button"
-                onClick={handleRunNpmCommand}
-                disabled={isRunningNpmCommand}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-100 transition ${isRunningNpmCommand ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400'}`}
-              >
-                {isRunningNpmCommand ? (
-                  <>
-                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                    </svg>
-                    Running…
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                      <path d="M6 4.75a.75.75 0 01.75-.75H11a.75.75 0 010 1.5H7.5v10.75a.75.75 0 01-1.5 0V4.75z" />
-                      <path d="M12.22 7.03a.75.75 0 011.06 0l2.968 2.969a.75.75 0 010 1.06L13.28 14.03a.75.75 0 01-1.06-1.06l1.689-1.69H9.75a.75.75 0 010-1.5h4.158l-1.689-1.69a.75.75 0 010-1.06z" />
-                    </svg>
-                    Run Command
-                  </>
-                )}
-              </button>
-            </div>
+          <div className="flex justify-end mb-6">
+            <button
+              type="button"
+              onClick={handleClearNpmTerminal}
+              className="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-gray-100 transition bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path d="M6 6.75A.75.75 0 016.75 6h6.5a.75.75 0 010 1.5h-6.5A.75.75 0 016 6.75zM5 9.25A.75.75 0 015.75 8.5h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 9.25zM4.25 12a.75.75 0 000 1.5h11.5a.75.75 0 000-1.5H4.25z" />
+              </svg>
+              Clear Terminal
+            </button>
           </div>
 
           <div className="bg-gray-900 text-gray-100 rounded-xl border border-gray-800 shadow-lg overflow-hidden">

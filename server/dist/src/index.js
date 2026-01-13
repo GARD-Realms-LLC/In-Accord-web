@@ -10,6 +10,8 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
 const helmet_1 = __importDefault(require("helmet"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 /* ROUTE IMPORTS */
 const dashboardRoutes_1 = __importDefault(require("./routes/dashboardRoutes")); // http://localhost:8000/dashboard
 /* CONFIGURATION */
@@ -26,7 +28,17 @@ const io = new socket_io_1.Server(httpServer, {
 setInterval(() => {
     io.emit('liveUpdate', { message: 'This is a live update from the server', timestamp: Date.now() });
 }, 10000);
-app.use(express_1.default.json({ limit: '50mb' }));
+app.use(express_1.default.json({
+    limit: '50mb',
+    verify: (req, _res, buf) => {
+        try {
+            req.rawBody = buf.toString('utf8');
+        }
+        catch (error) {
+            console.warn('Unable to capture raw request body', error);
+        }
+    }
+}));
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 app.use((0, helmet_1.default)());
 app.use(helmet_1.default.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -63,10 +75,31 @@ const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 app.use('/api/admin/auth', authRoutes_1.default);
 const backupRoutes_1 = __importDefault(require("./routes/backupRoutes"));
 app.use('/api/backup', backupRoutes_1.default);
-const path_1 = __importDefault(require("path"));
 app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..', 'data')));
 const npmRoutes_1 = __importDefault(require("./routes/npmRoutes"));
 app.use('/api/npm', npmRoutes_1.default);
+app.use((err, req, res, next) => {
+    const isJsonSyntaxError = err instanceof SyntaxError && err.status === 400 && 'body' in err;
+    if (isJsonSyntaxError) {
+        const rawBody = req.rawBody;
+        const logEntry = `[${new Date().toISOString()}] JSON parse error: ${err.message}\nraw=${rawBody}\n`;
+        try {
+            fs_1.default.appendFileSync(path_1.default.resolve(__dirname, '..', '..', 'logs', 'error.log'), logEntry, 'utf8');
+        }
+        catch (writeErr) {
+            console.warn('Failed to append JSON parse error log', writeErr);
+        }
+        console.error('JSON parse error:', err.message, rawBody);
+        res.status(400).json({
+            success: false,
+            error: 'Invalid JSON payload',
+            details: err.message,
+            rawBodyPreview: rawBody === null || rawBody === void 0 ? void 0 : rawBody.slice(0, 200)
+        });
+        return;
+    }
+    next(err);
+});
 /* SERVER */
 const port = process.env.PORT || 8000;
 httpServer.listen(port, () => {

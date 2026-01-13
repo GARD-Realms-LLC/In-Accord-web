@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import dotenv from "dotenv";
@@ -6,6 +6,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
+import fs from "fs";
+import path from "path";
 
 /* ROUTE IMPORTS */
 import dashboardRoutes from "./routes/dashboardRoutes"; // http://localhost:8000/dashboard
@@ -25,7 +27,20 @@ const io = new SocketIOServer(httpServer, {
 setInterval(() => {
     io.emit('liveUpdate', { message: 'This is a live update from the server', timestamp: Date.now() });
 }, 10000);
-app.use(express.json({ limit: '50mb' }));
+interface RequestWithRawBody extends Request {
+    rawBody?: string;
+}
+
+app.use(express.json({
+    limit: '50mb',
+    verify: (req, _res, buf) => {
+        try {
+            (req as RequestWithRawBody).rawBody = buf.toString('utf8');
+        } catch (error) {
+            console.warn('Unable to capture raw request body', error);
+        }
+    }
+}));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -64,10 +79,31 @@ import authRoutes from './routes/authRoutes';
 app.use('/api/admin/auth', authRoutes);
 import backupRoutes from './routes/backupRoutes';
 app.use('/api/backup', backupRoutes);
-import path from 'path';
 app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
 import npmRoutes from './routes/npmRoutes';
 app.use('/api/npm', npmRoutes);
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    const isJsonSyntaxError = err instanceof SyntaxError && (err as any).status === 400 && 'body' in err;
+    if (isJsonSyntaxError) {
+        const rawBody = (req as RequestWithRawBody).rawBody;
+        const logEntry = `[${new Date().toISOString()}] JSON parse error: ${err.message}\nraw=${rawBody}\n`;
+        try {
+            fs.appendFileSync(path.resolve(__dirname, '..', '..', 'logs', 'error.log'), logEntry, 'utf8');
+        } catch (writeErr) {
+            console.warn('Failed to append JSON parse error log', writeErr);
+        }
+        console.error('JSON parse error:', err.message, rawBody);
+        res.status(400).json({
+            success: false,
+            error: 'Invalid JSON payload',
+            details: err.message,
+            rawBodyPreview: rawBody?.slice(0, 200)
+        });
+        return;
+    }
+    next(err);
+});
 
 
 

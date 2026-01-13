@@ -78,6 +78,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       '/servers',
       '/hosting',
       '/users',
+      '/support',
+      '/team',
       '/administrator',
     ],
     []
@@ -94,22 +96,54 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     [PROTECTED_ROUTE_PREFIXES, normalizeRoute]
   );
 
+  const extractAllowedRoutes = React.useCallback(
+    (user: any): string[] => {
+      if (!user || typeof user !== 'object') {
+        return [];
+      }
+
+      const listFromArray = Array.isArray(user.allowedRoutes)
+        ? (user.allowedRoutes as unknown[])
+            .map((route) => (typeof route === 'string' ? normalizeRoute(route) : ''))
+            .filter(Boolean)
+        : [];
+
+      if (listFromArray.length > 0) {
+        return Array.from(new Set(listFromArray));
+      }
+
+      if (user.permissions && typeof user.permissions === 'object') {
+        const listFromPermissions = Object.entries(user.permissions as Record<string, unknown>)
+          .filter(([, value]) => value === true || value === 'true')
+          .map(([route]) => normalizeRoute(route))
+          .filter(Boolean);
+
+        if (listFromPermissions.length > 0) {
+          return Array.from(new Set(listFromPermissions));
+        }
+      }
+
+      return [];
+    },
+    [normalizeRoute]
+  );
+
   const hasRouteAccess = React.useCallback(
     (user: any, targetPath: string) => {
       const normalizedTarget = normalizeRoute(targetPath);
       const role = typeof user?.role === 'string' ? user.role.trim().toLowerCase() : '';
       if (role === 'admin') return true;
-      const allowed = Array.isArray(user?.allowedRoutes)
-        ? user.allowedRoutes
-            .map((route: any) => (typeof route === 'string' ? normalizeRoute(route) : null))
-            .filter(Boolean) as string[]
-        : [];
+
+      const allowed = extractAllowedRoutes(user);
       if (allowed.includes('*')) return true;
-      return allowed.some((allowedRoute) =>
-        normalizedTarget === allowedRoute || normalizedTarget.startsWith(`${allowedRoute}/`)
+      if (allowed.length === 0) return false;
+
+      return allowed.some(
+        (allowedRoute) =>
+          normalizedTarget === allowedRoute || normalizedTarget.startsWith(`${allowedRoute}/`)
       );
     },
-    [normalizeRoute]
+    [extractAllowedRoutes, normalizeRoute]
   );
 
   const enforceRouteGuards = React.useCallback(() => {
@@ -124,12 +158,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       if (!hasRouteAccess(user, normalizedPath)) {
-        router.replace('/home');
+        const allowed = extractAllowedRoutes(user);
+        const fallback = allowed.find((route) => route !== '*' && route !== normalizedPath) || '/home';
+        router.replace(fallback);
       }
     } catch {
       router.replace('/home');
     }
-  }, [hasRouteAccess, normalizeRoute, pathname, routeRequiresAuth, router]);
+  }, [extractAllowedRoutes, hasRouteAccess, normalizeRoute, pathname, routeRequiresAuth, router]);
 
   // Redirect to home when accessing protected routes without permission
   useEffect(() => {
