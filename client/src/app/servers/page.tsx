@@ -58,7 +58,7 @@ interface DiscordServerAd {
     const formatRoleLabel = (user: any, tokens: string[]): string => {
         if (Array.isArray(user?.roles) && user.roles.length) {
           return user.roles
-            .filter((role) => typeof role === 'string' && role.trim().length)
+            .filter((role: string) => typeof role === 'string' && role.trim().length)
             .join(', ');
         }
         if (typeof user?.role === 'string' && user.role.trim().length) {
