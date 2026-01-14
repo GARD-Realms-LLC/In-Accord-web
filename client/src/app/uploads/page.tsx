@@ -47,10 +47,14 @@ const Uploads = () => {
 
   const handleFinished = async (id) => {
     try {
-      await fetch('/api/save-mod', {
+      const formData = new FormData();
+      formData.append('json', JSON.stringify(form));
+      if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
+        formData.append('file', fileInputRef.current.files[0]);
+      }
+      await fetch('/api/save-mod-file', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: formData,
       });
     } catch (e) {
       // eslint-disable-next-line no-console
