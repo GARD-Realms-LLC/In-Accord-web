@@ -2854,6 +2854,7 @@ const Administrator = (props: Props) => {
               <div className="text-xs text-blue-700 dark:text-blue-300 mb-3">Roles can be used to manage permissions and restrict access to features or data.</div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
                 <div className="p-3 border rounded bg-gray-50 dark:bg-gray-700/40">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Role Name</label>
                     <input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g. Admins, Sales Team" className="mt-1 w-full px-3 py-2 border rounded bg-white dark:bg-gray-800 text-sm" />

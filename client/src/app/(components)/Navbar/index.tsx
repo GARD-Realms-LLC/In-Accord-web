@@ -213,7 +213,7 @@ const normalizeRoute = (route: string): string => {
     return (
       <>
         <div
-          className="flex justify-between items-center px-4 py-3 rounded-xl fixed top-0 z-50 shadow-md transition-all"
+          className="flex justify-between items-center px-4 py-3 rounded-xl fixed top-0 z-50 shadow-md transition-all whitespace-nowrap"
           style={{
             backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
             color: isDarkMode ? '#f3f4f6' : '#111827',
@@ -228,32 +228,36 @@ const normalizeRoute = (route: string): string => {
             minWidth: 0
           }}
         >
-         
-          {/*left side */} 
-          <div className="flex justify-between items-center gap-5">
-            <div className="hidden md:flex justify-between items-center gap-5">
-            </div>  
-            {currentUser && (
-              <button 
-                className="px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600" 
-                onClick={toggleSidebar}
-              >
-                <Menu className="w-4 h-4 dark:text-gray-300" />
-              </button>
-            )}
-          </div>
-          
-          {currentUser && (
-            <div className='relative'>
-              <input 
-                type="search" 
-                placeholder="Start typing  to search" 
-                className="pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
-              />
-              <div className='absolute inset-y-0 left-0 pl- flex items-center pointer-events-none'>
-                <Bell className="text-gray-500 dark:text-gray-400" size={20} />
+          {currentUser ? (
+            <div className="flex items-center w-full justify-between">
+              {/* Minimize button (left) */}
+              <div className="flex items-center gap-5">
+                <div className="hidden md:flex justify-between items-center gap-5"></div>
+                <button 
+                  className="px-3 py-3 bg-gray-100 dark:bg-gray-700 rounded-full hover:bg-blue-100 dark:hover:bg-gray-600" 
+                  onClick={toggleSidebar}
+                >
+                  <Menu className="w-4 h-4 dark:text-gray-300" />
+                </button>
               </div>
-            </div> 
+              {/* IN-BETA label (center) */}
+              <span className="font-bold text-red-800 text-lg mx-8 whitespace-nowrap">IN-BETA</span>
+              {/* Search box (right) */}
+              <div className='relative'>
+                <input 
+                  type="search" 
+                  placeholder="Start typing  to search" 
+                  className="pl-10 pr-4 py-2 w-50 md:w-60 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-blue-500"
+                />
+                <div className='absolute inset-y-0 left-0 pl- flex items-center pointer-events-none'>
+                  <Bell className="text-gray-500 dark:text-gray-400" size={20} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex w-full justify-center items-center">
+              <span className="font-bold text-red-800 text-lg mx-8 whitespace-nowrap">IN-BETA</span>
+            </div>
           )}
 
           {/*Right Side */}

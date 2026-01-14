@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type LoginResult = { ok?: boolean; error?: string; user?: any };
 
@@ -20,6 +20,24 @@ export default function LoginModal({
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Clear error when modal is closed
+  useEffect(() => {
+    if (!show) setError(null);
+    else {
+      // Only check server status when modal opens
+      let cancelled = false;
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      fetch(apiBase + '/api/health', { method: 'GET' })
+        .then(() => {
+          if (!cancelled) setError(null);
+        })
+        .catch(() => {
+          if (!cancelled) setError('Network error: server offline');
+        });
+      return () => { cancelled = true; };
+    }
+  }, [show]);
 
   async function submit() {
     setError(null);
@@ -47,6 +65,10 @@ export default function LoginModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black opacity-40" onClick={onClose} />
       <div className="relative bg-white dark:bg-gray-800 rounded-lg p-6 w-80 shadow-lg">
+        {/* Server offline message above logo */}
+        {error && /not reachable|offline|network/i.test(error) && (
+          <div className="text-center font-bold text-red-700 mb-2">Server is offline</div>
+        )}
         {/* Logo at the top */}
         <div className="flex justify-center mb-4">
           <img 
