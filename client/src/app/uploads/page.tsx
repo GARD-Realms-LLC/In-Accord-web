@@ -23,6 +23,7 @@ const Uploads = () => {
   const [uploads, setUploads] = useState([]);
   const [submittedIds, setSubmittedIds] = useState([]);
   const [finishedIds, setFinishedIds] = useState([]);
+  const [showModal, setShowModal] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
@@ -46,11 +47,25 @@ const Uploads = () => {
 
   const handleFinished = (id) => {
     setFinishedIds((prev) => [id, ...prev]);
+    setShowModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setShowPreview(false);
+      setForm(initialForm);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }, 2000);
   };
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen bg-blue-950 py-10">
-      <div className="w-full max-w-lg bg-blue-900 rounded-xl shadow-lg p-8 border border-blue-700">
+      <div className="w-full max-w-lg bg-blue-900 rounded-xl shadow-lg p-8 border border-blue-700 relative">
+                {showModal && (
+                  <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center">
+                      <span className="text-2xl font-bold text-blue-800 mb-2">Submitted for approval</span>
+                    </div>
+                  </div>
+                )}
         <h1 className="text-2xl font-bold text-blue-100 mb-6">Upload Plugin / Theme / CSS Mod</h1>
         {showPreview ? (
           <div className="bg-blue-900 rounded-xl shadow-lg p-6 border border-blue-700 mt-4">
@@ -91,7 +106,7 @@ const Uploads = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="inline w-6 h-6 align-text-bottom opacity-50">
                       <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
                     </svg>
-                  </span>
+                  </a>
                 )}
                 {form.github ? (
                   <a href={form.github} target="_blank" rel="noopener noreferrer" className="text-blue-200 hover:text-blue-400">
