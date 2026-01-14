@@ -429,6 +429,9 @@ const Administrator = (props: Props) => {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
+    // Team Member selection state for dropdown (MUST be inside the component)
+    const [selectedTeamMemberIndex, setSelectedTeamMemberIndex] = useState(0);
+
     const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
       {
         name: "Doc Cowles - DocRST",
@@ -4837,138 +4840,148 @@ const Administrator = (props: Props) => {
             Edit and manage team member information, profile details, and contact links for all team members.
           </p>
           
-          <div className="space-y-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                  {index === 0 ? 'Team Member 1 (Doc Cowles - DocRST)' : `Team Member ${index + 1}`}
-                </h3>
-                <form onSubmit={(e) => handleSubmit(index, e)} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member Name</label>
-                    <input 
-                      type="text" 
-                      name="name"
-                      value={member.name}
-                      onChange={(e) => updateMemberField(index, 'name', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                      required
-                    />
-                    {errors[index]?.name && (
-                      <p className="mt-1 text-sm text-red-600">{errors[index]?.name}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Job Title</label>
-                    <input 
-                      type="text" 
-                      name="jobTitle"
-                      value={member.jobTitle}
-                      onChange={(e) => updateMemberField(index, 'jobTitle', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                      required
-                    />
-                    {errors[index]?.jobTitle && (
-                      <p className="mt-1 text-sm text-red-600">{errors[index]?.jobTitle}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
-                    <textarea 
-                      name="description"
-                      rows={2} 
-                      value={member.description}
-                      onChange={(e) => updateMemberField(index, 'description', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                      required
-                    />
-                    {errors[index]?.description && (
-                      <p className="mt-1 text-sm text-red-600">{errors[index]?.description}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profile Image URL</label>
-                    <input 
-                      type="url" 
-                      name="imageUrl"
-                      value={member.imageUrl}
-                      onChange={(e) => updateMemberField(index, 'imageUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                      required
-                    />
-                    {errors[index]?.imageUrl && (
-                      <p className="mt-1 text-sm text-red-600">{errors[index]?.imageUrl}</p>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                      <input 
-                        type="email" 
-                        name="email"
-                        value={member.email}
-                        onChange={(e) => updateMemberField(index, 'email', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                        required
-                      />
-                      {errors[index]?.email && (
-                        <p className="mt-1 text-sm text-red-600">{errors[index]?.email}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Website</label>
-                      <input 
-                        type="url" 
-                        name="website"
-                        value={member.website}
-                        onChange={(e) => updateMemberField(index, 'website', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                        required
-                      />
-                      {errors[index]?.website && (
-                        <p className="mt-1 text-sm text-red-600">{errors[index]?.website}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">GitHub</label>
-                      <input 
-                        type="url" 
-                        name="github"
-                        value={member.github}
-                        onChange={(e) => updateMemberField(index, 'github', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                        required
-                      />
-                      {errors[index]?.github && (
-                        <p className="mt-1 text-sm text-red-600">{errors[index]?.github}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Discord</label>
-                      <input 
-                        type="url" 
-                        name="discord"
-                        value={member.discord}
-                        onChange={(e) => updateMemberField(index, 'discord', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" 
-                        required
-                      />
-                      {errors[index]?.discord && (
-                        <p className="mt-1 text-sm text-red-600">{errors[index]?.discord}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-4 pt-2">
-                    <button type="submit" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                      Save Changes
-                    </button>
-                    <button type="button" className="px-6 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors">
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+          {/* Team Member Selection Dropdown */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Team Member</label>
+            <select
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              value={selectedTeamMemberIndex}
+              onChange={e => setSelectedTeamMemberIndex(Number(e.target.value))}
+            >
+              {teamMembers.map((member, idx) => (
+                <option key={idx} value={idx}>
+                  {idx === 0 ? `Team Member 1 (Doc Cowles - DocRST)` : `Team Member ${idx + 1}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Single Team Member Edit Form */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              {selectedTeamMemberIndex === 0 ? 'Team Member 1 (Doc Cowles - DocRST)' : `Team Member ${selectedTeamMemberIndex + 1}`}
+            </h3>
+            <form onSubmit={(e) => handleSubmit(selectedTeamMemberIndex, e)} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={teamMembers[selectedTeamMemberIndex]?.name || ''}
+                  onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'name', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  required
+                />
+                {errors[selectedTeamMemberIndex]?.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.name}</p>
+                )}
               </div>
-            ))}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Job Title</label>
+                <input
+                  type="text"
+                  name="jobTitle"
+                  value={teamMembers[selectedTeamMemberIndex]?.jobTitle || ''}
+                  onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'jobTitle', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  required
+                />
+                {errors[selectedTeamMemberIndex]?.jobTitle && (
+                  <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.jobTitle}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                <textarea
+                  name="description"
+                  rows={2}
+                  value={teamMembers[selectedTeamMemberIndex]?.description || ''}
+                  onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'description', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  required
+                />
+                {errors[selectedTeamMemberIndex]?.description && (
+                  <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.description}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profile Image URL</label>
+                <input
+                  type="url"
+                  name="imageUrl"
+                  value={teamMembers[selectedTeamMemberIndex]?.imageUrl || ''}
+                  onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'imageUrl', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  required
+                />
+                {errors[selectedTeamMemberIndex]?.imageUrl && (
+                  <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.imageUrl}</p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={teamMembers[selectedTeamMemberIndex]?.email || ''}
+                    onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'email', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                  {errors[selectedTeamMemberIndex]?.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.email}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Website</label>
+                  <input
+                    type="url"
+                    name="website"
+                    value={teamMembers[selectedTeamMemberIndex]?.website || ''}
+                    onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'website', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                  {errors[selectedTeamMemberIndex]?.website && (
+                    <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.website}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">GitHub</label>
+                  <input
+                    type="url"
+                    name="github"
+                    value={teamMembers[selectedTeamMemberIndex]?.github || ''}
+                    onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'github', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                  {errors[selectedTeamMemberIndex]?.github && (
+                    <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.github}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Discord</label>
+                  <input
+                    type="url"
+                    name="discord"
+                    value={teamMembers[selectedTeamMemberIndex]?.discord || ''}
+                    onChange={(e) => updateMemberField(selectedTeamMemberIndex, 'discord', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                  {errors[selectedTeamMemberIndex]?.discord && (
+                    <p className="mt-1 text-sm text-red-600">{errors[selectedTeamMemberIndex]?.discord}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-4 pt-2">
+                <button type="submit" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </section>
 
