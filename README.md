@@ -17,6 +17,24 @@ In-Accord is The Premier Discord Customization and Management App for Users and 
     <a href="https://InAccord.app/invite" target="_blank">
       <img src="https://img.shields.io/badge/discord-join-green?labelColor=0c0d10&color=3a71c1&style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxsPSJub25lIj4NCjxwYXRoIGQ9Ik0xNi41MzUzIDUuNDUwNTNDMzMuODIzMyAtMS40NjgwOSA1MC44ODE1IDE2Ljg4NjMgNDEuNTkyNSAzMy42MDY2QzM3LjM3MzIgNDEuMjAxMiAyNi44OTA0IDQ3LjMxNyAxNC42ODQyIDQxLjUzMjZMNi4xOTk5IDQzLjk1NjdDNC44ODM0NiA0NC4zMzI4IDMuNjY2OTMgNDMuMTIxMiA0LjAzNjM0IDQxLjgwMzdDNC41NDI3MiAzOS45OTc2IDUuNzQyNTcgMzUuNzM5OCA2LjQ0NDEgMzMuNDMyM0MxLjE4Mjc5IDI0LjA0NCA0LjczMDUgMTAuMTc0OCAxNi41MzUzIDUuNDUwNTNaTTE1Ljk5NTQgMjAuMjQ5NkMxNS45OTU0IDIwLjkzOTkgMTYuNTU1IDIxLjQ5OTYgMTcuMjQ1NCAyMS40OTk2SDMwLjc0OThDMzEuNDQwMSAyMS40OTk2IDMxLjk5OTggMjAuOTM5OSAzMS45OTk4IDIwLjI0OTZDMzEuOTk5OCAxOS41NTkyIDMxLjQ0MDEgMTguOTk5NiAzMC43NDk4IDE4Ljk5OTZIMTcuMjQ1NEMxNi41NTUgMTguOTk5NiAxNS45OTU0IDE5LjU1OTIgMTUuOTk1NCAyMC4yNDk2Wk0xNy4yNDk4IDI2LjQ3NDZDMTYuNTU5NCAyNi40NzQ2IDE1Ljk5OTggMjcuMDM0MiAxNS45OTk4IDI3LjcyNDZDMTUuOTk5OCAyOC40MTQ5IDE2LjU1OTQgMjguOTc0NiAxNy4yNDk4IDI4Ljk3NDZIMjYuNzQ5OEMyNy40NDAxIDI4Ljk3NDYgMjcuOTk5OCAyOC40MTQ5IDI3Ljk5OTggMjcuNzI0NkMyNy45OTk4IDI3LjAzNDIgMjcuNDQwMSAyNi40NzQ2IDI2Ljc0OTggMjYuNDc0NkgxNy4yNDk4WiIgZmlsia0iIzNhNzFjMSIvPg0KPC9zdmc+" alt="Chat" height="22"/>
     </a>
+    <a href="/administrator" target="_blank"><img src="https://img.shields.io/badge/administrator-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="administrator" height="22"/></a>
+    <a href="/bots" target="_blank"><img src="https://img.shields.io/badge/bots-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="bots" height="22"/></a>
+    <a href="/dashboard" target="_blank"><img src="https://img.shields.io/badge/dashboard-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="dashboard" height="22"/></a>
+    <a href="/expenses" target="_blank"><img src="https://img.shields.io/badge/expenses-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="expenses" height="22"/></a>
+    <a href="/home" target="_blank"><img src="https://img.shields.io/badge/home-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="home" height="22"/></a>
+    <a href="/hosting" target="_blank"><img src="https://img.shields.io/badge/hosting-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="hosting" height="22"/></a>
+    <a href="/ide" target="_blank"><img src="https://img.shields.io/badge/ide-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="ide" height="22"/></a>
+    <a href="/inventory" target="_blank"><img src="https://img.shields.io/badge/inventory-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="inventory" height="22"/></a>
+    <a href="/plugins" target="_blank"><img src="https://img.shields.io/badge/plugins-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="plugins" height="22"/></a>
+    <a href="/products" target="_blank"><img src="https://img.shields.io/badge/products-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="products" height="22"/></a>
+    <a href="/profile" target="_blank"><img src="https://img.shields.io/badge/profile-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="profile" height="22"/></a>
+    <a href="/servers" target="_blank"><img src="https://img.shields.io/badge/servers-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="servers" height="22"/></a>
+    <a href="/signup" target="_blank"><img src="https://img.shields.io/badge/signup-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="signup" height="22"/></a>
+    <a href="/support" target="_blank"><img src="https://img.shields.io/badge/support-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="support" height="22"/></a>
+    <a href="/team" target="_blank"><img src="https://img.shields.io/badge/team-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="team" height="22"/></a>
+    <a href="/themes" target="_blank"><img src="https://img.shields.io/badge/themes-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="themes" height="22"/></a>
+    <a href="/uploads" target="_blank"><img src="https://img.shields.io/badge/uploads-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="uploads" height="22"/></a>
+    <a href="/users" target="_blank"><img src="https://img.shields.io/badge/users-page-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="users" height="22"/></a>
     <a href="https://github.com/GARD-Realms-LLC/In-Accord-web/releases" target="_blank">
       <img src="https://img.shields.io/github/downloads/GARD-Realms-LLC/In-Accord-web/total?labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="Downloads" height="22"/>
     </a>
