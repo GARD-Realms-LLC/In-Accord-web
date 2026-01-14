@@ -9,6 +9,7 @@ import { dracula } from "@uiw/codemirror-theme-dracula";
 const IDE = (props: any) => {
 	const [mode, setMode] = useState<'css' | 'javascript' | 'json'>('css');
 	const [code, setCode] = useState<string>(`body {\n  background: #f9fafb;\n  color: #222;\n}`);
+	const [copied, setCopied] = useState(false);
 	// File input ref for import
 	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -81,12 +82,31 @@ const IDE = (props: any) => {
 						style={{ display: 'none' }}
 						onChange={handleImport}
 					/>
+					   <button
+						   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
+						   onClick={handleExport}
+					   >
+						   Export File
+					   </button>
 					<button
-						className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
-						onClick={handleExport}
+						className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow"
+						onClick={async () => {
+							try {
+								await navigator.clipboard.writeText(code);
+								setCopied(true);
+								setTimeout(() => setCopied(false), 1500);
+							} catch (e) {
+								alert('Failed to copy!');
+							}
+						}}
 					>
-						Export File
+						Copy Code
 					</button>
+								{copied && (
+								  <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 transition-all">
+								    Code copied to clipboard!
+								  </div>
+								)}
 					<button
 						className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow"
 						onClick={() => setCode("")}

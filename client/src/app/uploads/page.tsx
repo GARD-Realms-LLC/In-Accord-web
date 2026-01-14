@@ -222,6 +222,7 @@ const Uploads = () => {
               <div className="flex gap-4">
                 <button type="button" onClick={handleClear} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">Clear Form</button>
                 <button type="submit" className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow">Submit</button>
+                <button type="button" onClick={() => window.location.href = '/ide'} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded shadow">Open IDE</button>
               </div>
               <div className="flex gap-2 items-center mt-2">
                 <label htmlFor="addFile" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-6 rounded shadow cursor-pointer text-sm min-w-30 text-center whitespace-nowrap">Add File
