@@ -45,7 +45,17 @@ const Uploads = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleFinished = (id) => {
+  const handleFinished = async (id) => {
+    try {
+      await fetch('/api/save-mod', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to save mod file:', e);
+    }
     setFinishedIds((prev) => [id, ...prev]);
     setShowModal(true);
     setTimeout(() => {
@@ -140,7 +150,7 @@ const Uploads = () => {
               <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow" onClick={() => setShowPreview(false)}>
                 Edit
               </button>
-              <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow" onClick={() => { setShowPreview(false); handleClear(); }}>
+              <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow" onClick={() => handleFinished(Date.now())}>
                 Finished
               </button>
             </div>
