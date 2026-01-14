@@ -52,15 +52,55 @@ const Uploads = () => {
         <h1 className="text-2xl font-bold text-blue-100 mb-6">Upload Plugin / Theme / CSS Mod</h1>
         <form onSubmit={e => { e.preventDefault(); handleUpload(); }}>
           <div className="flex flex-col gap-4">
-            <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="rounded p-2 bg-blue-800 text-blue-100" required />
-            <input name="author" value={form.author} onChange={handleChange} placeholder="Author" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <input name="version" value={form.version} onChange={handleChange} placeholder="Version" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <input name="authorId" value={form.authorId} onChange={handleChange} placeholder="In-Accord Id" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <input name="donate" value={form.donate} onChange={handleChange} placeholder="Donate Link" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <input name="patreon" value={form.patreon} onChange={handleChange} placeholder="Patreon Link" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <input name="website" value={form.website} onChange={handleChange} placeholder="Website" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="rounded p-2 bg-blue-800 text-blue-100" />
-            <select name="category" value={form.category} onChange={handleChange} className="rounded p-2 bg-blue-800 text-blue-100">
+            {/* Picture Preview Box */}
+            <div className="flex flex-col items-center mb-2">
+              <div className="w-32 h-32 bg-blue-800 rounded-lg flex items-center justify-center overflow-hidden border border-blue-600">
+                {form.imageUrl ? (
+                  <img src={form.imageUrl} alt="Preview" className="object-cover w-full h-full" />
+                ) : (
+                  <span className="text-blue-300 text-xs">Image Preview</span>
+                )}
+              </div>
+              <label className="mt-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold py-1 px-4 rounded shadow cursor-pointer text-xs">
+                Upload Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files && e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = ev => {
+                        if (ev.target && typeof ev.target.result === 'string') {
+                          setForm(prev => ({ ...prev, imageUrl: ev.target.result }));
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+            <input name="name" value={form.name} onChange={handleChange} placeholder="MOD Name" className="rounded p-2 bg-gray-800 text-gray-100" required />
+            <textarea name="description" value={form.description} onChange={handleChange} placeholder="MOD Description" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="author" value={form.author} onChange={handleChange} placeholder="MOD Author" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="version" value={form.version} onChange={handleChange} placeholder="Mod Version" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="authorId" value={form.authorId} onChange={handleChange} placeholder="In-Accord Id" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="donate" value={form.donate} onChange={handleChange} placeholder="Donate Link" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="patreon" value={form.patreon} onChange={handleChange} placeholder="Patreon Link" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="github" value={form.github || ''} onChange={handleChange} placeholder="GitHub" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <input name="website" value={form.website} onChange={handleChange} placeholder="Website Link" className="rounded p-2 bg-gray-800 text-gray-100" />
+            <textarea
+              name="code"
+              value={form.code || ''}
+              onChange={handleChange}
+              placeholder="json or js code"
+              className="rounded p-2 bg-gray-800 text-gray-100 mt-2"
+              rows={6}
+              style={{ resize: 'vertical' }}
+            />
+            <select name="category" value={form.category} onChange={handleChange} className="rounded p-2 bg-gray-800 text-gray-100">
               <option>Plugins</option>
               <option>Themes</option>
               <option>CSS Mods</option>
@@ -69,10 +109,11 @@ const Uploads = () => {
               <button type="button" onClick={handleClear} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">Clear Form</button>
               <button type="submit" className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow">Submit</button>
             </div>
-            <div className="flex gap-2 items-center mt-2">
-              <input type="file" accept=".json,.js" id="addFile" ref={fileInputRef} className="block w-full text-sm text-blue-100 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-700 file:text-white hover:file:bg-blue-800" />
-              <label htmlFor="addFile" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-6 rounded shadow cursor-pointer text-sm min-w-30 text-center whitespace-nowrap">Add File</label>
-            </div>
+                    <div className="flex gap-2 items-center mt-2">
+                      <label htmlFor="addFile" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-6 rounded shadow cursor-pointer text-sm min-w-30 text-center whitespace-nowrap">Add File
+                        <input type="file" accept=".json,.js" id="addFile" ref={fileInputRef} style={{ display: 'none' }} />
+                      </label>
+                    </div>
             <div className="text-xs text-blue-300 mt-1 ml-1">Files must be .json or .js files only!</div>
           </div>
         </form>
