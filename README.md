@@ -19,16 +19,16 @@ In-Accord is The Premier Discord Customization and Management App for Users and 
   </a>
   <div align="center">
     <a href="https://github.com/GARD-Realms-LLC/In-Accord-web/releases" target="_blank">
-      <img src="https://img.shields.io/github/downloads/GARD-Realms-LLC/In-Accord-web/total?labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="Downloads"/>
+      <img src="https://img.shields.io/github/downloads/GARD-Realms-LLC/In-Accord-web/total?labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="Downloads" height="22"/>
     </a>
     <a href="https://github.com/GARD-Realms-LLC/In-Accord-web/blob/main/LICENSE.md" target="_blank">
-      <img src="https://img.shields.io/github/license/GARD-Realms-LLC/In-Accord-web?labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="License"/>
+      <img src="https://img.shields.io/github/license/GARD-Realms-LLC/In-Accord-web?labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="License" height="22"/>
     </a>
     <a href="https://github.com/GARD-Realms-LLC/In-Accord-web/issues" target="_blank">
-      <img src="https://img.shields.io/github/issues/GARD-Realms-LLC/In-Accord-web?label=issues&labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="Issues"/>
+      <img src="https://img.shields.io/github/issues/GARD-Realms-LLC/In-Accord-web?label=issues&labelColor=0c0d10&color=3a71c1&style=for-the-badge" alt="Issues" height="22"/>
     </a>
     <a href="https://github.com/GARD-Realms-LLC/In-Accord-web/wiki" target="_blank">
-      <img src="https://img.shields.io/badge/wiki-available-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="Wiki"/>
+      <img src="https://img.shields.io/badge/wiki-available-3a71c1?labelColor=0c0d10&style=for-the-badge" alt="Wiki" height="22"/>
     </a>
   </div>
 </p>
