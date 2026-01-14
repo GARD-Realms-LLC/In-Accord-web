@@ -109,6 +109,15 @@ For information on contributing to this project, please see [CONTRIBUTING.md](/C
 
 ## GitHub Code Contributors:
 
-| [Doc Cowles - Docrst](https://github.com/docrst) |
-| [Eli Copter- Harry James Potter](https://github.com/hogwartsworld47)
+<p align="left">
+  <a href="https://github.com/docrst" target="_blank">
+    <img src="https://github.com/docrst.png" width="32" height="32" style="border-radius:50%;vertical-align:middle;" alt="Doc Cowles" />
+    Doc Cowles - Docrst
+  </a>
+  <br/>
+  <a href="https://github.com/hogwartsworld47" target="_blank">
+    <img src="https://github.com/hogwartsworld47.png" width="32" height="32" style="border-radius:50%;vertical-align:middle;" alt="Eli Copter" />
+    Eli Copter- Harry James Potter
+  </a>
+</p>
 </div>
