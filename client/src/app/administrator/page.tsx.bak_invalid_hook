@@ -1,4 +1,0 @@
-'use client';
-// Team Member selection state for dropdown
-  const [selectedTeamMemberIndex, setSelectedTeamMemberIndex] = useState(0);
-
