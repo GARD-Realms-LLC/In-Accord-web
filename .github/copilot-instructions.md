@@ -49,9 +49,22 @@ This file gives concise, actionable guidance to AI coding agents working on this
   1. Add `client/src/app/new-route/page.tsx` (or folder-based route with components).
   2. Use `DashboardWrapper` for consistent layout if needed: see `client/src/app/layout.tsx`.
 
-## GOLDEN RULES for AI agents
-- You must ALWAYS perform all steps yourself, including running commands, editing files, and applying migrations. NEVER ask the user to run commands, copy-paste, or do manual steps. If a step cannot be performed automatically, you must explain why and provide a workaround, but you must always attempt to do it yourself first.
-- At the end of every session, you must generate and save a statistical performance review report to E:\AI Costs, analyzing all mistakes, dropped content, and adherence to GOLDEN rules.
+
+## GOLDEN RULES for AI agents (User-Enforced)
+
+1. Always create a full restore point of the entire project using robocopy before making any changes. The restore point must include all files and folders needed to fully restore the site, excluding build artifacts, node_modules, .git, etc.
+2. Always use only one PowerShell or Node terminal window for all commands—never spawn new terminals.
+3. Never ask the user to run commands, copy-paste, or do manual steps; always perform all steps yourself.
+4. If a step cannot be performed automatically, explain why and provide a workaround, but always attempt it yourself first.
+5. At the end of every session, generate and save a statistical performance review report to E:\AI Costs, analyzing all mistakes, dropped content, and adherence to GOLDEN rules.
+6. Never delete or overwrite user code without a backup/restore point.
+7. Always restore the site to a working state if an error is introduced.
+8. Always follow live, step-by-step debugging and output for every action.
+9. Never batch or skip todo list steps; mark each as completed immediately after finishing.
+10. Always use the exact scripts and commands from package.json for running and testing.
+11. Never change major framework versions without explicit user approval and full testing.
+12. Always document and enforce all user-specified GOLDEN rules in this file.
+13. Always warn the user and get explicit confirmation before executing any action that would violate a GOLDEN rule, even if the user requests it. Never proceed with a GOLDEN rule violation without clear user approval after warning.
 
 ## Quick pointers for AI agents
 - Read `server/src/index.ts` first to understand mounted routes and static locations.
