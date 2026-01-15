@@ -10,47 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getDashboardStats = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const db_1 = require("../db");
+const schema_1 = require("../schema");
+const drizzle_orm_1 = require("drizzle-orm");
 const getDashboardStats = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const popularProducts = yield prisma.products.findMany({
-            take: 15,
-            orderBy: {
-                stockQuantity: "desc"
-            },
-        });
-        const saleSummary = yield prisma.salesSummary.findMany({
-            take: 5,
-            orderBy: {
-                date: "desc",
-            },
-        });
-        const purchaseSummary = yield prisma.purchaseSummary.findMany({
-            take: 5,
-            orderBy: {
-                date: "desc",
-            },
-        });
-        const expenseSummary = yield prisma.expenseSummary.findMany({
-            take: 5,
-            orderBy: {
-                date: "desc",
-            },
-        });
-        const expenseByCategorySummaryRaw = yield prisma.expenseByCategory.findMany({
-            take: 5,
-            orderBy: {
-                date: "desc",
-            },
-        });
-        const expenseByCategorySummary = expenseByCategorySummaryRaw.map((item) => (Object.assign(Object.assign({}, item), { amount: item.amount.toString() })));
+        const popularProducts = yield db_1.db.select().from(schema_1.products).orderBy((0, drizzle_orm_1.desc)(schema_1.products.stockQuantity)).limit(15);
+        const saleSummary = yield db_1.db.select().from(schema_1.salesSummary).orderBy((0, drizzle_orm_1.desc)(schema_1.salesSummary.date)).limit(5);
+        const purchaseSummary = yield db_1.db.select().from(schema_1.purchaseSummaryTable).orderBy((0, drizzle_orm_1.desc)(schema_1.purchaseSummaryTable.date)).limit(5);
+        const expenseSummaryRows = yield db_1.db.select().from(schema_1.expenseSummary).orderBy((0, drizzle_orm_1.desc)(schema_1.expenseSummary.date)).limit(5);
+        const expenseByCategorySummaryRaw = yield db_1.db.select().from(schema_1.expenseByCategory).orderBy((0, drizzle_orm_1.desc)(schema_1.expenseByCategory.date)).limit(5);
+        const expenseByCategorySummary = expenseByCategorySummaryRaw.map((item) => (Object.assign(Object.assign({}, item), { amount: item.amount ? item.amount.toString() : '' })));
         res.json({
             popularProducts,
             salesSummary: saleSummary,
             purchaseSummary,
-            expenseSummary,
-            expenseByCategorySummary
+            expenseSummary: expenseSummaryRows,
+            expenseByCategorySummary,
         });
     }
     catch (error) {

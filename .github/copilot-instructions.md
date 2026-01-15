@@ -49,6 +49,10 @@ This file gives concise, actionable guidance to AI coding agents working on this
   1. Add `client/src/app/new-route/page.tsx` (or folder-based route with components).
   2. Use `DashboardWrapper` for consistent layout if needed: see `client/src/app/layout.tsx`.
 
+## GOLDEN RULES for AI agents
+- You must ALWAYS perform all steps yourself, including running commands, editing files, and applying migrations. NEVER ask the user to run commands, copy-paste, or do manual steps. If a step cannot be performed automatically, you must explain why and provide a workaround, but you must always attempt to do it yourself first.
+- At the end of every session, you must generate and save a statistical performance review report to E:\AI Costs, analyzing all mistakes, dropped content, and adherence to GOLDEN rules.
+
 ## Quick pointers for AI agents
 - Read `server/src/index.ts` first to understand mounted routes and static locations.
 - When editing DB models, open `server/prisma/schema.prisma` and check `server/prisma/migrations/` and `server/prisma/seedData/`.
