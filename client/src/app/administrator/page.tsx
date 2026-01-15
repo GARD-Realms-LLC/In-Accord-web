@@ -429,6 +429,8 @@ const initialUsers: User[] = [
 const Administrator = (props: Props) => {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    // Permission modal state
+    const [permissionModal, setPermissionModal] = useState<{ open: boolean, permissions: string[], role: string } | null>(null);
 
     // Team Member selection state for dropdown (MUST be inside the component)
     const [selectedTeamMemberIndex, setSelectedTeamMemberIndex] = useState(0);
@@ -2997,6 +2999,31 @@ const Administrator = (props: Props) => {
                                 ) : (
                                   <span className="italic text-gray-400">None</span>
                                 )}
+                                      {/* Permission Modal */}
+                                      {permissionModal?.open && (
+                                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+                                          <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+                                            <div className="flex items-center justify-between mb-3">
+                                              <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400">Permissions for Role: {permissionModal.role}</h3>
+                                              <button onClick={() => setPermissionModal(null)} className="text-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded">Close</button>
+                                            </div>
+                                            <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap wrap-break-word border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/40 rounded p-3 mb-4">
+                                              {permissionModal.permissions.length === 0 ? (
+                                                <span className="italic text-gray-400">No permissions assigned.</span>
+                                              ) : (
+                                                <ul className="list-disc pl-5">
+                                                  {permissionModal.permissions.map((perm, idx) => (
+                                                    <li key={perm + idx}>{formatPermissionLabel(perm)}</li>
+                                                  ))}
+                                                </ul>
+                                              )}
+                                            </div>
+                                            <div className="flex justify-end">
+                                              <button onClick={() => setPermissionModal(null)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">OK</button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
                               </div>
                             </td>
                             <td className="px-3 py-2">
