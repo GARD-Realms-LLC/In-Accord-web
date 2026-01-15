@@ -1,5 +1,6 @@
-'use client';
 
+"use client";
+import React from 'react';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -2981,13 +2982,21 @@ const Administrator = (props: Props) => {
                             </td>
                             <td className="px-3 py-2">
                               <div className="flex flex-wrap gap-1">
-                                {g.permissions && g.permissions.length > 0
-                                  ? g.permissions.map((value) => (
-                                      <span key={value} className="px-2 py-1 bg-blue-50 dark:bg-blue-900 border rounded text-xs">
-                                        {formatPermissionLabel(value)}
-                                      </span>
-                                    ))
-                                  : <span className="italic text-gray-400">None</span>}
+                                {g.permissions && g.permissions.length > 0 ? (
+                                  <>
+                                    <button
+                                      className="px-2 py-1 bg-blue-50 dark:bg-blue-900 border rounded text-xs hover:bg-blue-100 dark:hover:bg-blue-800 focus:outline-none"
+                                      onClick={() => setPermissionModal({ open: true, permissions: g.permissions, role: g.name })}
+                                    >
+                                      {formatPermissionLabel(g.permissions[0])}
+                                      {g.permissions.length > 1 && (
+                                        <span className="ml-1 text-blue-600 dark:text-blue-300">+{g.permissions.length - 1}</span>
+                                      )}
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span className="italic text-gray-400">None</span>
+                                )}
                               </div>
                             </td>
                             <td className="px-3 py-2">

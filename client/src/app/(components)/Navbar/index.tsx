@@ -285,7 +285,7 @@ const normalizeRoute = (route: string): string => {
               </div>
             )}
             <hr className="w-0 h-7 border border-solid border-l border-gray-300 mx-3" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full">
               {!avatarError && !isGeneratedAvatar ? (
                 <img
                   src={avatarUrl}
@@ -298,12 +298,12 @@ const normalizeRoute = (route: string): string => {
                   <User className="text-gray-600" size={18} />
                 </div>
               )}
-              <span className="font-semibold">{currentUser?.name ?? 'Not Logged In'}</span>
+              <span className="font-semibold whitespace-nowrap ml-2 overflow-hidden text-ellipsis" style={{ width: '200px', display: 'inline-block' }}>{currentUser?.name ?? 'Not Logged In'}</span>
             </div>
             <div className="flex items-center gap-2">
               {!currentUser && (
                 <>
-                  <button onClick={() => setShowLoginModal(true)} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded">Login/Register</button>
+                  <button onClick={() => setShowLoginModal(true)} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded ml-2">Login/Register</button>
                   <LoginModal show={showLoginModal} onClose={() => setShowLoginModal(false)} onSubmit={handleLogin} />
                 </>
               )}
