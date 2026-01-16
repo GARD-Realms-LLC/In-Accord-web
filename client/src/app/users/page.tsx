@@ -1,13 +1,14 @@
+"use client";
+import HomePageWrapper from "../HomePageWrapper";
+
 const Users = (props: Props) => {
-    return (
+  return (
+    <HomePageWrapper>
       <div>
-      <hr></hr>
-      <p></p>
-      <p></p> 
-        USERS
-        Under Construction
+users
       </div>
-    )
+    </HomePageWrapper>
+  );
 }
 
 export default Users

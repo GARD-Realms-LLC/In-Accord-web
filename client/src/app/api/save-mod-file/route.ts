@@ -1,6 +1,13 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+
+interface ModData {
+  name?: string;
+  category?: string;
+  [key: string]: any;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,9 +15,9 @@ export async function POST(req: NextRequest) {
     const json = formData.get('json');
     const file = formData.get('file');
     let fileName = 'mod-category.json';
-    let modData = {};
+    let modData: ModData = {};
     if (json && typeof json === 'string') {
-      modData = JSON.parse(json);
+      modData = JSON.parse(json) as ModData;
       const safeModName = (modData.name || 'mod').replace(/[^a-zA-Z0-9-_]/g, '_');
       const safeCategory = (modData.category || 'category').replace(/[^a-zA-Z0-9-_]/g, '_');
       fileName = `${safeModName}-${safeCategory}.json`;

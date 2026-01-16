@@ -1,13 +1,17 @@
+import HomePageWrapper from "../HomePageWrapper";
+
 const Plugins = (props: Props) => {
-    return (
+  return (
+    <HomePageWrapper>
       <div>
-              <hr></hr>
-      <p></p>
-      <p></p>
+        <hr></hr>
+        <p></p>
+        <p></p>
         Plugins
         Under Construction
       </div>
-    )
+    </HomePageWrapper>
+  );
 }
 
 export default Plugins

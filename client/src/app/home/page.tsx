@@ -1,39 +1,42 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
+import HomePageWrapper from "../HomePageWrapper";
+
 const Home = (props: Props) => {
   const currentYear = new Date().getFullYear();
  
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto w-full px-6">
-        <header className="w-full flex justify-center items-center py-8">
-        <h1
-          className="font-extrabold text-indigo-700 dark:text-indigo-400 text-center"
-          style={{ fontSize: '8rem', lineHeight: '1', margin: 0 }}
-        >
-          In-Accord
-        </h1>
-        <div style={{ height: '1.5em' }}></div>
-      </header>
-        <section className="w-full py-8">
-        <h2 className="max-w-4xl text-2xl font-semibold text-gray-700 dark:text-gray-200 text-center mx-auto">
-          The Premier Discord customization and management suite.
-        </h2>
-        <p className="mt-4 mb-4 w-full max-w-3xl mx-auto text-center text-base text-gray-600 dark:text-gray-300">
-          In-Accord empowers community leaders and server owners with advanced Discord management tools, customizable themes, plugin support, and seamless integrations. Built for reliability, security, and ease of use, it’s the all-in-one solution for growing and managing vibrant online communities.
-        </p>
-      </section>
-        <main className="flex flex-1 flex-col items-center pb-0 min-h-0">
-        <div className="flex flex-1 flex-col items-center justify-center gap-6">
-
-          <section className="flex justify-center items-center w-full">
-            <ResizableImage />
+    <HomePageWrapper>
+      <div className="flex h-full flex-col bg-white dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto w-full px-6">
+          <header className="w-full flex justify-center items-center py-8">
+            <h1
+              className="font-extrabold text-indigo-700 dark:text-indigo-400 text-center"
+              style={{ fontSize: '8rem', lineHeight: '1', margin: 0 }}
+            >
+              In-Accord
+            </h1>
+            <div style={{ height: '1.5em' }}></div>
+          </header>
+          <section className="w-full py-8">
+            <h2 className="max-w-4xl text-2xl font-semibold text-gray-700 dark:text-gray-200 text-center mx-auto">
+              The Premier Discord customization and management suite.
+            </h2>
+            <p className="mt-4 mb-4 w-full max-w-3xl mx-auto text-center text-base text-gray-600 dark:text-gray-300">
+              In-Accord empowers community leaders and server owners with advanced Discord management tools, customizable themes, plugin support, and seamless integrations. Built for reliability, security, and ease of use, it’s the all-in-one solution for growing and managing vibrant online communities.
+            </p>
           </section>
+          <main className="flex flex-1 flex-col items-center pb-0 min-h-0">
+            <div className="flex flex-1 flex-col items-center justify-center gap-6">
+              <section className="flex justify-center items-center w-full">
+                <ResizableImage />
+              </section>
+            </div>
+          </main>
         </div>
-      </main>
       </div>
-    </div>
+    </HomePageWrapper>
   );
 };
 

@@ -200,17 +200,17 @@ function BotsPage() {
   return (
     <HomePageWrapper>
       <div className="max-w-3xl mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-4 dark:text-white text-gray-900">Discord Bot Builders</h1>
-        <p className="mb-6 text-gray-600 dark:text-gray-300">
+        <h1 className="text-3xl font-bold mb-4">Discord Bot Builders</h1>
+        <p className="mb-6 text-gray-600">
           Discover Discord bot builders, automation studios, and integration experts. Browse featured teams or submit your own bot-building service.
         </p>
 
-        <form onSubmit={handleSubmit} className="mb-8 p-4 border rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-          <h2 className="text-xl font-semibold mb-2 dark:text-white text-gray-900">Submit Your Bot Service</h2>
-          {error && <div className="text-red-600 dark:text-red-400 mb-2">{error}</div>}
+        <form onSubmit={handleSubmit} className="mb-8 p-4 border rounded bg-gray-50">
+          <h2 className="text-xl font-semibold mb-2">Submit Your Bot Service</h2>
+          {error && <div className="text-red-600 mb-2">{error}</div>}
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Builder Name"
               value={form.builderName}
               onChange={e => setForm(f => ({ ...f, builderName: e.target.value }))}
@@ -218,7 +218,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Tagline"
               value={form.tagline}
               onChange={e => setForm(f => ({ ...f, tagline: e.target.value }))}
@@ -226,7 +226,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Price"
               value={form.price}
               onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
@@ -234,7 +234,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <textarea
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Highlights (one per line)"
               value={form.highlightsText}
               onChange={e => setForm(f => ({ ...f, highlightsText: e.target.value }))}
@@ -242,7 +242,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Badge"
               value={form.badge}
               onChange={e => setForm(f => ({ ...f, badge: e.target.value }))}
@@ -250,7 +250,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Target Audience"
               value={form.targetAudience}
               onChange={e => setForm(f => ({ ...f, targetAudience: e.target.value }))}
@@ -258,7 +258,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="CTA Label"
               value={form.ctaLabel}
               onChange={e => setForm(f => ({ ...f, ctaLabel: e.target.value }))}
@@ -266,7 +266,7 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="CTA URL"
               value={form.ctaUrl}
               onChange={e => setForm(f => ({ ...f, ctaUrl: e.target.value }))}
@@ -274,50 +274,50 @@ function BotsPage() {
           </div>
           <div className="mb-2">
             <input
-              className="border p-2 w-full dark:bg-gray-900 dark:text-white dark:border-gray-700"
+              className="border p-2 w-full"
               placeholder="Contact Email"
               value={form.contact}
               onChange={e => setForm(f => ({ ...f, contact: e.target.value }))}
             />
           </div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded dark:bg-blue-700 dark:text-white" type="submit">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded" type="submit">
             Submit
           </button>
         </form>
 
         <div>
-          <h2 className="text-2xl font-semibold mb-4 dark:text-white text-gray-900">Featured Bot Builders</h2>
+          <h2 className="text-2xl font-semibold mb-4">Featured Bot Builders</h2>
           <div className="space-y-6">
             {ads.map((ad) => (
-              <div key={ad.id} className="border rounded p-4 bg-white shadow dark:bg-gray-900 dark:border-gray-700">
+              <div key={ad.id} className="border rounded p-4 bg-white shadow">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-lg dark:text-white text-gray-900">{ad.builderName}</span>
-                  {ad.badge && <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs dark:bg-green-900 dark:text-green-200">{ad.badge}</span>}
+                  <span className="font-bold text-lg">{ad.builderName}</span>
+                  {ad.badge && <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">{ad.badge}</span>}
                 </div>
-                <div className="mb-1 text-gray-700 dark:text-gray-300">{ad.tagline}</div>
-                <div className="mb-1 text-sm text-gray-500 dark:text-gray-400">{ad.price}</div>
+                <div className="mb-1 text-gray-700">{ad.tagline}</div>
+                <div className="mb-1 text-sm text-gray-500">{ad.price}</div>
                 <ul className="list-disc ml-6 mb-2">
                   {ad.highlights.map((h, i) => (
-                    <li key={i} className="dark:text-gray-300 text-gray-700">{h}</li>
+                    <li key={i}>{h}</li>
                   ))}
                 </ul>
                 {ad.targetAudience && (
-                  <div className="mb-1 text-xs text-gray-400 dark:text-gray-500">For: {ad.targetAudience}</div>
+                  <div className="mb-1 text-xs text-gray-400">For: {ad.targetAudience}</div>
                 )}
                 <div className="flex items-center gap-4 mt-2">
                   <a
                     href={ad.ctaUrl}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 dark:bg-blue-700 dark:text-white dark:hover:bg-blue-800"
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     {ad.ctaLabel}
                   </a>
                   {ad.contact && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Contact: {ad.contact}</span>
+                    <span className="text-xs text-gray-500">Contact: {ad.contact}</span>
                   )}
                 </div>
-                <div className="text-xs text-gray-300 dark:text-gray-500 mt-2">
+                <div className="text-xs text-gray-300 mt-2">
                   Added: {formatTimestamp(ad.createdAt)}
                 </div>
               </div>

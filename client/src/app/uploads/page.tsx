@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef } from "react";
+import HomePageWrapper from "../HomePageWrapper";
 
 const initialForm = {
   name: "",
@@ -37,9 +38,7 @@ const Uploads = () => {
     setUploads((prev) => [newUpload, ...prev]);
     setSubmittedIds((prev) => [newUpload.id, ...prev]);
     setForm(initialForm);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
-
   const handleClear = () => {
     setForm(initialForm);
     if (fileInputRef.current) fileInputRef.current.value = '';
