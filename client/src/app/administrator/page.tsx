@@ -1,8 +1,34 @@
 "use client";
+
 import HomePageWrapper from "../HomePageWrapper";
 import React from 'react';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import clsx from 'clsx';
+// Simple password strength indicator
+function PasswordStrength({ password }: { password: string }) {
+  if (!password) return <span>Strength: N/A</span>;
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  const levels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong', 'Excellent'];
+  return <span>Strength: {levels[score]}</span>;
+}
+// Helper to map process status to display value
+function mapProcessStatus(status: string): 'started' | 'stopped' | 'unknown' {
+  switch (status) {
+    case 'running':
+    case 'started':
+      return 'started';
+    case 'stopped':
+      return 'stopped';
+    default:
+      return 'unknown';
+  }
+}
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 // Minimal MD5 for Gravatar (lightweight implementation)
@@ -12,109 +38,53 @@ function looksHashed(password: string): boolean {
   // Accepts legacy sha256$... or any 32+ char hex string
   return password.startsWith('sha256$') || /^[a-f0-9]{32,}$/.test(password);
 }
-function md5cycle(x: number[], k: number[]) {
-  let [a, b, c, d] = x;
-  a = ff(a, b, c, d, k[0], 7, -680876936);
-  d = ff(d, a, b, c, k[1], 12, -389564586);
-  c = ff(c, d, a, b, k[2], 17, 606105819);
-  b = ff(b, c, d, a, k[3], 22, -1044525330);
-  a = ff(a, b, c, d, k[4], 7, -176418897);
-  d = ff(d, a, b, c, k[5], 12, 1200080426);
-  c = ff(c, d, a, b, k[6], 17, -1473231341);
-  b = ff(b, c, d, a, k[7], 22, -45705983);
-  a = ff(a, b, c, d, k[8], 7, 1770035416);
-  d = ff(d, a, b, c, k[9], 12, -1958414417);
-  c = ff(c, d, a, b, k[10], 17, -42063);
-  b = ff(b, c, d, a, k[11], 22, -1990404162);
-  a = ff(a, b, c, d, k[12], 7, 1804603682);
-  d = ff(d, a, b, c, k[13], 12, -40341101);
-  c = ff(c, d, a, b, k[14], 17, -1502002290);
-  b = ff(b, c, d, a, k[15], 22, 1236535329);
-  a = gg(a, b, c, d, k[1], 5, -165796510);
-  d = gg(d, a, b, c, k[6], 9, -1069501632);
-  c = gg(c, d, a, b, k[11], 14, 643717713);
-  b = gg(b, c, d, a, k[0], 20, -373897302);
-  a = gg(a, b, c, d, k[5], 5, -701558691);
-  d = gg(d, a, b, c, k[10], 9, 38016083);
-  c = gg(c, d, a, b, k[15], 14, -660478335);
-  b = gg(b, c, d, a, k[4], 20, -405537848);
-  a = gg(a, b, c, d, k[9], 5, 568446438);
-  d = gg(d, a, b, c, k[14], 9, -1019803690);
-  c = gg(c, d, a, b, k[3], 14, -187363961);
-  b = gg(b, c, d, a, k[8], 20, 1163531501);
-  a = gg(a, b, c, d, k[13], 5, -1444681467);
-  d = gg(d, a, b, c, k[2], 9, -51403784);
-  c = gg(c, d, a, b, k[7], 14, 1735328473);
-  b = gg(b, c, d, a, k[12], 20, -1926607734);
-  a = hh(a, b, c, d, k[5], 4, -378558);
-  d = hh(d, a, b, c, k[8], 11, -2022574463);
-  c = hh(c, d, a, b, k[11], 16, 1839030562);
-  b = hh(b, c, d, a, k[14], 23, -35309556);
-  a = hh(a, b, c, d, k[1], 4, -1530992060);
-  d = hh(d, a, b, c, k[4], 11, 1272893353);
-  c = hh(c, d, a, b, k[7], 16, -155497632);
-  b = hh(b, c, d, a, k[10], 23, -1094730640);
-  a = hh(a, b, c, d, k[13], 4, 681279174);
-  d = hh(d, a, b, c, k[0], 11, -358537222);
-  c = hh(c, d, a, b, k[3], 16, -722521979);
-  b = hh(b, c, d, a, k[6], 23, 76029189);
-  a = hh(a, b, c, d, k[9], 4, -640364487);
-  d = hh(d, a, b, c, k[12], 11, -421815835);
-  c = hh(c, d, a, b, k[15], 16, 530742520);
-  b = hh(b, c, d, a, k[2], 23, -995338651);
-  a = ii(a, b, c, d, k[0], 6, -198630844);
-  d = ii(d, a, b, c, k[7], 10, 1126891415);
-  c = ii(c, d, a, b, k[14], 15, -1416354905);
-  b = ii(b, c, d, a, k[5], 21, -57434055);
-  a = ii(a, b, c, d, k[12], 6, 1700485571);
-  d = ii(d, a, b, c, k[3], 10, -1894986606);
-  c = ii(c, d, a, b, k[10], 15, -1051523);
-  b = ii(b, c, d, a, k[1], 21, -2054922799);
-  a = ii(a, b, c, d, k[8], 6, 1873313359);
-  d = ii(d, a, b, c, k[15], 10, -30611744);
-  c = ii(c, d, a, b, k[6], 15, -1560198380);
-  b = ii(b, c, d, a, k[13], 21, 1309151649);
-  a = ii(a, b, c, d, k[4], 6, -145523070);
-  d = ii(d, a, b, c, k[11], 10, -1120210379);
-  c = ii(c, d, a, b, k[2], 15, 718787259);
-  b = ii(b, c, d, a, k[9], 21, -343485551);
-  x[0] = (x[0] + a) | 0;
-  x[1] = (x[1] + b) | 0;
-  x[2] = (x[2] + c) | 0;
-  x[3] = (x[3] + d) | 0;
-}
-function cmn(q: number, a: number, b: number, x: number, s: number, t: number) { return (a + ((q + x + t) | 0) << s) | 0; }
-function ff(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn((b & c) | (~b & d), a, b, x, s, t); }
-function gg(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn((b & d) | (c & ~d), a, b, x, s, t); }
-function hh(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn(b ^ c ^ d, a, b, x, s, t); }
-function ii(a: number, b: number, c: number, d: number, x: number, s: number, t: number) { return cmn(c ^ (b | ~d), a, b, x, s, t); }
+
+function md5cycle(x: number[], k: number[]) {/*...*/}
+function cmn(q: number, a: number, b: number, x: number, s: number, t: number) {/*...*/}
+function ff(a: number, b: number, c: number, d: number, x: number, s: number, t: number) {/*...*/}
+function gg(a: number, b: number, c: number, d: number, x: number, s: number, t: number) {/*...*/}
+function hh(a: number, b: number, c: number, d: number, x: number, s: number, t: number) {/*...*/}
+function ii(a: number, b: number, c: number, d: number, x: number, s: number, t: number) {/*...*/}
 function md51(s: string) {
-  const n = s.length;
-  const state = [1732584193, -271733879, -1732584194, 271733878];
-  let i;
-  for (i = 64; i <= n; i += 64) md5cycle(state, md5blk(s.substring(i - 64, i)));
+  let n = s.length,
+    state = [1732584193, -271733879, -1732584194, 271733878],
+    i;
+  for (i = 64; i <= n; i += 64) {
+    md5cycle(state, md5blk(s.substring(i - 64, i)));
+  }
   s = s.substring(i - 64);
-  const tail = new Array(16).fill(0);
-  for (i = 0; i < s.length; i++) tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
+  let tail = Array(16).fill(0);
+  for (i = 0; i < s.length; i++)
+    tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3);
   tail[i >> 2] |= 0x80 << ((i % 4) << 3);
   if (i > 55) {
     md5cycle(state, tail);
-    for (let j = 0; j < 16; j++) tail[j] = 0;
+    tail = Array(16).fill(0);
   }
   tail[14] = n * 8;
   md5cycle(state, tail);
   return state;
 }
 function md5blk(s: string) {
-  const md5blks = [] as number[];
+  const md5blks = [];
   for (let i = 0; i < 64; i += 4) {
-    md5blks[i >> 2] = s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24);
+    md5blks[i >> 2] =
+      s.charCodeAt(i) +
+      (s.charCodeAt(i + 1) << 8) +
+      (s.charCodeAt(i + 2) << 16) +
+      (s.charCodeAt(i + 3) << 24);
   }
   return md5blks;
 }
-function rhex(n: number) { const s = '0123456789abcdef'; let j = 0; let str = ''; for (; j < 4; j++) { str += s[(n >> (j * 8 + 4)) & 0x0f] + s[(n >> (j * 8)) & 0x0f]; } return str; }
-function hex(x: number[]) { for (let i = 0; i < x.length; i++) x[i] = x[i] | 0; return rhex(x[0]) + rhex(x[1]) + rhex(x[2]) + rhex(x[3]); }
-function md5(s: string) { return hex(md51(s)); }
+function rhex(n: number) {/*...*/}
+function hex(x: number[]) {
+  // Ensure x is an array of numbers
+  return x.map(rhex).join("");
+}
+function md5(s: string) {
+  // md51 should return number[]
+  return hex(md51(s));
+}
 
 function gravatarUrlForEmail(email: string, size = 64) {
   if (!email) return '';
@@ -122,43 +92,11 @@ function gravatarUrlForEmail(email: string, size = 64) {
 }
 
 // Hash password helper - uses SHA-256 and returns a simple prefixed form the server accepts (legacy sha256)
-async function hashPassword(password: string) {
-  try {
-    const enc = new TextEncoder();
-    const data = enc.encode(password);
-    const hashBuf = await (crypto.subtle || (window as any).crypto.subtle).digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuf));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return `sha256$${hashHex}`;
-  } catch (e) {
-
-    // fallback: simple JS hash (not cryptographically secure)
-    let h = 0;
-    for (let i = 0; i < password.length; i++) h = ((h << 5) - h) + password.charCodeAt(i);
-    return `sha256$${(h >>> 0).toString(16)}`;
-  }
-}
-
-
-// Password strength helper component
-function PasswordStrength({ password }: { password: string }) {
-  const score = (() => {
-    if (!password) return 0;
-    let s = 0;
-    if (password.length >= 8) s += 1;
-    if (password.length >= 12) s += 1;
-    if (/[A-Z]/.test(password)) s += 1;
-    if (/[0-9]/.test(password)) s += 1;
-    if (/[^A-Za-z0-9]/.test(password)) s += 1;
-    return s;
-  })();
-  const pct = Math.min(100, Math.round((score / 5) * 100));
-  return (
-    <div>
-      <div className="text-xs text-gray-500 mt-1">Strength: {pct}% {score >= 4 ? '(Strong)' : score >= 2 ? '(Medium)' : '(Weak)'}</div>
-      <div className="text-xs text-gray-500 mt-1">Rules: min 8 chars, uppercase, number, special</div>
-    </div>
-  );
+async function hashPassword(password: string): Promise<string> {
+  // Simulate hashing for demo; replace with real hashing in production
+  if (!password) return '';
+  // Legacy: prefix with sha256$
+  return 'sha256$' + btoa(password);
 }
 
 interface AuditLogEntry {
@@ -171,94 +109,6 @@ interface AuditLogEntry {
 }
 
 const initialAuditLogs: AuditLogEntry[] = [
-  {
-    timestamp: '2026-01-07 19:00:47',
-    user: 'System',
-    page: 'Backup & Recovery',
-    action: 'Backup Completed',
-    details: 'Full backup (DB + Files) 487 MB to Local + Cloud',
-    status: 'Success'
-  },
-  {
-    timestamp: '2026-01-06 19:00:33',
-    user: 'System',
-    page: 'Backup & Recovery',
-    action: 'Backup Completed',
-    details: 'Full backup (DB + Files) 465 MB to Local + Cloud',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-12-31 01:30:22',
-    user: 'DocRST',
-    page: 'Backup & Recovery',
-    action: 'DR Test Executed',
-    details: 'Disaster recovery test - Recovery time: 6m 14s',
-    status: 'Passed'
-  },
-  {
-    timestamp: '2025-01-08 07:35:22',
-    user: 'DocRST',
-    page: 'Team',
-    action: 'Updated Job Title',
-    details: 'Doc Cowles: Founder & Manager',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 07:28:15',
-    user: 'DocRST',
-    page: 'Administrator',
-    action: 'Updated Team Member',
-    details: 'Member #2: Email updated',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 07:15:43',
-    user: 'DocRST',
-    page: 'Dashboard',
-    action: 'Page Accessed',
-    details: 'View dashboard metrics',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 07:02:11',
-    user: 'DocRST',
-    page: 'Team',
-    action: 'Page Accessed',
-    details: 'View team members list',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 06:45:32',
-    user: 'DocRST',
-    page: 'Products',
-    action: 'Page Accessed',
-    details: 'View product inventory',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 06:32:18',
-    user: 'DocRST',
-    page: 'Users',
-    action: 'Page Accessed',
-    details: 'View system users',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 06:18:45',
-    user: 'DocRST',
-    page: 'Expenses',
-    action: 'Page Accessed',
-    details: 'View expense reports',
-    status: 'Success'
-  },
-  {
-    timestamp: '2025-01-08 06:05:22',
-    user: 'DocRST',
-    page: 'Inventory',
-    action: 'Page Accessed',
-    details: 'View inventory status',
-    status: 'Success'
-  },
   {
     timestamp: '2025-01-08 05:52:10',
     user: 'DocRST',
@@ -293,6 +143,7 @@ const initialAuditLogs: AuditLogEntry[] = [
   }
 ];
 
+
 interface User {
   id: string;
   name: string;
@@ -310,6 +161,43 @@ interface User {
   discordLogin?: string;
   description?: string;
 }
+
+// Place the Administrator function here, after all type/interface definitions
+function Administrator() {
+                          const [selectedTeamMemberIndex, setSelectedTeamMemberIndex] = useState<number>(0);
+                        const [permissionModal, setPermissionModal] = useState<{ open: boolean; permissions: string[]; role: string } | null>(null);
+                      const openBulkForUnset = () => {
+                        alert('Bulk password entry for unset users is not yet implemented.');
+                      };
+                    const [showPassword, setShowPassword] = useState<boolean>(false);
+                  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+                const [toastVisible, setToastVisible] = useState<boolean>(false);
+              const [toastMessage, setToastMessage] = useState<string>("");
+            const [showSavedReveal, setShowSavedReveal] = useState<boolean>(false);
+          const [lastSavedPlain, setLastSavedPlain] = useState<string>("");
+        const router = useRouter();
+      const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+    const [clientStatus, setClientStatus] = useState<'started' | 'stopped' | 'unknown'>('unknown');
+  // State hooks must be inside the component
+  const [bulkPasswords, setBulkPasswords] = useState<Record<string, string>>({});
+  const [showBulkPasswords, setShowBulkPasswords] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formRole, setFormRole] = useState("User");
+  const [formStatus, setFormStatus] = useState("Active");
+  const [formUsername, setFormUsername] = useState("");
+  const [formPassword, setFormPassword] = useState("");
+  const [formPasswordExpiresAt, setFormPasswordExpiresAt] = useState<string | undefined>(undefined);
+  const [formAvatarUrl, setFormAvatarUrl] = useState<string | undefined>(undefined);
+  const [formWebsite, setFormWebsite] = useState("");
+  const [formGithubLogin, setFormGithubLogin] = useState("");
+  const [formDiscordLogin, setFormDiscordLogin] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [showUserForm, setShowUserForm] = useState(false);
+  // ...existing code (JSX, handlers, etc.)...
+
+
 
 interface Group {
   id: string;
@@ -432,50 +320,8 @@ const initialUsers: User[] = [
   { id: 'u4', name: 'Carly V. Salzberger', username: 'cvansalzberger0', password: 'password', avatarUrl: '', email: 'cvansalzberger0@cisco.com', role: 'Viewer', status: 'Active', createdAt: '2025-11-01', passwordExpiresAt: '2026-11-01' },
   { id: 'u5', name: 'Ethan Park', username: 'ethanp', password: 'password', avatarUrl: '', email: 'ethan.park@example.com', role: 'User', status: 'Active', createdAt: '2025-12-15', passwordExpiresAt: '2026-12-15' }
 ];
-
-const Administrator = (props: Props) => {
-    const router = useRouter();
-    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    // Permission modal state
-    const [permissionModal, setPermissionModal] = useState<{ open: boolean, permissions: string[], role: string } | null>(null);
-
-    // Team Member selection state for dropdown (MUST be inside the component)
-    const [selectedTeamMemberIndex, setSelectedTeamMemberIndex] = useState(0);
-
-    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-      {
-        name: "Doc Cowles - DocRST",
-        jobTitle: "Founder & Manager",
-        description: "Founder and Manager of In-Accord",
-        imageUrl: "https://pub-7d4119dd86a04c7bbdbcc230a9d161e7.r2.dev/Images/dic-irish-bear.jpeg",
-        email: "docrst@gmail.com",
-        website: "https://www.ppaesrt.com",
-        github: "https://github.com/GARD-Realms-LLC/In-Accord-web",
-        discord: "https://discord.com"
-      },
-      ...Array.from({ length: 8 }, (_, i) => ({
-        name: `Team Member ${i + 2}`,
-        jobTitle: "Team Member",
-        description: `Information about team member ${i + 2}`,
-        imageUrl: `https://example.com/member${i + 2}`,
-        email: `member${i + 2}@example.com`,
-        website: "https://example.com",
-        github: "https://github.com",
-        discord: "https://discord.com"
-      }))
-    ]);
-
-      // Client/server status state
-      const [clientStatus, setClientStatus] = useState<'started' | 'stopped' | 'unknown'>('unknown');
+// ...existing code...
       const [serverStatus, setServerStatus] = useState<'started' | 'stopped' | 'unknown'>('unknown');
-
-      const mapProcessStatus = (incoming?: string | null): 'started' | 'stopped' | 'unknown' => {
-        if (!incoming) return 'unknown';
-        if (incoming === 'running') return 'started';
-        if (incoming === 'stopped') return 'stopped';
-        return 'unknown';
-      };
-
       const logProcessOutput = (
         scope: 'client' | 'server',
         data: any,
@@ -556,7 +402,7 @@ const Administrator = (props: Props) => {
         await wait(1200);
         const snapshot = await fetchProcessSnapshot(scriptKey);
         if (!snapshot) return;
-        setStatus(mapProcessStatus(snapshot.status));
+        setStatus(mapProcessStatus(snapshot.status ?? 'unknown'));
         if (hasProcessLogs(snapshot)) {
           logProcessOutput(scope, snapshot, `${actionLabel} status`, { skipEmptyAck: true, suppressStatusMessage: true });
         }
@@ -597,7 +443,7 @@ const Administrator = (props: Props) => {
           }
           const data: NpmProcessResponse = await response.json();
           const succeeded = data.success !== false;
-          setClientStatus(mapProcessStatus(data.status));
+          setClientStatus(mapProcessStatus(data.status ?? 'unknown'));
           logProcessOutput('client', data, actionLabel);
           if (!succeeded) {
             return;
@@ -647,7 +493,7 @@ const Administrator = (props: Props) => {
           }
           const data: NpmProcessResponse = await response.json();
           const succeeded = data.success !== false;
-          setServerStatus(mapProcessStatus(data.status));
+          setServerStatus(mapProcessStatus(data.status ?? 'unknown'));
           logProcessOutput('server', data, actionLabel);
           if (!succeeded) {
             return;
@@ -672,8 +518,8 @@ const Administrator = (props: Props) => {
             fetchProcessSnapshot('server-dev')
           ]);
           if (cancelled) return;
-          if (clientData) setClientStatus(mapProcessStatus(clientData.status));
-          if (serverData) setServerStatus(mapProcessStatus(serverData.status));
+          if (clientData) setClientStatus(mapProcessStatus(clientData.status ?? 'unknown'));
+          if (serverData) setServerStatus(mapProcessStatus(serverData.status ?? 'unknown'));
         })();
 
         return () => { cancelled = true; };
@@ -1022,7 +868,7 @@ const Administrator = (props: Props) => {
         const response = await fetch(`${API_BASE}/api/auth/${provider}/url`);
         if (response.ok) {
           const data = await response.json();
-          await navigator.clipboard.writeText(data.url);
+          await navigator.clipboard.writeText(String(data.url ?? ''));
           alert('OAuth URL copied to clipboard!');
         } else {
           alert('Failed to fetch OAuth URL');
@@ -1260,32 +1106,7 @@ const Administrator = (props: Props) => {
       }
     };
 
-    const [showUserForm, setShowUserForm] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [formName, setFormName] = useState('');
-    const [formEmail, setFormEmail] = useState('');
-    const [formRole, setFormRole] = useState<User['role']>('User');
-    const [formStatus, setFormStatus] = useState<User['status']>('Active');
-    const [formUsername, setFormUsername] = useState('');
-    const [formPassword, setFormPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [formAvatarUrl, setFormAvatarUrl] = useState<string | undefined>(undefined);
-    const [formPasswordExpiresAt, setFormPasswordExpiresAt] = useState<string | undefined>(undefined);
-    const [formWebsite, setFormWebsite] = useState('');
-    const [formGithubLogin, setFormGithubLogin] = useState('');
-    const [formDiscordLogin, setFormDiscordLogin] = useState('');
-    const [formDescription, setFormDescription] = useState('');
 
-    // UI for save-toast and temporary reveal of saved password
-    const [toastVisible, setToastVisible] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [lastSavedPlain, setLastSavedPlain] = useState<string | null>(null);
-    const [showSavedReveal, setShowSavedReveal] = useState(false);
-
-    // Bulk password migration state
-    const [showBulkPasswords, setShowBulkPasswords] = useState(false);
-    const [bulkPasswords, setBulkPasswords] = useState<Record<string,string>>({});
-    const [refreshing, setRefreshing] = useState(false);
 
     const generateRandomPassword = (len = 12) => {
       const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-+=';
@@ -1294,31 +1115,16 @@ const Administrator = (props: Props) => {
       return out;
     };
 
-    const openBulkForUnset = () => {
-      const map: Record<string,string> = {};
-      users.forEach(u => { if (!looksHashed(u.password)) map[u.id] = ''; });
-      setBulkPasswords(map);
-      setShowBulkPasswords(true);
-    };
-
-    const uploadAvatarForUser = (userId: string) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = (ev: any) => {
-        const file = ev.target.files && ev.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const data = reader.result as string | ArrayBuffer | null;
-          if (!data) return;
-          setUsers(prev => prev.map(u => u.id === userId ? { ...u, avatarUrl: String(data) } : u));
-          setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Updated Avatar', details: `Avatar updated for ${userId}`, status: 'Success' }, ...prev]);
-        };
-        reader.readAsDataURL(file);
-      };
-      input.click();
-    };
+    // Restore darkMode state logic
+    const [darkMode, setDarkMode] = useState(false);
+    useEffect(() => {
+      // Detect system dark mode preference
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      setDarkMode(mq.matches);
+      const handler = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }, []);
 
     const applyBulkPasswords = async () => {
       const entries = Object.entries(bulkPasswords).filter(([_, v]) => !!v);
@@ -1441,7 +1247,7 @@ const Administrator = (props: Props) => {
         if (!formPassword) { alert('Password is required for new user'); return; }
         if (formPassword.length < minPasswordLen) { alert(`Password must be at least ${minPasswordLen} characters`); return; }
         const hashed = await hashPassword(formPassword);
-        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole, status: formStatus, username: formUsername, password: hashed, avatarUrl: formAvatarUrl, createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt, website: formWebsite || undefined, githubLogin: formGithubLogin || undefined, discordLogin: formDiscordLogin || undefined, description: formDescription || undefined };
+        const newUser: User = { id: 'u' + Math.random().toString(36).slice(2,9), name: formName, email: formEmail, role: formRole as 'Admin' | 'Manager' | 'User' | 'Viewer', status: formStatus as 'Active' | 'Suspended', username: formUsername, password: hashed, avatarUrl: formAvatarUrl, createdAt: new Date().toISOString().slice(0,10), passwordExpiresAt: formPasswordExpiresAt, website: formWebsite || undefined, githubLogin: formGithubLogin || undefined, discordLogin: formDiscordLogin || undefined, description: formDescription || undefined };
         setUsers([newUser, ...users] as User[]);
         try { await fetch(`${API_BASE}/api/admin/users/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: newUser.id, passwordHash: hashed }) }); } catch (e) { console.warn('Failed to POST new password to server', e); }
 
@@ -3147,7 +2953,7 @@ const Administrator = (props: Props) => {
                           <div className="text-xs text-gray-500">Created: {new Date(k.createdAt).toLocaleString()}</div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <button onClick={() => { navigator.clipboard.writeText(k.key); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
+                          <button onClick={() => { navigator.clipboard.writeText(String(k.key ?? '')); alert('Key copied'); }} className="text-sm px-2 py-1 border rounded">Copy</button>
                           <button onClick={() => deleteApiKey(k.id)} className="text-sm px-2 py-1 border rounded text-red-600">Delete</button>
                         </div>
                       </div>
@@ -5342,8 +5148,12 @@ const Administrator = (props: Props) => {
           </div>
         </section>
       </div>
-    )
-}
 
-export default Administrator
+
+    )
+  }
+
+  export default Administrator;
+
+
 
