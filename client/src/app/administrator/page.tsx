@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import HomePageWrapper from "../HomePageWrapper";
 import React from 'react';
@@ -264,10 +264,10 @@ const initialNpmTerminalLines: NpmTerminalLine[] = [
   { id: 'init-server-command', kind: 'command', scope: 'server', text: 'npm run dev' },
   { id: 'init-server-output', kind: 'stdout', text: '[nodemon] watching extensions: ts,json' },
   { id: 'init-root-build', kind: 'command', scope: 'root', text: 'npm run build' },
-  { id: 'init-root-build-output', kind: 'stdout', text: '✔ compiled successfully — artifacts ready for deployment' },
+  { id: 'init-root-build-output', kind: 'stdout', text: 'âœ” compiled successfully â€” artifacts ready for deployment' },
   { id: 'init-root-lint', kind: 'command', scope: 'root', text: 'npm run lint' },
-  { id: 'init-root-lint-output', kind: 'stdout', text: '✓ no issues found in 154 files' },
-  { id: 'init-system', kind: 'system', text: 'npm console initialized · Select a command to run a live check.' },
+  { id: 'init-root-lint-output', kind: 'stdout', text: 'âœ“ no issues found in 154 files' },
+  { id: 'init-system', kind: 'system', text: 'npm console initialized Â· Select a command to run a live check.' },
 ];
 
 // *NPM Termanal* //
@@ -415,13 +415,13 @@ const initialUsers: User[] = [
         setClientStatus('unknown');
         appendTerminalLines([
           { id: generateLineId(), kind: 'command', scope: 'client', text: `${actionLabel} Client` },
-          { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} client...` }
+          { id: generateLineId(), kind: 'system', text: `â†’ ${actionLabel} client...` }
         ]);
 
         const clientEndpointReachable = await ensureNpmEndpointReachable();
         if (!clientEndpointReachable) {
           appendTerminalLines([
-            { id: generateLineId(), kind: 'stderr', text: `⚠ Cannot reach admin server at ${API_BASE}. Start the backend before using Client Controls.` }
+            { id: generateLineId(), kind: 'stderr', text: `âš  Cannot reach admin server at ${API_BASE}. Start the backend before using Client Controls.` }
           ]);
           setClientStatus('unknown');
           return;
@@ -437,7 +437,7 @@ const initialUsers: User[] = [
             setClientStatus('stopped');
             appendTerminalLines([
               { id: generateLineId(), kind: 'stderr', text: `Client ${action} failed (${response.status})` },
-              { id: generateLineId(), kind: 'system', text: `✖ Client ${action} error.` }
+              { id: generateLineId(), kind: 'system', text: `âœ– Client ${action} error.` }
             ]);
             return;
           }
@@ -453,7 +453,7 @@ const initialUsers: User[] = [
           setClientStatus('stopped');
           appendTerminalLines([
             { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
-            { id: generateLineId(), kind: 'system', text: `✖ Client ${action} network error.` }
+            { id: generateLineId(), kind: 'system', text: `âœ– Client ${action} network error.` }
           ]);
         }
       };
@@ -465,13 +465,13 @@ const initialUsers: User[] = [
         setServerStatus('unknown');
         appendTerminalLines([
           { id: generateLineId(), kind: 'command', scope: 'server', text: `${actionLabel} Server` },
-          { id: generateLineId(), kind: 'system', text: `→ ${actionLabel} server...` }
+          { id: generateLineId(), kind: 'system', text: `â†’ ${actionLabel} server...` }
         ]);
 
         const serverEndpointReachable = await ensureNpmEndpointReachable();
         if (!serverEndpointReachable) {
           appendTerminalLines([
-            { id: generateLineId(), kind: 'stderr', text: `⚠ Cannot reach admin server at ${API_BASE}. Start the backend before using Server Controls.` }
+            { id: generateLineId(), kind: 'stderr', text: `âš  Cannot reach admin server at ${API_BASE}. Start the backend before using Server Controls.` }
           ]);
           setServerStatus('unknown');
           return;
@@ -487,7 +487,7 @@ const initialUsers: User[] = [
             setServerStatus('stopped');
             appendTerminalLines([
               { id: generateLineId(), kind: 'stderr', text: `Server ${action} failed (${response.status})` },
-              { id: generateLineId(), kind: 'system', text: `✖ Server ${action} error.` }
+              { id: generateLineId(), kind: 'system', text: `âœ– Server ${action} error.` }
             ]);
             return;
           }
@@ -503,7 +503,7 @@ const initialUsers: User[] = [
           setServerStatus('stopped');
           appendTerminalLines([
             { id: generateLineId(), kind: 'stderr', text: `Network error: ${String((err as Error).message)}` },
-            { id: generateLineId(), kind: 'system', text: `✖ Server ${action} network error.` }
+            { id: generateLineId(), kind: 'system', text: `âœ– Server ${action} network error.` }
           ]);
         }
       };
@@ -691,7 +691,7 @@ const initialUsers: User[] = [
       appendTerminalLines([commandLine, {
         id: generateLineId(),
         kind: 'system',
-        text: `→ executing ${command.label} …`
+        text: `â†’ executing ${command.label} â€¦`
       }]);
 
       try {
@@ -705,7 +705,7 @@ const initialUsers: User[] = [
           const errorText = await response.text();
           appendTerminalLines([
             { id: generateLineId(), kind: 'stderr', text: `Request failed (${response.status}): ${errorText || 'Unknown error'}` },
-            { id: generateLineId(), kind: 'system', text: `✖ ${command.label} encountered an error.` }
+            { id: generateLineId(), kind: 'system', text: `âœ– ${command.label} encountered an error.` }
           ]);
           return;
         }
@@ -728,13 +728,13 @@ const initialUsers: User[] = [
         }
 
         const summaryText = data.success
-          ? `✔ ${command.label} completed${data.timedOut ? ' (stopped after timeout)' : ''}`
-          : `✖ ${command.label} exited with code ${data.exitCode ?? 'unknown'}`;
+          ? `âœ” ${command.label} completed${data.timedOut ? ' (stopped after timeout)' : ''}`
+          : `âœ– ${command.label} exited with code ${data.exitCode ?? 'unknown'}`;
 
         outputLines.push({ id: generateLineId(), kind: 'system', text: summaryText });
 
         if (data.timedOut) {
-          outputLines.push({ id: generateLineId(), kind: 'system', text: 'ℹ Process output captured for 10 seconds then halted to keep the session responsive.' });
+          outputLines.push({ id: generateLineId(), kind: 'system', text: 'â„¹ Process output captured for 10 seconds then halted to keep the session responsive.' });
         }
 
         appendTerminalLines(outputLines);
@@ -742,7 +742,7 @@ const initialUsers: User[] = [
       } catch (error) {
         appendTerminalLines([
           { id: generateLineId(), kind: 'stderr', text: `Network error: ${(error as Error).message}` },
-          { id: generateLineId(), kind: 'system', text: `✖ ${command.label} could not be started.` }
+          { id: generateLineId(), kind: 'system', text: `âœ– ${command.label} could not be started.` }
         ]);
       } finally {
         setIsRunningNpmCommand(false);
@@ -1437,7 +1437,7 @@ const initialUsers: User[] = [
       { name: 'id', type: 'string', description: 'Unique identifier for the user', example: 'u1' },
       { name: 'name', type: 'string', description: 'Full name', example: 'Alice Johnson' },
       { name: 'username', type: 'string', description: 'Login username', example: 'alice' },
-      { name: 'password', type: 'string', description: 'Login password (stored hashed in production)', example: '••••••••' },
+      { name: 'password', type: 'string', description: 'Login password (stored hashed in production)', example: 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' },
       { name: 'email', type: 'string', description: 'Email address used for login and notifications', example: 'alice@example.com' },
       { name: 'role', type: 'enum', description: 'Assigned role determining permissions', example: 'Admin | Manager | User | Viewer' },
       { name: 'status', type: 'enum', description: 'Account status', example: 'Active | Suspended' },
@@ -2564,7 +2564,7 @@ const initialUsers: User[] = [
                     <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-4 py-3 text-gray-900 dark:text-white">{u.name}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.username}</td>
-                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.password ? '••••••••' : <span className="text-xs text-red-500">Unset</span>}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.password ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : <span className="text-xs text-red-500">Unset</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.passwordExpiresAt ? u.passwordExpiresAt : <span className="text-xs text-gray-500">Never</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.email}</td>
                       <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">{u.role}</span></td>
@@ -3683,7 +3683,7 @@ const initialUsers: User[] = [
                         </div>
                         <div className="text-xs text-gray-700 dark:text-gray-300">
                           <div>Backup: {test.backup}</div>
-                          <div>Source: {test.source} • Recovery: {test.recoveryTime}</div>
+                          <div>Source: {test.source} â€¢ Recovery: {test.recoveryTime}</div>
                         </div>
                       </div>
                     ))}
@@ -3830,7 +3830,7 @@ const initialUsers: User[] = [
                 </div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">R2 API Token</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? '••••••••••••••••• (stored)' : 'Not set'}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢ (stored)' : 'Not set'}</p>
                 </div>
               </div>
             ) : (
@@ -4558,7 +4558,7 @@ const initialUsers: User[] = [
                   className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Refresh GitHub changes"
                 >
-                  {githubRefreshing ? 'Refreshing...' : '≡ƒöä Refresh'}
+                  {githubRefreshing ? 'Refreshing...' : 'â‰¡Æ’Ã¶Ã¤ Refresh'}
                 </button>
                 <a href="https://github.com/GARD-Realms-LLC/In-Accord-web" target="_blank" rel="noopener noreferrer" className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                   View on GitHub
@@ -4956,7 +4956,7 @@ const initialUsers: User[] = [
           {/* Last Updated Info */}
           <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <div className="text-blue-600 dark:text-blue-400 mt-1">Γä╣∩╕Å</div>
+              <div className="text-blue-600 dark:text-blue-400 mt-1">Î“Ã¤â•£âˆ©â••Ã…</div>
               <div>
                 <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">Last Dependency Update</p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">January 10, 2026</p>
@@ -5096,7 +5096,7 @@ const initialUsers: User[] = [
                 );
               })}
               <div className="text-xs text-gray-500 border-t border-gray-800 pt-4 mt-4">
-                Last live command: {lastNpmRun ? formatRunTimestamp(lastNpmRun) : 'No interactive runs yet'} · Data reflects actual npm/stdout content.
+                Last live command: {lastNpmRun ? formatRunTimestamp(lastNpmRun) : 'No interactive runs yet'} Â· Data reflects actual npm/stdout content.
               </div>
             </div>
           </div>
@@ -5153,7 +5153,8 @@ const initialUsers: User[] = [
     )
   }
 
-  export default Administrator;
+  export default function Page(){return <HomePageWrapper><Administrator /></HomePageWrapper>;}
+
 
 
 

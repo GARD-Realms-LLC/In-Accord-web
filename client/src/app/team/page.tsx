@@ -1,4 +1,6 @@
-﻿'use client';
+﻿"use client";
+
+import HomePageWrapper from '../HomePageWrapper';
 
 import { useEffect, useState } from 'react';
 
@@ -228,4 +230,5 @@ const Team = () => {
     )
 }
 
-export default Team
+export default function Page(){return <HomePageWrapper><Team /></HomePageWrapper>;}
+

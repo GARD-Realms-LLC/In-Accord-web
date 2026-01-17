@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect } from "react";
 import { io, Socket } from "socket.io-client";
@@ -59,8 +59,6 @@ const HomeLayout = ({ children }: { children: React.ReactNode }) => {
 	// Replace debug bar with an empty fragment for testing
 	return (
 		<>
-			<div style={{position: 'fixed', top: 128, left: 0, background: 'blue', zIndex: 9999, padding: '8px'}}>DEBUG: HomeLayout is rendering</div>
-			<div style={{position: 'fixed', top: 160, left: 0, background: 'purple', zIndex: 9999, padding: '8px'}}>STATIC: HomeLayout static element</div>
 			<div className="flex bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 w-full min-h-screen">
 				<Sidebar />
 				<main
@@ -93,3 +91,4 @@ const HomePageWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default HomePageWrapper;
+
