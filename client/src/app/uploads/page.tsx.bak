@@ -325,4 +325,4 @@ const Uploads = () => {
   );
 };
 
-export default function Page(){return <HomePageWrapper><Uploads/></HomePageWrapper>}
+export default Uploads;
