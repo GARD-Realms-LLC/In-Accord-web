@@ -2697,4 +2697,4 @@ const Profile = () => {
   );
 };
 
-export default function Page(){return <HomePageWrapper><Profile/></HomePageWrapper>}
+export default Profile;

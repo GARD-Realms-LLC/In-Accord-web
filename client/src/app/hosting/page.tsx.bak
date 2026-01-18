@@ -1,5 +1,4 @@
 'use client';
-import HomePageWrapper from '../HomePageWrapper';
 
 import { useEffect, useMemo, useState } from 'react';
 
@@ -309,9 +308,5 @@ interface HostingAd {
   );
 };
 
-export default function HostingPageWrapper(){ return (
-  <HomePageWrapper>
-    <HostingPage/>
-  </HomePageWrapper>
-); }
+export default HostingPage;
 
