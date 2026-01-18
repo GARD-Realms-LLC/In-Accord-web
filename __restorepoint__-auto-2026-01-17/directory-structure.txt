@@ -1,0 +1,47 @@
+In-Accord-Web
+	client/
+	client/client/
+	client/public/
+	client/scripts/
+	client/src/
+	client/src/app/
+	client/src/app/(components)/
+	client/src/app/(components)/Navbar/
+	client/src/app/(components)/Rating/
+	client/src/app/(components)/Sidebar/
+	client/src/app/administrator/
+	client/src/app/api/
+	client/src/app/bots/
+	client/src/app/dashboard/
+	client/src/app/expenses/
+	client/src/app/home/
+	client/src/app/hosting/
+	client/src/app/ide/
+	client/src/app/inventory/
+	client/src/app/plugins/
+	client/src/app/products/
+	client/src/app/profile/
+	client/src/app/servers/
+	client/src/app/signup/
+	client/src/app/support/
+	client/src/app/team/
+	client/src/app/themes/
+	client/src/app/uploads/
+	client/src/app/users/
+	client/src/state/
+	client/src/types/
+	client/Submited Mods/
+	client/logs/
+server/
+server/assets/
+server/data/
+server/data/avatars/
+server/prisma/
+server/prisma/migrations/
+server/prisma/seedData/
+server/scripts/
+server/src/
+server/src/config/
+server/src/controllers/
+server/src/routes/
+server/Submited Mods/
