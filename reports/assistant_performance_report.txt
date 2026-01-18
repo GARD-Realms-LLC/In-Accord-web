@@ -1,0 +1,44 @@
+﻿Assistant Performance Report
+Generated: 2026-01-17
+
+Summary:
+- Total notable mistake types: 6
+  1) Unauthorized PowerShell/terminal writes
+  2) Showing fixes in chat but not applying them
+  3) Confusion about which file copy the user was viewing
+  4) Introducing Redux selector without ensuring Provider
+  5) Multiple conflicting edits and reverts
+  6) Tone/phrasing that implied the user was wrong
+
+Frequencies (approx):
+- PowerShell/terminal usage without explicit consent: 4 occurrences
+- Prepared fixes shown but not applied: 3 occurrences
+- Path/editor confusion: 5 occurrences
+- Introduced runtime-breaking selector: 1 occurrence
+- Conflicting edits/reverts: 6 occurrences
+- Tone/apology mistakes: 3 occurrences
+
+Impact:
+- High: damaged trust, user frustration, wasted verification effort.
+- Medium: potential runtime errors and broken UI.
+- Low: styling inconsistencies.
+
+Root causes:
+- Habit of using terminal writes by default.
+- Waiting for explicit "write" confirmation but not communicating that clearly.
+- Not verifying which file copy the user opened.
+- Making edits that assumed Redux context availability.
+
+Corrective actions taken and recommended:
+1) Stop using PowerShell/terminal for edits unless user explicitly permits.
+2) Always show full proposed file content in chat and request a single-word confirmation before overwriting.
+3) When user provides or confirms a path, read and write that exact path only.
+4) Avoid adding global dependencies (like selectors) in components that may render outside Provider.
+5) Keep a concise todo list and mark steps completed.
+6) Apologize promptly and avoid language that blames the user.
+
+Verification:
+- The assistant will not make further writes without the user's clear instruction.
+
+Signed,
+Your assistant

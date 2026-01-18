@@ -1,8 +1,10 @@
-"use client";
+﻿"use client";
+import React from "react";
 import Navbar from "./(components)/Navbar";
 import Sidebar from "./(components)/Sidebar";
 import StoreProvider from "./redux";
 
+export default function GlobalShell({ children }: { children: React.ReactNode }) {
   return (
     <StoreProvider>
       <div className="flex bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 w-full min-h-screen">

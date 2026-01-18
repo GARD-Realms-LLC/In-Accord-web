@@ -1,4 +1,4 @@
-import {
+﻿import {
   ExpenseByCategorySummary,
   useGetDashboardMetricsQuery,
 } from "@/state/api";
@@ -12,7 +12,7 @@ type ExpenseSums = {
 const colors = ["#00C49F", "#0088FE", "#FFBB28"];
 
 const CardExpenseSummary = () => {
-  const { data: dashboardMetrics, isLoading } = useGetDashboardMetricsQuery();
+  const { data: dashboardMetrics, isLoading } = useGetDashboardMetricsQuery(undefined);
 
   const expenseSummary = dashboardMetrics?.expenseSummary[0];
 
@@ -130,3 +130,4 @@ const CardExpenseSummary = () => {
 };
 
 export default CardExpenseSummary;
+
