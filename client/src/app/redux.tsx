@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
   TypedUseSelectorHook,
@@ -85,13 +85,32 @@ export default function StoreProvider({
     storeRef.current = makeStore();
     setupListeners(storeRef.current.dispatch);
   }
-  const persistor = persistStore(storeRef.current);
+  const persistorRef = useRef<any | null>(null);
+
+  // Create persistor only on the client after store is available
+  useEffect(() => {
+    if (!persistorRef.current && storeRef.current) {
+      try {
+        persistorRef.current = persistStore(storeRef.current);
+      } catch (e) {
+        // swallow — fall back to rendering children without PersistGate
+        // eslint-disable-next-line no-console
+        console.error('[StoreProvider] persistStore failed', e);
+        persistorRef.current = null;
+      }
+    }
+  }, []);
 
   return (
     <Provider store={storeRef.current}>
-      <PersistGate loading={null} persistor={persistor}>
-        {children}
-      </PersistGate>
+      {persistorRef.current ? (
+        <PersistGate loading={null} persistor={persistorRef.current}>
+          {children}
+        </PersistGate>
+      ) : (
+        // If persistor isn't ready (server or failed), render children directly
+        <>{children}</>
+      )}
     </Provider>
   );
 }
