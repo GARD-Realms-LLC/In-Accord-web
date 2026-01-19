@@ -142,6 +142,11 @@ export default function UsersPageClient() {
                     <div className="text-xs text-gray-400">{u.role || u.title || ''}</div>
                   </div>
                 </div>
+
+                <div className="flex-1 px-4 text-center">
+                  <div className="text-sm text-gray-300 truncate italic">{(u.description || u.bio || u.about) ? `“${u.description || u.bio || u.about}”` : ''}</div>
+                </div>
+
                 <div className="flex items-center space-x-2">
                   {u.email ? (
                     <a href={`mailto:${u.email}`} title={`Email ${u.email}`} className="p-1 rounded hover:bg-gray-700">
@@ -237,7 +242,7 @@ export default function UsersPageClient() {
         <div className="flex-1">
           <Navbar />
           <main style={{ padding: 16, paddingTop: topOffset }}>
-            <h1 className="text-2xl font-semibold mb-2 text-center">Users</h1>
+            <h1 className="text-2xl font-semibold mb-2 text-center">Developers and Users</h1>
             <p className="text-sm text-gray-400 mb-4 text-center">List of registered users in the system — auto-refreshes every 10 seconds. Click a user to view details (if available).</p>
             <section className="max-w-3xl mx-auto w-full">
               <div className="p-4 bg-gray-900 rounded-lg shadow-sm">
