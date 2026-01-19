@@ -1437,7 +1437,7 @@ const initialUsers: User[] = [
       { name: 'id', type: 'string', description: 'Unique identifier for the user', example: 'u1' },
       { name: 'name', type: 'string', description: 'Full name', example: 'Alice Johnson' },
       { name: 'username', type: 'string', description: 'Login username', example: 'alice' },
-      { name: 'password', type: 'string', description: 'Login password (stored hashed in production)', example: 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' },
+      { name: 'password', type: 'string', description: 'Login password (stored hashed in production)', example: '••••••••' },
       { name: 'email', type: 'string', description: 'Email address used for login and notifications', example: 'alice@example.com' },
       { name: 'role', type: 'enum', description: 'Assigned role determining permissions', example: 'Admin | Manager | User | Viewer' },
       { name: 'status', type: 'enum', description: 'Account status', example: 'Active | Suspended' },
@@ -2564,7 +2564,7 @@ const initialUsers: User[] = [
                     <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-4 py-3 text-gray-900 dark:text-white">{u.name}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.username}</td>
-                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.password ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : <span className="text-xs text-red-500">Unset</span>}</td>
+                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.password ? '••••••••' : <span className="text-xs text-red-500">Unset</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.passwordExpiresAt ? u.passwordExpiresAt : <span className="text-xs text-gray-500">Never</span>}</td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{u.email}</td>
                       <td className="px-4 py-3"><span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">{u.role}</span></td>
@@ -3683,7 +3683,7 @@ const initialUsers: User[] = [
                         </div>
                         <div className="text-xs text-gray-700 dark:text-gray-300">
                           <div>Backup: {test.backup}</div>
-                          <div>Source: {test.source} â€¢ Recovery: {test.recoveryTime}</div>
+                          <div>Source: {test.source} • Recovery: {test.recoveryTime}</div>
                         </div>
                       </div>
                     ))}
@@ -3830,7 +3830,7 @@ const initialUsers: User[] = [
                 </div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">R2 API Token</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢ (stored)' : 'Not set'}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">{backupSettings.r2ApiToken ? '••••••••••••••• (stored)' : 'Not set'}</p>
                 </div>
               </div>
             ) : (

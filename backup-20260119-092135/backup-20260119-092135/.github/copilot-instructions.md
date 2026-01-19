@@ -52,7 +52,7 @@ This file gives concise, actionable guidance to AI coding agents working on this
 
 ## GOLDEN RULES for AI agents (User-Enforced)
 
-1. Always create restore point of only the code in the file you are going to make changes to using robocopy but never use powershell to do it before making any changes. The restore point must only include only all files and folders needed to only restore the code change not the full site, excluding build artifacts, node_modules, .git, etc.
+1. Always create a full restore point of the entire project using robocopy before making any changes. The restore point must include all files and folders needed to fully restore the site, excluding build artifacts, node_modules, .git, etc.
 2. Always use only one PowerShell or Node terminal window for all commands—never spawn new terminals.
 3. Never ask the user to run commands, copy-paste, or do manual steps; always perform all steps yourself.
 4. If a step cannot be performed automatically, explain why and provide a workaround, but always attempt it yourself first.
@@ -65,7 +65,6 @@ This file gives concise, actionable guidance to AI coding agents working on this
 11. Never change major framework versions without explicit user approval and full testing.
 12. Always document and enforce all user-specified GOLDEN rules in this file.
 13. Always warn the user and get explicit confirmation before executing any action that would violate a GOLDEN rule, even if the user requests it. Never proceed with a GOLDEN rule violation without clear user approval after warning.
-14. IPOWERSHELL IS NOT INSTALLED, NEVEDR USE POWERSHELL COMMANDS. ALWAYS USE NODE.JS COMMANDS INSTEAD.
 
 ## Quick pointers for AI agents
 - Read `server/src/index.ts` first to understand mounted routes and static locations.

@@ -79,7 +79,26 @@ import authRoutes from './routes/authRoutes';
 app.use('/api/admin/auth', authRoutes);
 import backupRoutes from './routes/backupRoutes';
 app.use('/api/backup', backupRoutes);
-app.use('/data', express.static(path.resolve(__dirname, '..', 'data')));
+// Serve static `/data` files and ensure a UTF-8 charset is present for text-like responses
+app.use(
+    '/data',
+    express.static(path.resolve(__dirname, '..', 'data'), {
+        setHeaders: (res, filePath) => {
+            try {
+                const current = res.getHeader('Content-Type');
+                if (typeof current === 'string') {
+                    // if a charset is not already present and the content looks like text/JSON/JS/XML, add utf-8
+                    if (!/charset=/i.test(current) && /^(text\/|application\/(json|javascript|xml))/i.test(current)) {
+                        res.setHeader('Content-Type', `${current}; charset=utf-8`);
+                    }
+                }
+            } catch (err) {
+                // don't let header-setting failures crash the server
+                console.warn('Failed to set charset header for static asset', filePath, err);
+            }
+        },
+    })
+);
 import npmRoutes from './routes/npmRoutes';
 app.use('/api/npm', npmRoutes);
 

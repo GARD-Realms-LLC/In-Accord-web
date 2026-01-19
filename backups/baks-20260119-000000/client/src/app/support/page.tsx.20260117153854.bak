@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 
-`nimport HomePageWrapper from '../HomePageWrapper';`nimport { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const Support = (props: Props) => {
   // Live chat messages
   const [messages, setMessages] = useState<{ id: string; author: 'You' | 'Support' | 'System'; text: string; time: string }[]>([
-    { id: 'm1', author: 'System', text: 'Welcome to In-Accord support â€” how can we help today?', time: new Date().toLocaleTimeString() }
+    { id: 'm1', author: 'System', text: 'Welcome to In-Accord support — how can we help today?', time: new Date().toLocaleTimeString() }
   ]);
   const [chatInput, setChatInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -35,7 +35,7 @@ const Support = (props: Props) => {
 
     // simulate a support reply
     setTimeout(() => {
-      setMessages(prev => [...prev, { id: 's' + Math.random().toString(36).slice(2,9), author: 'Support', text: 'Thanks â€” we received your message and will respond shortly.', time: new Date().toLocaleTimeString() }]);
+      setMessages(prev => [...prev, { id: 's' + Math.random().toString(36).slice(2,9), author: 'Support', text: 'Thanks — we received your message and will respond shortly.', time: new Date().toLocaleTimeString() }]);
     }, 900);
   };
 
@@ -98,7 +98,7 @@ const Support = (props: Props) => {
       if (res.status === 403 && remaining === '0') {
         const resetAt = reset ? Number(reset) * 1000 : Date.now() + 60000;
         const waitMs = Math.max(5000, resetAt - Date.now());
-        setIssuesError('GitHub API rate limit exceeded â€” retrying soon.');
+        setIssuesError('GitHub API rate limit exceeded — retrying soon.');
         setTimeout(() => fetchIssues(), waitMs + 1000);
         setIssuesLoading(false);
         return;
@@ -227,4 +227,4 @@ const Support = (props: Props) => {
   );
 };
 
-export default function Page(){return <HomePageWrapper><Support/></HomePageWrapper>; }
+export default Support;
