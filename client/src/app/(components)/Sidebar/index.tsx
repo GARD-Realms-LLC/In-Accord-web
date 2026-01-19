@@ -335,20 +335,63 @@ const Sidebar = () => {
   const isCompact = isSidebarCollapsed || appliedWidth <= compactThreshold;
 
   if (!isLoggedIn) {
-    return null;
+    // If the app isn't showing the full sidebar (user not logged in), render
+    // a thin fixed left-edge border so the visual change is always visible to
+    // the user. This keeps the change single-file and non-destructive.
+    return (
+      <div
+        aria-hidden
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          zIndex: 40,
+          backgroundColor: isDarkMode ? '#374151' : '#e5e7eb',
+        }}
+      />
+    );
   }
 
-  const sidebarClassNames = 'relative flex flex-col h-screen bg-white dark:bg-gray-800 transition-all duration-300 overflow-hidden shadow-md z-40';
+  // keep visual layout classes but avoid hard-coded bg utility classes so the
+  // inline backgroundColor (matching the Navbar) takes precedence
+  // include explicit border utility classes so the border is visible even if
+  // inline styles are missed or overridden by other CSS layers
+  const sidebarClassNames = 'relative flex flex-col h-screen transition-all duration-300 overflow-hidden shadow-md z-40 border-r dark:border-gray-700 border-gray-200';
   const isAdminVisible = canAccessRoute(allowedRoutes, '/administrator', currentUserRole);
 
   return (
     <Tooltip.Provider>
+      {/* persistent left-edge indicator to guarantee visibility across sessions/dev cache
+          use the same neutral border color as the sidebar and square edges so it
+          fits the site color scheme (no rounded corners) */}
+      <div
+        aria-hidden
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 6,
+          zIndex: 9999,
+          pointerEvents: 'none',
+          backgroundColor: isDarkMode ? '#374151' : '#e5e7eb',
+          borderRadius: 0,
+        }}
+      />
       <div
         className={sidebarClassNames}
         style={{
           width: `${appliedWidth}px`,
           backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
           color: isDarkMode ? '#f3f4f6' : '#111827',
+          // visible border and rounded corners to indicate the sidebar boundary on all sides
+          borderRight: isDarkMode ? '2px solid #374151' : '2px solid #e5e7eb',
+          borderRadius: '8px',
+          // outline provides a clear all-sides border without changing layout
+          outline: isDarkMode ? '2px solid rgba(55,65,81,0.6)' : '2px solid rgba(229,231,235,0.95)',
+          overflow: 'hidden',
         }}
       >
         <div className={`flex justify-center items-center pt-4 pb-4 ${isCompact ? 'px-2' : 'px-4'}`}>
