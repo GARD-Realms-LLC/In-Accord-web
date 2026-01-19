@@ -1,7 +1,10 @@
 const fs = require('fs');
+const path = require('path');
+const BAK_DIR = path.join(process.cwd(), 'assistant_baks');
+if (!fs.existsSync(BAK_DIR)) fs.mkdirSync(BAK_DIR, { recursive: true });
 const p = "e:\\In-Accord-web\\client\\src\\app\\themes\\page.tsx";
 let s = fs.readFileSync(p,'utf8');
-fs.writeFileSync(p + '.bak', s);
+fs.writeFileSync(path.join(BAK_DIR, path.basename(p) + '.bak'), s);
 if (s.includes('HomePageWrapper') && /export\s+default\s+function\s+Page\(\)/.test(s)) { console.log('already-wrapped'); process.exit(0); }
 if (!/import\s+HomePageWrapper/.test(s)){
   if (/^'use client'|^"use client"/.test(s)){

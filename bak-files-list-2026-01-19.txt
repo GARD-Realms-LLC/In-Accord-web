@@ -1,21 +1,2 @@
-Bak files scan — 2026-01-19
 
-Found .bak files (full paths):
-
-e:\In-Accord-web\server\data\users.json.2026-01-10T00-51-28-275Z.bak
-e:\In-Accord-web\client\src\app\themes\page.tsx.bak
-e:\In-Accord-web\client\src\app\support\page.tsx.20260117154245.bak
-e:\In-Accord-web\client\src\app\support\page.tsx.20260117153854.bak
-e:\In-Accord-web\client\src\app\servers\page.tsx.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\themes\page.tsx.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\uploads\page.tsx.bak
-e:\In-Accord-web\client\src\app\uploads\page.tsx.bak
-e:\In-Accord-web\backups\baks-20260119-000000\server\data\users.json.2026-01-10T00-51-28-275Z.bak
-e:\In-Accord-web\client\src\app\profile\page.tsx.bak
-e:\In-Accord-web\client\src\app\products\page.tsx.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\servers\page.tsx.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\products\page.tsx.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\support\page.tsx.20260117154245.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\support\page.tsx.20260117153854.bak
-e:\In-Accord-web\backups\baks-20260119-000000\client\src\app\hosting\page.tsx.bak
-e:\In-Accord-web\client\src\app\hosting\page.tsx.bak
+Deleted: assistant removed generated bak-list file to comply with user request.

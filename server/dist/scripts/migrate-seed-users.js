@@ -15,7 +15,11 @@ function backupFile(file) {
         return;
     const stat = fs_1.default.statSync(file);
     const ts = new Date(stat.mtime).toISOString().replace(/[:.]/g, '-');
-    const bak = file + '.' + ts + '.bak';
+    // place assistant-created backups in a dedicated folder at repo root
+    const repoRoot = path_1.default.resolve(__dirname, '..');
+    const ASSISTANT_BAK_DIR = path_1.default.resolve(repoRoot, '..', 'assistant_baks');
+    ensureDir(ASSISTANT_BAK_DIR);
+    const bak = path_1.default.join(ASSISTANT_BAK_DIR, path_1.default.basename(file) + '.' + ts + '.bak');
     fs_1.default.copyFileSync(file, bak);
     console.log(`Backed up existing file to ${bak}`);
 }
