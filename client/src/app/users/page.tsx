@@ -178,6 +178,49 @@ export default function UsersPageClient() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
                     </svg>
                   </button>
+                  {
+                    // always render github icon; if no url/handle present, render disabled/no-op
+                    (() => {
+                      const hasGH = !!(u.github || u.githubUrl || u.githubHandle);
+                      const href = u.githubUrl || (u.github ? u.github : (u.githubHandle ? `https://github.com/${u.githubHandle}` : '#'));
+                      return (
+                        <a
+                          href={href}
+                          target={hasGH ? '_blank' : undefined}
+                          rel={hasGH ? 'noopener noreferrer' : undefined}
+                          title={hasGH ? 'GitHub' : 'No GitHub'}
+                          onClick={(e) => { if (!hasGH) e.preventDefault(); }}
+                          className="p-1 rounded hover:bg-gray-700 text-gray-300"
+                        >
+                          {/* github icon */}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 .5C5.73.5.75 5.48.75 11.75c0 4.95 3.2 9.14 7.64 10.62.56.1.76-.24.76-.53 0-.26-.01-.96-.01-1.88-3.11.68-3.77-1.5-3.77-1.5-.51-1.29-1.25-1.64-1.25-1.64-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 .92 2.62.66 3.26.5.1-.39.39-.66.71-.81-2.48-.28-5.09-1.24-5.09-5.53 0-1.22.44-2.22 1.16-3-.12-.28-.5-1.4.11-2.92 0 0 .95-.3 3.12 1.15a10.8 10.8 0 012.84-.38c.96 0 1.93.13 2.84.38 2.17-1.45 3.12-1.15 3.12-1.15.61 1.52.23 2.64.11 2.92.72.78 1.16 1.78 1.16 3 0 4.3-2.62 5.24-5.11 5.52.4.35.75 1.03.75 2.08 0 1.5-.01 2.71-.01 3.08 0 .3.2.64.77.53C19.06 20.88 22.25 16.69 22.25 11.75 22.25 5.48 17.27.5 12 .5z" />
+                          </svg>
+                        </a>
+                      );
+                    })()
+                  }
+
+                  {
+                    // always render discord icon; copy to clipboard if value present, otherwise no-op with muted style
+                    (() => {
+                      const dval = (u.discord || u.discordTag || u.discordId);
+                      const hasD = !!dval;
+                      return (
+                        <button
+                          type="button"
+                          title={hasD ? 'Copy Discord' : 'No Discord'}
+                          onClick={() => { if (hasD) { try { navigator.clipboard?.writeText(dval.toString()); } catch (e) { } } }}
+                          className={`p-1 rounded hover:bg-gray-700 text-gray-300 ${hasD ? '' : 'opacity-50 cursor-default'}`}
+                        >
+                          {/* discord icon */}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.317 4.369a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.08.037c-.21.375-.444.864-.608 1.249-1.84-.276-3.68-.276-5.486 0-.165-.405-.41-.874-.632-1.249a.077.077 0 00-.08-.037 19.736 19.736 0 00-4.885 1.515.069.069 0 00-.032.027C2.58 9.02 1.675 13.42 2.16 17.773a.082.082 0 00.031.056 19.9 19.9 0 006.02 3.044.077.077 0 00.084-.027c.465-.639.878-1.312 1.226-2.017a.076.076 0 00-.041-.105 13.08 13.08 0 01-1.88-.892.075.075 0 01-.007-.127c.126-.094.252-.19.373-.291a.074.074 0 01.077-.01c3.927 1.792 8.18 1.792 12.061 0a.073.073 0 01.079.009c.12.1.247.197.374.291a.076.076 0 01-.006.127 12.98 12.98 0 01-1.88.893.076.076 0 00-.04.105c.36.705.773 1.378 1.227 2.017a.077.077 0 00.084.027 19.9 19.9 0 006.02-3.044.077.077 0 00.031-.056c.5-4.42-.45-8.79-2.927-13.377a.061.061 0 00-.03-.028zM8.02 15.331c-1.18 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.947 2.419-2.157 2.419zm7.974 0c-1.18 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.21 0 2.176 1.095 2.157 2.418 0 1.334-.947 2.419-2.157 2.419z" />
+                          </svg>
+                        </button>
+                      );
+                    })()
+                  }
                 </div>
               </div>
             </li>
