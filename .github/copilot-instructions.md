@@ -65,7 +65,8 @@ This file gives concise, actionable guidance to AI coding agents working on this
 11. Never change major framework versions without explicit user approval and full testing.
 12. Always document and enforce all user-specified GOLDEN rules in this file.
 13. Always warn the user and get explicit confirmation before executing any action that would violate a GOLDEN rule, even if the user requests it. Never proceed with a GOLDEN rule violation without clear user approval after warning.
-14. IPOWERSHELL IS NOT INSTALLED, NEVEDR USE POWERSHELL COMMANDS. ALWAYS USE NODE.JS COMMANDS INSTEAD.
+14. POWERSHELL IS NOT INSTALLED, NEVEDR USE POWERSHELL COMMANDS. ALWAYS USE NODE.JS COMMANDS INSTEAD.
+15. Dont use this set of rules to say you cant do or fix something, you need to always find a correct alternavie to fix anything in the correct manner!
 
 ## Quick pointers for AI agents
 - Read `server/src/index.ts` first to understand mounted routes and static locations.
