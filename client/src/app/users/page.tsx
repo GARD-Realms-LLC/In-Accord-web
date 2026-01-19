@@ -119,7 +119,6 @@ export default function UsersPageClient() {
         <div className="flex-1">
           <Navbar />
           <main style={{ padding: 16, paddingTop: topOffset }}>
-            <h1>Users</h1>
             <section className="max-w-3xl mx-auto w-full">
               <div className="p-4 bg-gray-900 rounded-lg shadow-sm">
                 <UsersList />
