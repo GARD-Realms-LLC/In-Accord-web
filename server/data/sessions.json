@@ -107,6 +107,18 @@
         "email": "dacowles@gmail.com",
         "username": "WorldsOfWogwarts"
       }
+    },
+    {
+      "id": "sess-uxkgeoua",
+      "userId": "uxkgeoua",
+      "ip": "::1",
+      "since": "2026-01-19T15:44:06.925Z",
+      "user": {
+        "id": "uxkgeoua",
+        "name": "Doc Cowles",
+        "email": "docrst@gmail.com",
+        "username": "docrst"
+      }
     }
   ]
 }
