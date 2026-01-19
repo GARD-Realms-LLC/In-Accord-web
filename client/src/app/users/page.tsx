@@ -1,4 +1,25 @@
-﻿'use client';
+﻿"use client";
+
+/**
+ * users page (client)
+ *
+ * Description:
+ * Renders the Users page for the dashboard. This file contains a client-only
+ * `UsersList` component that fetches the users list from the backend (polling
+ * every 10s) and displays it inside a centered, narrow section. All UI and
+ * network logic are intentionally scoped to this file so edits remain local.
+ *
+ * Behavior:
+ * - Forces dark mode styles for accessibility fallbacks
+ * - Uses AbortController and a mounted ref to safely cancel fetches
+ * - Attempts to read `NEXT_PUBLIC_API_BASE_URL` and falls back to
+ *   http://localhost:8000
+ *
+ * Edits to this file should be minimal and self-contained per project policy.
+ *
+ * Author: assistant
+ * Date: 2026-01-19
+ */
 
 import React, { useEffect, useState, useRef } from 'react';
 import StoreProvider from '../redux';
@@ -119,6 +140,8 @@ export default function UsersPageClient() {
         <div className="flex-1">
           <Navbar />
           <main style={{ padding: 16, paddingTop: topOffset }}>
+            <h1 className="text-2xl font-semibold mb-2 text-center">Users</h1>
+            <p className="text-sm text-gray-400 mb-4 text-center">List of registered users in the system — auto-refreshes every 10 seconds. Click a user to view details (if available).</p>
             <section className="max-w-3xl mx-auto w-full">
               <div className="p-4 bg-gray-900 rounded-lg shadow-sm">
                 <UsersList />
