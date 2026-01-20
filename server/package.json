@@ -10,7 +10,7 @@
     "build": "rimraf dist && npx tsc",
     "start": "npm run build && node dist/index.js",
     "dev": "npm run build && concurrently \"npx tsc -w\" \"nodemon --exec ts-node src/index.ts\"",
-    "prisma": "prisma",
+    
     "dev:port": "node scripts/free-port-8000.cjs",
     "dev:freeport": "node scripts/free-port-8000.cjs --kill"
   },
@@ -18,15 +18,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.16.2",
+    
     "body-parser": "^1.20.4",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
+    "drizzle-orm": "^0.45.1",
     "express": "^4.22.1",
     "helmet": "^7.1.0",
     "morgan": "^1.10.1",
     "nodemailer": "^6.9.3",
+    "pg": "^8.17.1",
     "rimraf": "^6.1.2"
   },
   "devDependencies": {
@@ -35,15 +37,14 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^20.14.10",
     "@types/nodemailer": "^7.0.4",
+    "@types/pg": "^8.16.0",
     "cross-env": "^10.1.0",
     "nodemon": "^3.1.11",
-    "prisma": "^7.2.0",
+    
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },
-  "prisma": {
-    "seed": "ts-node --esm prisma/seed.ts"
-  },
+  
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

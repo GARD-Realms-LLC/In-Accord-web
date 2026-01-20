@@ -10,7 +10,6 @@ import fs from "fs";
 import path from "path";
 
 /* ROUTE IMPORTS */
-import dashboardRoutes from "./routes/dashboardRoutes"; // http://localhost:8000/dashboard
 
 /* CONFIGURATION */
 dotenv.config();
@@ -62,7 +61,6 @@ app.use(morgan("common"));
 app.use(cors());
 
 /* ROUTES */
-app.use("/dashboard", dashboardRoutes);
 import supportRoutes from "./routes/supportRoutes";
 app.use('/api/support', supportRoutes);
 import schemasRoutes from './routes/schemasRoutes';

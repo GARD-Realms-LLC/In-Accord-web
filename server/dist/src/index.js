@@ -13,7 +13,6 @@ const helmet_1 = __importDefault(require("helmet"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 /* ROUTE IMPORTS */
-const dashboardRoutes_1 = __importDefault(require("./routes/dashboardRoutes")); // http://localhost:8000/dashboard
 /* CONFIGURATION */
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -58,7 +57,6 @@ helmet_1.default.contentSecurityPolicy({
 app.use((0, morgan_1.default)("common"));
 app.use((0, cors_1.default)());
 /* ROUTES */
-app.use("/dashboard", dashboardRoutes_1.default);
 const supportRoutes_1 = __importDefault(require("./routes/supportRoutes"));
 app.use('/api/support', supportRoutes_1.default);
 const schemasRoutes_1 = __importDefault(require("./routes/schemasRoutes"));
