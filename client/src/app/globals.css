@@ -15,6 +15,34 @@ body,
   @apply text-sm;
 }
 
+/* Ensure the main app background respects dark mode even when inline styles exist */
+html.dark main {
+  background-color: #0f1720 !important;
+}
+
+/* Broader dark-mode overrides to neutralize inline/light backgrounds */
+html.dark .bg-gray-50 {
+  background-color: #0f1720 !important;
+  color: #e5e7eb !important;
+}
+
+/* Ensure the top fixed navbar uses a dark background in dark mode */
+html.dark .fixed.top-0.z-50 {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Override explicit white backgrounds used inline */
+html.dark [style*="#f9fafb"] {
+  background-color: #0f1720 !important;
+}
+
+/* Override common white-bg utilities */
+html.dark .bg-white {
+  background-color: #111827 !important;
+  color: #e5e7eb !important;
+}
+
 @media (min-width: 768px) {
   .custom-grid-rows {
     grid-template-rows: repeat(8, 20vh);

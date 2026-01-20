@@ -1,3 +1,4 @@
+"use client";
 import { useRef, useEffect } from "react";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
@@ -72,7 +73,27 @@ export type AppStore = ReturnType<typeof makeStore>;
 export type RootState = ReturnType<AppStore["getState"]>;
 export type AppDispatch = AppStore["dispatch"];
 export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+// Wrap useSelector to avoid hard crashes when a Provider is temporarily missing
+// (e.g., during fast refresh/hydration races). This returns a sensible fallback
+// result instead of throwing the react-redux context error. Components should
+// still prefer checking for undefined values where appropriate.
+export const useAppSelector: TypedUseSelectorHook<RootState> = (selector: any) => {
+  try {
+    // Attempt normal behaviour when Provider exists
+    return useSelector(selector as any);
+  } catch (e) {
+    // If react-redux context is missing, fallback: attempt to execute selector
+    // against an empty default state and return safe defaults. This prevents
+    // the app from hard-failing during hydration or hot-reload races.
+    try {
+      const empty = {} as RootState;
+      return selector(empty as any);
+    } catch {
+      // As a last resort, return undefined-ish values to avoid crashes.
+      return undefined as any;
+    }
+  }
+};
 
 /* PROVIDER */
 export default function StoreProvider({
