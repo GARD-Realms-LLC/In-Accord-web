@@ -67,6 +67,7 @@ This file gives concise, actionable guidance to AI coding agents working on this
 13. Always warn the user and get explicit confirmation before executing any action that would violate a GOLDEN rule, even if the user requests it. Never proceed with a GOLDEN rule violation without clear user approval after warning.
 14. Prefer using Node/npm scripts and cross-platform commands for automation. Avoid PowerShell-specific commands unless the environment explicitly requires them.
 15. Dont use this set of rules to say you cant do or fix something, you need to always find a correct alternavie to fix anything in the correct manner!
+16. NEVER create any files with the .html extension unless explicitly requested and approved by the project owner. Prefer framework pages/components (Next.js `app/` routes or React components) over raw `.html` files.
 
 ## Quick pointers for AI agents
 - Read `server/src/index.ts` first to understand mounted routes and static locations.
