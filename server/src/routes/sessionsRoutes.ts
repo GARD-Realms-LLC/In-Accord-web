@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { safeReadJsonSync } from '../lib/safeJson';
 
 const router = Router();
 
@@ -22,8 +23,8 @@ function ensureSessionsFile() {
 function readSessions(): SessionRecord[] {
   try {
     ensureSessionsFile();
-    const raw = fs.readFileSync(sessionsFile, 'utf8');
-    const parsed = JSON.parse(raw);
+    const parsed = safeReadJsonSync(sessionsFile, { sessions: [] });
+    if (!parsed) return [];
     return Array.isArray(parsed.sessions) ? parsed.sessions : Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     console.warn('[Sessions] read error', e);

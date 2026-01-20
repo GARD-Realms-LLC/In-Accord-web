@@ -1083,20 +1083,16 @@ const initialUsers: User[] = [
           alert('No session data returned');
           return;
         }
-          const mapped: OnlineSession[] = data.sessions.map((s: any) => ({
-            id: s.id || s.sessionId || ('sess-' + (s.userId || Math.random().toString(36).slice(2,8))),
-            userId: s.userId || s.user?.id || s.userId,
-            name: s.user?.name || s.name || s.username || 'Unknown',
-            username: s.user?.username || s.username || s.user?.email || '',
-            ip: s.ip || s.remoteAddr || '0.0.0.0',
-            since: s.since || s.createdAt || new Date().toISOString(),
-            avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
-          }));
-          // Deduplicate by userId
-          const deduped = mapped.filter((user, idx, arr) =>
-            arr.findIndex(u => u.userId === user.userId) === idx
-          );
-          setOnlineUsers(deduped);
+        const mapped: OnlineSession[] = data.sessions.map((s: any) => ({
+          id: s.id || s.sessionId || ('sess-' + (s.userId || Math.random().toString(36).slice(2,8))),
+          userId: s.userId || s.user?.id || s.userId,
+          name: s.user?.name || s.name || s.username || 'Unknown',
+          username: s.user?.username || s.username || s.user?.email || '',
+          ip: s.ip || s.remoteAddr || '0.0.0.0',
+          since: s.since || s.createdAt || new Date().toISOString(),
+          avatar: s.avatar || (s.user?.email ? gravatarUrlForEmail(s.user.email, 40) : undefined)
+        }));
+        setOnlineUsers(mapped);
         setAuditLogEntries(prev => [{ timestamp: new Date().toISOString(), user: 'Admin', page: 'Users', action: 'Refreshed Online Users', details: `Loaded ${mapped.length} sessions`, status: 'Success' }, ...prev]);
       } catch (e) {
         console.warn('refreshOnlineUsers failed', e);
@@ -5060,7 +5056,7 @@ const initialUsers: User[] = [
               <div className="text-xs font-mono text-emerald-400">in-accord-web</div>
             </div>
 
-            <div className="px-6 py-5 font-mono text-sm space-y-3 max-h-112 overflow-y-auto">
+            <div className="px-6 py-5 font-mono text-sm space-y-3 max-h-[28rem] overflow-y-auto">
               {npmTerminalLines.map((line, idx) => {
                 const baseClasses = ['whitespace-pre-wrap'];
                 if (line.kind === 'command') {

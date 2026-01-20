@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const safeJson_1 = require("../lib/safeJson");
 const crypto_1 = __importDefault(require("crypto"));
 const accessControl_1 = require("../config/accessControl");
 const router = (0, express_1.Router)();
@@ -13,8 +14,7 @@ function readLocalUsers() {
     try {
         const dataPath = path_1.default.resolve(__dirname, '..', '..', 'data', 'users.json');
         if (fs_1.default.existsSync(dataPath)) {
-            const raw = fs_1.default.readFileSync(dataPath, 'utf8');
-            const parsed = JSON.parse(raw);
+            const parsed = (0, safeJson_1.safeReadJsonSync)(dataPath, { users: [] });
             const dataUsers = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
             return dataUsers;
         }

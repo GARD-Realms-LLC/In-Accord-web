@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { safeReadJsonSync, safeWriteJsonSync } from '../lib/safeJson';
 
 const router = Router();
 const dataFile = path.resolve(__dirname, '..', '..', 'data', 'custom_tables.json');
@@ -13,8 +14,7 @@ function readFileSafe() {
     if (!fs.existsSync(dataFile)) {
       fs.writeFileSync(dataFile, JSON.stringify({ tables: [] }, null, 2));
     }
-    const raw = fs.readFileSync(dataFile, 'utf8');
-    return JSON.parse(raw);
+    return safeReadJsonSync(dataFile, { tables: [] });
   } catch (err) {
     console.error('[Schemas] read error', err);
     return { tables: [] };
@@ -24,8 +24,8 @@ function readFileSafe() {
 function writeFileSafe(obj: any) {
   try {
     if (!fs.existsSync(path.dirname(dataFile))) fs.mkdirSync(path.dirname(dataFile), { recursive: true });
-    fs.writeFileSync(dataFile, JSON.stringify(obj, null, 2), 'utf8');
-    return true;
+    return safeWriteJsonSync(dataFile, obj);
+    
   } catch (err) {
     console.error('[Schemas] write error', err);
     return false;

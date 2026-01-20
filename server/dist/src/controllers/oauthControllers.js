@@ -18,15 +18,15 @@ exports.discordAuthUrl = discordAuthUrl;
 exports.discordCallback = discordCallback;
 exports.integrationStatus = integrationStatus;
 const integrationStore_1 = __importDefault(require("../integrationStore"));
-const promises_1 = __importDefault(require("fs/promises"));
 const path_1 = __importDefault(require("path"));
+const safeJson_1 = require("../lib/safeJson");
 const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 8000}`;
 const CONFIG_PATH = path_1.default.resolve(__dirname, '..', '..', 'data', 'oauth-config.json');
 function readStoredConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const raw = yield promises_1.default.readFile(CONFIG_PATH, 'utf8').catch(() => '{}');
-            return raw ? JSON.parse(raw) : {};
+            const parsed = yield (0, safeJson_1.safeReadJson)(CONFIG_PATH, {});
+            return parsed || {};
         }
         catch (e) {
             return {};

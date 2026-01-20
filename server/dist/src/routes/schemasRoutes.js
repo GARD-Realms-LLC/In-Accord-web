@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const safeJson_1 = require("../lib/safeJson");
 const router = (0, express_1.Router)();
 const dataFile = path_1.default.resolve(__dirname, '..', '..', 'data', 'custom_tables.json');
 const ALLOWED_FIELD_TYPES = ['string', 'number', 'boolean', 'date', 'text'];
@@ -16,8 +17,7 @@ function readFileSafe() {
         if (!fs_1.default.existsSync(dataFile)) {
             fs_1.default.writeFileSync(dataFile, JSON.stringify({ tables: [] }, null, 2));
         }
-        const raw = fs_1.default.readFileSync(dataFile, 'utf8');
-        return JSON.parse(raw);
+        return (0, safeJson_1.safeReadJsonSync)(dataFile, { tables: [] });
     }
     catch (err) {
         console.error('[Schemas] read error', err);
@@ -28,8 +28,7 @@ function writeFileSafe(obj) {
     try {
         if (!fs_1.default.existsSync(path_1.default.dirname(dataFile)))
             fs_1.default.mkdirSync(path_1.default.dirname(dataFile), { recursive: true });
-        fs_1.default.writeFileSync(dataFile, JSON.stringify(obj, null, 2), 'utf8');
-        return true;
+        return (0, safeJson_1.safeWriteJsonSync)(dataFile, obj);
     }
     catch (err) {
         console.error('[Schemas] write error', err);

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const safeJson_1 = require("../lib/safeJson");
 const router = (0, express_1.Router)();
 const sessionsFile = path_1.default.resolve(__dirname, '..', '..', 'data', 'sessions.json');
 function ensureSessionsFile() {
@@ -23,8 +24,9 @@ function ensureSessionsFile() {
 function readSessions() {
     try {
         ensureSessionsFile();
-        const raw = fs_1.default.readFileSync(sessionsFile, 'utf8');
-        const parsed = JSON.parse(raw);
+        const parsed = (0, safeJson_1.safeReadJsonSync)(sessionsFile, { sessions: [] });
+        if (!parsed)
+            return [];
         return Array.isArray(parsed.sessions) ? parsed.sessions : Array.isArray(parsed) ? parsed : [];
     }
     catch (e) {

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { safeReadJsonSync } from '../lib/safeJson';
 import crypto from 'crypto';
 import {
   getAllowedRoutesForRole,
@@ -15,8 +16,7 @@ function readLocalUsers() {
   try {
     const dataPath = path.resolve(__dirname, '..', '..', 'data', 'users.json');
     if (fs.existsSync(dataPath)) {
-      const raw = fs.readFileSync(dataPath, 'utf8');
-      const parsed = JSON.parse(raw);
+      const parsed = safeReadJsonSync(dataPath, { users: [] });
       const dataUsers = Array.isArray(parsed.users) ? parsed.users : Array.isArray(parsed) ? parsed : [];
       return dataUsers;
     }

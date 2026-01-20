@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { safeTryParseString } from '../lib/safeJson';
 import { spawn, spawnSync, ChildProcessWithoutNullStreams } from 'child_process';
 import path from 'path';
 
@@ -290,8 +291,69 @@ const forceKillPortListeners = (port?: number): number[] => {
   return killProcessesByPid(listeners);
 };
 
+function parseLenientBody(req: Request) {
+  // Prefer already-parsed body
+  const asBody = (req as any).body;
+  if (asBody && typeof asBody === 'object' && Object.keys(asBody).length) {
+    // If client sent form-encoded body like raw={...}, express.urlencoded will produce { raw: '...'}.
+    // If scriptKey is present, return as-is. Otherwise, if a single 'raw' field exists, try parsing it.
+    if (typeof asBody.scriptKey === 'string' || typeof asBody.action === 'string') return asBody;
+    if (typeof asBody.raw === 'string') {
+      // continue parsing using the raw string payload below
+      // reuse variable name 'payload' by falling through
+      // note: do not return early
+    } else {
+      return asBody;
+    }
+  }
+
+  // Try rawBody tolerant JSON parse
+  // prefer explicit rawBody populated by our JSON middleware, fall back to body.raw
+  const raw = (req as any).rawBody || (req as any).raw || ((req as any).body && (req as any).body.raw);
+  if (!raw || typeof raw !== 'string') return {};
+
+  // If raw starts with "raw=...", strip prefix
+  let payload = raw;
+  if (payload.startsWith('raw=')) payload = payload.slice(4);
+
+  // Try strict JSON parse first (use tolerant parser to avoid throwing)
+  try {
+    const strict = safeTryParseString(payload);
+    if (strict !== null) return strict;
+  } catch {
+    // Heuristic parse for patterns like {scriptKey:server-dev,action:status}
+    const m = payload.match(/^\{\s*([\s\S]*)\s*\}$/);
+    if (m) {
+      const inner = m[1];
+      const parts = inner.split(/\s*,\s*/g);
+      const out: Record<string, string> = {};
+      for (const part of parts) {
+        const [k, v] = part.split(/\s*:\s*/);
+        if (!k) continue;
+        const key = k.replace(/^"|"$/g, '').trim();
+        let val = (v ?? '').trim();
+        // strip surrounding quotes if present
+        val = val.replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+        out[key] = val;
+      }
+      return out;
+    }
+
+    // Fallback: attempt URLSearchParams parse (for form-encoded bodies)
+    try {
+      const params = new URLSearchParams(payload);
+      const obj: Record<string, string> = {};
+      for (const [k, v] of params.entries()) obj[k] = v;
+      return obj;
+    } catch {
+      return {};
+    }
+  }
+}
+
 export const runNpmScript = async (req: Request, res: Response) => {
-  const { scriptKey, action } = req.body as { scriptKey?: string; action?: ScriptAction };
+  const parsedBody = parseLenientBody(req) as Record<string, any>;
+  const { scriptKey, action } = parsedBody as { scriptKey?: string; action?: ScriptAction };
 
   if (!scriptKey || !COMMANDS[scriptKey]) {
     res.status(400).json({ success: false, error: 'Invalid or unsupported npm script.' });

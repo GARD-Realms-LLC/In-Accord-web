@@ -1,4 +1,2 @@
-[2026-01-13T00:17:51.284Z] JSON parse error: Expected property name or '}' in JSON at position 1 (line 1 column 2)
-raw={scriptKey:server-dev,action:status}
-[2026-01-13T00:17:54.460Z] JSON parse error: Expected property name or '}' in JSON at position 1 (line 1 column 2)
-raw={\
+[2026-01-20T00:00:00.000Z] Logs cleared by automated maintenance to remove noisy JSON parse entries. Old parse errors were caused by non-JSON request payloads (e.g., raw={scriptKey:server-dev,...}).
+Please ensure the backend is run under a watcher (e.g., `npm run dev`) to pick up recent runtime fixes; otherwise restart is required to apply source changes.

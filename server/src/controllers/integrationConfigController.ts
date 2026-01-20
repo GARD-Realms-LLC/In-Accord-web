@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import fs from 'fs/promises';
 import path from 'path';
+import { safeReadJson } from '../lib/safeJson';
 
 const CONFIG_PATH = path.resolve(__dirname, '..', '..', 'data', 'oauth-config.json');
 
@@ -12,8 +13,7 @@ async function ensureDataDir() {
 export async function getConfig(req: Request, res: Response) {
   try {
     await ensureDataDir();
-    const raw = await fs.readFile(CONFIG_PATH, 'utf8').catch(() => '{}');
-    const json = raw ? JSON.parse(raw) : {};
+    const json = (await safeReadJson(CONFIG_PATH, {})) || {};
     // Do not return secrets by default unless explicitly requested
     const safe = { github: { clientId: json.github?.clientId || '', enabled: !!json.github?.enabled, connected: !!json.github?.connected }, discord: { clientId: json.discord?.clientId || '', enabled: !!json.discord?.enabled, connected: !!json.discord?.connected } };
     res.json({ config: safe });
@@ -28,8 +28,7 @@ export async function saveConfig(req: Request, res: Response) {
     const body = req.body || {};
     await ensureDataDir();
     // Only accept specific shape to avoid accidental overrides
-    const currentRaw = await fs.readFile(CONFIG_PATH, 'utf8').catch(() => '{}');
-    const current = currentRaw ? JSON.parse(currentRaw) : {};
+    const current = (await safeReadJson(CONFIG_PATH, {})) || {};
 
     const next = { ...current };
     if (body.github) {

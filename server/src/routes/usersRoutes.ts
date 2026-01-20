@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { safeReadJsonSync, safeWriteJsonSync } from '../lib/safeJson';
 import crypto from 'crypto';
 import {
   getAllowedRoutesForRole,
@@ -25,8 +26,7 @@ function ensureDataFile() {
 function readUsersFile() {
   try {
     ensureDataFile();
-    const raw = fs.readFileSync(dataFile, 'utf8');
-    return JSON.parse(raw);
+    return safeReadJsonSync(dataFile, { users: [] });
   } catch (e) {
     console.error('[UsersRoute] read error', e);
     return { users: [] };
@@ -36,8 +36,7 @@ function readUsersFile() {
 function writeUsersFile(obj: any) {
   try {
     ensureDataFile();
-    fs.writeFileSync(dataFile, JSON.stringify(obj, null, 2), 'utf8');
-    return true;
+    return safeWriteJsonSync(dataFile, obj);
   } catch (e) {
     console.error('[UsersRoute] write error', e);
     return false;

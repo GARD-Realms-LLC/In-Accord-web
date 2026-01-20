@@ -2,14 +2,15 @@ import { Request, Response } from 'express';
 import integrationStore from '../integrationStore';
 import fs from 'fs/promises';
 import path from 'path';
+import { safeReadJson } from '../lib/safeJson';
 
 const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 8000}`;
 const CONFIG_PATH = path.resolve(__dirname, '..', '..', 'data', 'oauth-config.json');
 
 async function readStoredConfig() {
   try {
-    const raw = await fs.readFile(CONFIG_PATH, 'utf8').catch(() => '{}');
-    return raw ? JSON.parse(raw) : {};
+    const parsed = await safeReadJson(CONFIG_PATH, {});
+    return parsed || {};
   } catch (e) { return {}; }
 }
 

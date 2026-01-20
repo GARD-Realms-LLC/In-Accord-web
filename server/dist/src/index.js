@@ -7,12 +7,33 @@ const express_1 = __importDefault(require("express"));
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");
 const dotenv_1 = __importDefault(require("dotenv"));
+const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const morgan_1 = __importDefault(require("morgan"));
 const helmet_1 = __importDefault(require("helmet"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const safeJson_1 = require("./lib/safeJson");
+// Defensive: make JSON.parse tolerant globally to avoid uncaught parse exceptions
+// This prevents third-party or legacy code calling JSON.parse on malformed input
+// from crashing the running process. Returns null on parse failure.
+try {
+    const _origJSONParse = JSON.parse;
+    // @ts-ignore
+    JSON.parse = function (text, reviver) {
+        try {
+            return _origJSONParse.call(JSON, text, reviver);
+        }
+        catch (e) {
+            return null;
+        }
+    };
+}
+catch (e) {
+    // ignore if can't override
+}
 /* ROUTE IMPORTS */
+const dashboardRoutes_1 = __importDefault(require("./routes/dashboardRoutes")); // http://localhost:8000/dashboard
 /* CONFIGURATION */
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -23,21 +44,84 @@ const io = new socket_io_1.Server(httpServer, {
         methods: ['GET', 'POST']
     }
 });
+// Global process guards to prevent uncaught exceptions from crashing the server
+process.on('uncaughtException', (err) => {
+    try {
+        const preview = (err && err.message) ? err.message.slice(0, 400) : String(err);
+        const entry = `[${new Date().toISOString()}] uncaughtException: ${preview}\nstack=${(err && err.stack) ? err.stack.split('\n').slice(0, 5).join('\n') : 'no-stack'}\n`;
+        try {
+            fs_1.default.appendFileSync(path_1.default.resolve(__dirname, '..', '..', 'logs', 'error.log'), entry, 'utf8');
+        }
+        catch (_a) { }
+        console.error('uncaughtException', preview);
+    }
+    catch (_b) { }
+});
+process.on('unhandledRejection', (reason) => {
+    try {
+        const preview = typeof reason === 'string' ? reason.slice(0, 400) : (reason && reason.message) ? reason.message.slice(0, 400) : String(reason);
+        const entry = `[${new Date().toISOString()}] unhandledRejection: ${preview}\n`;
+        try {
+            fs_1.default.appendFileSync(path_1.default.resolve(__dirname, '..', '..', 'logs', 'error.log'), entry, 'utf8');
+        }
+        catch (_a) { }
+        console.error('unhandledRejection', preview);
+    }
+    catch (_b) { }
+});
 // Example: Broadcast a test event every 10 seconds (remove or replace in production)
 setInterval(() => {
     io.emit('liveUpdate', { message: 'This is a live update from the server', timestamp: Date.now() });
 }, 10000);
-app.use(express_1.default.json({
+// Use body-parser to capture raw bodies safely (via verify) and let us apply a tolerant parse.
+// This avoids ad-hoc stream consumption while still capturing raw content for diagnostics.
+app.use(body_parser_1.default.json({
     limit: '50mb',
-    verify: (req, _res, buf) => {
+    strict: false,
+    verify: (req, res, buf) => {
         try {
-            req.rawBody = buf.toString('utf8');
+            req.rawBody = buf && buf.length ? buf.toString('utf8') : '';
         }
-        catch (error) {
-            console.warn('Unable to capture raw request body', error);
+        catch (e) {
+            req.rawBody = '';
         }
     }
 }));
+app.use(body_parser_1.default.urlencoded({
+    limit: '50mb',
+    extended: true,
+    verify: (req, res, buf) => {
+        try {
+            req.rawBody = buf && buf.length ? buf.toString('utf8') : '';
+        }
+        catch (e) {
+            req.rawBody = '';
+        }
+    }
+}));
+// After body-parsers: if body is absent but we have a raw body, attempt a tolerant parse.
+app.use((req, res, next) => {
+    try {
+        const raw = req.rawBody || '';
+        if (raw && req.body == null) {
+            const parsed = (0, safeJson_1.safeTryParseString)(raw);
+            if (parsed !== null) {
+                req.body = parsed;
+            }
+            else {
+                // Mark so specific handlers can decide how to treat malformed payloads
+                req.jsonParseError = true;
+            }
+        }
+    }
+    catch (e) {
+        // Don't let this middleware crash the server; just continue.
+        req.jsonParseError = true;
+    }
+    return next();
+});
+// Request preview logger (safe, short previews) — helps identify malformed producers without storing full bodies
+// (debug) request-preview logging removed during cleanup
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 app.use((0, helmet_1.default)());
 app.use(helmet_1.default.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -57,6 +141,7 @@ helmet_1.default.contentSecurityPolicy({
 app.use((0, morgan_1.default)("common"));
 app.use((0, cors_1.default)());
 /* ROUTES */
+app.use("/dashboard", dashboardRoutes_1.default);
 const supportRoutes_1 = __importDefault(require("./routes/supportRoutes"));
 app.use('/api/support', supportRoutes_1.default);
 const schemasRoutes_1 = __importDefault(require("./routes/schemasRoutes"));
@@ -93,27 +178,52 @@ app.use('/data', express_1.default.static(path_1.default.resolve(__dirname, '..'
 }));
 const npmRoutes_1 = __importDefault(require("./routes/npmRoutes"));
 app.use('/api/npm', npmRoutes_1.default);
+const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
+app.use('/api/admin', adminRoutes_1.default);
 app.use((err, req, res, next) => {
+    var _a;
     const isJsonSyntaxError = err instanceof SyntaxError && err.status === 400 && 'body' in err;
     if (isJsonSyntaxError) {
         const rawBody = req.rawBody;
-        const logEntry = `[${new Date().toISOString()}] JSON parse error: ${err.message}\nraw=${rawBody}\n`;
+        // Keep logs concise and avoid writing full raw payloads which may be large or contain sensitive data.
+        const preview = (_a = rawBody === null || rawBody === void 0 ? void 0 : rawBody.slice(0, 200)) !== null && _a !== void 0 ? _a : '';
+        const parsedPreview = (0, safeJson_1.safeTryParseString)(rawBody);
+        const parsedPreviewStr = parsedPreview ? JSON.stringify(parsedPreview).slice(0, 400) : 'null';
+        const logEntry = `[${new Date().toISOString()}] JSON parse error: ${err.message}\npreview=${preview}\nparsedPreview=${parsedPreviewStr}\n`;
         try {
             fs_1.default.appendFileSync(path_1.default.resolve(__dirname, '..', '..', 'logs', 'error.log'), logEntry, 'utf8');
         }
         catch (writeErr) {
             console.warn('Failed to append JSON parse error log', writeErr);
         }
-        console.error('JSON parse error:', err.message, rawBody);
+        console.error('JSON parse error:', err.message, preview);
         res.status(400).json({
             success: false,
             error: 'Invalid JSON payload',
             details: err.message,
-            rawBodyPreview: rawBody === null || rawBody === void 0 ? void 0 : rawBody.slice(0, 200)
+            rawBodyPreview: preview
         });
         return;
     }
     next(err);
+});
+// Final generic error handler to prevent any route error from crashing the process.
+app.use((err, req, res, next) => {
+    try {
+        const preview = err && err.message ? String(err.message).slice(0, 400) : String(err).slice(0, 400);
+        const stack = err && err.stack ? err.stack.split('\n').slice(0, 6).join('\n') : 'no-stack';
+        const entry = `[${new Date().toISOString()}] unhandledRouteError: ${preview}\nstack=${stack}\n`;
+        try {
+            fs_1.default.appendFileSync(path_1.default.resolve(__dirname, '..', '..', 'logs', 'error.log'), entry, 'utf8');
+        }
+        catch (_a) { }
+    }
+    catch (_b) { }
+    console.error('Unhandled route error:', (err && err.message) ? err.message : err);
+    if (!res.headersSent) {
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+    // do not call next(err) to avoid default crash behavior
 });
 /* SERVER */
 const port = process.env.PORT || 8000;

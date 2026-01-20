@@ -30,7 +30,7 @@ const getDashboardStats = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
     catch (error) {
-        res.status(500).json({ message: "Error retrieving dashboard metrics" });
+        res.status(500).json({ message: 'Error retrieving dashboard metrics' });
     }
 });
 exports.getDashboardStats = getDashboardStats;

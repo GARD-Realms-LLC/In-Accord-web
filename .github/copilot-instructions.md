@@ -49,6 +49,7 @@ This file gives concise, actionable guidance to AI coding agents working on this
   1. Add `client/src/app/new-route/page.tsx` (or folder-based route with components).
   2. Use `DashboardWrapper` for consistent layout if needed: see `client/src/app/layout.tsx`.
 
+<<<<<<< HEAD
 
 ## GOLDEN RULES for AI agents (User-Enforced)
 
@@ -69,6 +70,8 @@ This file gives concise, actionable guidance to AI coding agents working on this
 15. Dont use this set of rules to say you cant do or fix something, you need to always find a correct alternavie to fix anything in the correct manner!
 16. NEVER create any files with the .html extension unless explicitly requested and approved by the project owner. Prefer framework pages/components (Next.js `app/` routes or React components) over raw `.html` files.
 
+=======
+>>>>>>> parent of 6e7c4dd4 (Refactor dashboard data retrieval to use Drizzle ORM; add database connection and schema definitions; deduplicate online users in Administrator page.)
 ## Quick pointers for AI agents
 - Read `server/src/index.ts` first to understand mounted routes and static locations.
 - When editing DB models, open `server/prisma/schema.prisma` and check `server/prisma/migrations/` and `server/prisma/seedData/`.

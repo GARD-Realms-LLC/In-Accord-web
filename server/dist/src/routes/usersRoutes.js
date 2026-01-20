@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const safeJson_1 = require("../lib/safeJson");
 const crypto_1 = __importDefault(require("crypto"));
 const accessControl_1 = require("../config/accessControl");
 const router = (0, express_1.Router)();
@@ -25,8 +26,7 @@ function ensureDataFile() {
 function readUsersFile() {
     try {
         ensureDataFile();
-        const raw = fs_1.default.readFileSync(dataFile, 'utf8');
-        return JSON.parse(raw);
+        return (0, safeJson_1.safeReadJsonSync)(dataFile, { users: [] });
     }
     catch (e) {
         console.error('[UsersRoute] read error', e);
@@ -36,8 +36,7 @@ function readUsersFile() {
 function writeUsersFile(obj) {
     try {
         ensureDataFile();
-        fs_1.default.writeFileSync(dataFile, JSON.stringify(obj, null, 2), 'utf8');
-        return true;
+        return (0, safeJson_1.safeWriteJsonSync)(dataFile, obj);
     }
     catch (e) {
         console.error('[UsersRoute] write error', e);

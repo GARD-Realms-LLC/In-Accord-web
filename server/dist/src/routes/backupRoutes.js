@@ -16,6 +16,7 @@ const express_1 = require("express");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const https_1 = __importDefault(require("https"));
+const safeJson_1 = require("../lib/safeJson");
 const router = (0, express_1.Router)();
 // __dirname when this file runs is server/src/routes
 // So: __dirname/../../.. = server/src/routes/../../.. = root/
@@ -37,18 +38,6 @@ function ensureDir(dir) {
         throw err;
     }
 }
-function safeReadJson(filePath) {
-    try {
-        if (!fs_1.default.existsSync(filePath))
-            return null;
-        const raw = fs_1.default.readFileSync(filePath, 'utf8');
-        return JSON.parse(raw);
-    }
-    catch (err) {
-        console.warn('[backup] failed to read sample file', filePath, err);
-        return null;
-    }
-}
 const defaultSettings = {
     localBackupPath: path_1.default.join(repoRoot, 'backups'),
     r2AccountId: '',
@@ -60,9 +49,8 @@ function loadBackupSettings() {
     try {
         if (!fs_1.default.existsSync(backupSettingsPath))
             return Object.assign({}, defaultSettings);
-        const raw = fs_1.default.readFileSync(backupSettingsPath, 'utf8');
-        const parsed = JSON.parse(raw);
-        return Object.assign(Object.assign({}, defaultSettings), parsed);
+        const parsed = (0, safeJson_1.safeReadJsonSync)(backupSettingsPath, {});
+        return Object.assign(Object.assign({}, defaultSettings), (parsed || {}));
     }
     catch (err) {
         console.warn('[backup] failed to read backupSettings, using defaults', err);
@@ -131,17 +119,16 @@ router.get('/list', (_req, res) => {
             .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
         // Build backup logs for Activity Log (most recent first)
         const logs = backupFiles.map(b => {
-            // Try to read backup file for more details
+            // Try to read backup file for more details using tolerant reader
             let note = '';
             let location = '';
             let includes = {};
             try {
                 const filePath = path_1.default.join(localPath, b.name + '.json');
-                const raw = fs_1.default.readFileSync(filePath, 'utf8');
-                const parsed = JSON.parse(raw);
-                note = parsed.note || '';
-                location = parsed.location || '';
-                includes = parsed.includes || {};
+                const parsed = (0, safeJson_1.safeReadJsonSync)(filePath, {});
+                note = (parsed && parsed.note) || '';
+                location = (parsed && parsed.location) || '';
+                includes = (parsed && parsed.includes) || {};
             }
             catch (_a) { }
             return {
@@ -260,8 +247,8 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const fileName = `backup-${stamp}-${loc}.json`;
         const filePath = path_1.default.join(targetDir, fileName);
         console.log('[backup] writing to:', filePath);
-        const users = safeReadJson(path_1.default.join(repoRoot, 'server', 'data', 'users.json'));
-        const sessions = safeReadJson(path_1.default.join(repoRoot, 'server', 'data', 'sessions.json'));
+        const users = (0, safeJson_1.safeReadJsonSync)(path_1.default.join(repoRoot, 'server', 'data', 'users.json'), []);
+        const sessions = (0, safeJson_1.safeReadJsonSync)(path_1.default.join(repoRoot, 'server', 'data', 'sessions.json'), []);
         const payload = {
             createdAt: timestamp.toISOString(),
             location: loc,
