@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { User as UserIcon } from 'lucide-react';
 import AppShell from '../AppShell';
 
 type User = any;
@@ -180,7 +181,9 @@ export default function UsersPage() {
                 {modalUser.avatarUrl ? (
                   <img src={modalUser.avatarUrl} alt="avatar" className="h-20 w-20 rounded-full object-cover" />
                 ) : (
-                  <div className="h-20 w-20 rounded-full bg-gray-700 flex items-center justify-center text-xl text-white">{(modalUser.name || modalUser.username || 'U').toString().slice(0,2).toUpperCase()}</div>
+                  <div className="h-20 w-20 rounded-full bg-gray-700 flex items-center justify-center text-xl text-white">
+                    <UserIcon size={28} />
+                  </div>
                 )}
               </div>
               <div className="mt-3 text-center text-sm text-gray-300">{modalUser.description || modalUser.bio || ''}</div>
@@ -229,7 +232,13 @@ export default function UsersPage() {
               return (
                 <li key={key} className="p-2 bg-gray-800 rounded flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center text-sm text-white">{display}</div>
+                    <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center text-sm text-white">
+                      {u?.avatarUrl ? (
+                        <img src={u.avatarUrl} alt={(u.name || u.username) ?? 'user'} className="h-9 w-9 rounded-full object-cover" />
+                      ) : (
+                        <UserIcon size={18} />
+                      )}
+                    </div>
                     <div>
                       <div className="font-medium">{title}</div>
                       <div className="text-xs text-gray-400">{sub}</div>
