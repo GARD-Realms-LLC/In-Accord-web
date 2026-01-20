@@ -11,7 +11,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <main
           className="flex flex-col flex-1 h-full px-6 bg-gray-50 dark:bg-gray-900"
           style={{
-            backgroundColor: "#f9fafb",
             marginLeft: 0,
             width: "100%",
             paddingTop: "68px", // Height of Navbar
